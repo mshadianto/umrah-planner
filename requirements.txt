@@ -1,39 +1,37 @@
 # ==============================================
-# Umrah Planner AI - Requirements (Core)
-# Python 3.10+ Required
-# Supabase optional - see requirements-full.txt
+# Umrah Planner AI - Requirements
+# Compatible with Python 3.13 (Streamlit Cloud)
 # ==============================================
 
 # Core Framework
-streamlit==1.29.0
-python-dotenv==1.0.0
+streamlit>=1.29.0
+python-dotenv>=1.0.0
 
-# LLM - Groq Only
-langchain==0.1.0
-langchain-community==0.0.13
-langchain-groq==0.0.1
-groq==0.4.2
+# LLM - Groq
+langchain>=0.1.0
+langchain-community>=0.0.13
+langchain-groq>=0.0.1
+groq>=0.4.2
 
-# RAG Components - Fixed Versions
-chromadb==0.4.22
-sentence-transformers==2.2.2
-huggingface-hub==0.20.3
-transformers==4.36.2
-tokenizers==0.15.0
+# RAG Components (flexible versions for Python 3.13)
+chromadb>=0.4.22
+sentence-transformers>=2.2.2
+huggingface-hub>=0.20.3
+transformers>=4.36.2
 
-# PyTorch CPU
-torch==2.1.2
+# PyTorch - Let pip resolve compatible version
+torch>=2.5.0
 
 # Data Processing
-pandas==2.1.4
-numpy==1.26.3
-pydantic==2.5.3
-pydantic-settings==2.1.0
+pandas>=2.1.4
+numpy>=1.26.3
+pydantic>=2.5.3
+pydantic-settings>=2.1.0
 
 # Utilities
-httpx==0.26.0
-tenacity==8.2.3
+httpx>=0.26.0
+tenacity>=8.2.3
 
 # Visualization
-plotly==5.18.0
-openpyxl==3.1.2
+plotly>=5.18.0
+openpyxl>=3.1.2
