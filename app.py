@@ -32,6 +32,12 @@ from monetization import (
     render_monetization_page, render_monetization_sidebar,
     render_quick_quote_widget, init_monetization_state, PRICING_TIERS
 )
+from auth import (
+    init_user_database, is_logged_in, get_current_user, get_user_role_info,
+    render_login_page, render_user_badge, render_upgrade_prompt,
+    render_admin_dashboard, has_permission, check_limit, increment_usage,
+    USER_ROLES, logout_user
+)
 
 # Page configuration
 st.set_page_config(
@@ -126,29 +132,48 @@ def render_sidebar():
         st.markdown(get_version_badge(), unsafe_allow_html=True)
         st.markdown("---")
         
-        # User tier badge
+        # Initialize systems
+        init_user_database()
         init_monetization_state()
-        render_monetization_sidebar()
+        
+        # User badge (login status)
+        render_user_badge()
         
         st.markdown("---")
         
+        # Build navigation based on user role
+        user = get_current_user()
+        
+        # Base navigation items
+        nav_items = [
+            "🏠 Beranda",
+            "💰 Simulasi Biaya",
+            "📊 Perbandingan Skenario",
+            "📅 Analisis Waktu",
+            "🤖 Chat AI",
+            "📋 Buat Rencana",
+            "✈️ Booking & Reservasi",
+            "🧰 Tools & Fitur",
+            "💼 Business Hub",
+        ]
+        
+        # Add auth-related items
+        if not is_logged_in():
+            nav_items.append("🔐 Login / Register")
+        else:
+            # Add admin dashboard for admin/superadmin
+            if user and user.get("role") in ["admin", "superadmin"]:
+                nav_items.append("🛡️ Admin Dashboard")
+            nav_items.append("👤 Profil Saya")
+        
+        # Common items
+        nav_items.extend([
+            "⚙️ Pengaturan",
+            "ℹ️ Tentang Aplikasi"
+        ])
+        
         # Navigation
-        page = st.radio(
-            "📍 Navigasi",
-            [
-                "🏠 Beranda",
-                "💰 Simulasi Biaya",
-                "📊 Perbandingan Skenario",
-                "📅 Analisis Waktu",
-                "🤖 Chat AI",
-                "📋 Buat Rencana",
-                "✈️ Booking & Reservasi",
-                "🧰 Tools & Fitur",
-                "💼 Business Hub",
-                "⚙️ Pengaturan",
-                "ℹ️ Tentang Aplikasi"
-            ]
-        )
+        page = st.radio("📍 Navigasi", nav_items)
         
         st.markdown("---")
         
@@ -1135,10 +1160,140 @@ def main():
         st.header("💼 Business Hub")
         st.markdown("Monetisasi, partnership, dan fitur premium")
         render_monetization_page()
+    elif "Login" in page:
+        render_login_page()
+    elif "Admin" in page:
+        render_admin_dashboard()
+    elif "Profil" in page:
+        render_user_profile()
     elif "Pengaturan" in page:
         render_settings()
     elif "Tentang" in page:
         render_about()
+
+
+def render_user_profile():
+    """Render user profile page"""
+    user = get_current_user()
+    
+    if not user:
+        st.warning("🔐 Silakan login untuk melihat profil")
+        render_login_page()
+        return
+    
+    st.header("👤 Profil Saya")
+    
+    role_info = get_user_role_info()
+    
+    # Profile card
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(135deg, {role_info['color']}88, {role_info['color']}44);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid {role_info['color']};
+        ">
+            <div style="font-size: 4rem;">{role_info['badge']}</div>
+            <h2>{user['name']}</h2>
+            <p style="color: {role_info['color']}; font-weight: bold;">{role_info['name']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("### 📋 Informasi Akun")
+        
+        st.markdown(f"""
+        | Field | Value |
+        |-------|-------|
+        | **Username** | @{user['username']} |
+        | **Email** | {user['email']} |
+        | **Phone** | {user.get('phone', '-')} |
+        | **Member Since** | {user.get('created_at', '-')[:10]} |
+        | **Last Login** | {user.get('last_login', '-')[:16] if user.get('last_login') else '-'} |
+        | **Status** | {'✅ Active' if user.get('status') == 'active' else '❌ Inactive'} |
+        """)
+    
+    st.markdown("---")
+    
+    # Subscription info
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### 💎 Subscription")
+        
+        subscription = user.get("subscription", {})
+        
+        if user["role"] == "free":
+            st.info("Anda menggunakan paket **Gratis**")
+            st.markdown("Upgrade untuk membuka fitur premium!")
+            
+            if st.button("🚀 Upgrade Sekarang", type="primary"):
+                st.session_state.show_upgrade = True
+        else:
+            st.success(f"Paket: **{role_info['name']}**")
+            if subscription.get("end_date"):
+                st.markdown(f"Berlaku hingga: **{subscription['end_date'][:10]}**")
+    
+    with col2:
+        st.markdown("### 📊 Usage Statistics")
+        
+        stats = user.get("stats", {})
+        limits = role_info.get("limits", {})
+        
+        # AI Chat usage
+        chat_today = stats.get("ai_chat_today", 0)
+        chat_limit = limits.get("ai_chat_daily", 5)
+        
+        if chat_limit == -1:
+            st.markdown(f"🤖 Chat AI hari ini: **{chat_today}** (Unlimited)")
+        else:
+            st.markdown(f"🤖 Chat AI hari ini: **{chat_today}/{chat_limit}**")
+            st.progress(min(chat_today / chat_limit, 1.0))
+        
+        st.markdown(f"📋 Saved Plans: **{stats.get('total_saved_plans', 0)}**")
+    
+    st.markdown("---")
+    
+    # Edit profile
+    with st.expander("✏️ Edit Profil"):
+        with st.form("edit_profile"):
+            new_name = st.text_input("Nama", value=user.get("name", ""))
+            new_phone = st.text_input("Phone", value=user.get("phone", ""))
+            
+            if st.form_submit_button("💾 Simpan"):
+                user["name"] = new_name
+                user["phone"] = new_phone
+                st.success("Profil berhasil diupdate!")
+                st.rerun()
+    
+    # Change password
+    with st.expander("🔐 Ganti Password"):
+        with st.form("change_password"):
+            current_pw = st.text_input("Password Saat Ini", type="password")
+            new_pw = st.text_input("Password Baru", type="password")
+            confirm_pw = st.text_input("Konfirmasi Password", type="password")
+            
+            if st.form_submit_button("🔐 Ganti Password"):
+                from auth import hash_password
+                if hash_password(current_pw) != user["password_hash"]:
+                    st.error("Password saat ini salah")
+                elif new_pw != confirm_pw:
+                    st.error("Password baru tidak cocok")
+                elif len(new_pw) < 6:
+                    st.error("Password minimal 6 karakter")
+                else:
+                    user["password_hash"] = hash_password(new_pw)
+                    st.success("Password berhasil diganti!")
+    
+    # Logout button
+    st.markdown("---")
+    if st.button("🚪 Logout", type="secondary"):
+        logout_user()
+        st.rerun()
 
 
 if __name__ == "__main__":
