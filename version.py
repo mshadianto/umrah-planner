@@ -9,8 +9,8 @@ from datetime import datetime
 from typing import Optional
 
 # Application Version
-__version__ = "2.1.0"
-__version_info__ = (2, 1, 0)
+__version__ = "2.3.0"
+__version_info__ = (2, 3, 0)
 
 # Build Information
 BUILD_DATE = "2025-11-26"
@@ -30,11 +30,10 @@ DEVELOPER = {
 # Application Metadata
 APP_INFO = {
     "name": "Umrah Planner AI",
-    "tagline": "Asisten Cerdas Perencanaan Perjalanan Umrah",
+    "tagline": "Platform Cerdas Perencanaan Umrah #1 Indonesia",
     "description": """
-    Aplikasi RAG Agentic AI untuk perencanaan dan simulasi biaya perjalanan umrah.
-    Dikembangkan dengan teknologi terdepan untuk membantu jamaah Indonesia
-    merencanakan ibadah umrah dengan lebih baik.
+    Platform RAG Agentic AI untuk perencanaan dan simulasi biaya perjalanan umrah.
+    Solusi lengkap untuk jamaah Indonesia dengan fitur booking, financing, dan loyalty.
     """,
     "license": "MIT License",
     "repository": "https://github.com/mshadianto/umrah-planner",
@@ -43,6 +42,38 @@ APP_INFO = {
 
 # Changelog
 CHANGELOG = {
+    "2.3.0": {
+        "date": "2025-11-26",
+        "title": "Advanced Revenue Optimization",
+        "changes": [
+            "💳 Payment Gateway Integration (Midtrans, Xendit, DOKU)",
+            "🎯 AI Dynamic Pricing Engine dengan competitor analysis",
+            "⚡ Flash Sale & Auction system",
+            "👥 Group Buying dengan tiered discounts",
+            "🏪 Multi-vendor Marketplace",
+            "🔌 API Monetization dengan pricing tiers",
+            "📊 Data Products & Market Insights",
+            "🎮 Gamification (achievements, badges, leaderboard)",
+            "💬 WhatsApp Commerce dengan chatbot flows",
+            "📈 AI Revenue Forecast & Projections",
+        ]
+    },
+    "2.2.0": {
+        "date": "2025-11-26",
+        "title": "Startup Scale Features",
+        "changes": [
+            "📊 Analytics Dashboard dengan real-time metrics",
+            "👥 CRM & Lead Management system",
+            "🤖 Marketing Automation (Email & WhatsApp)",
+            "💰 Commission & Payout Tracking",
+            "🎁 Loyalty Program dengan tier membership",
+            "🛡️ Insurance partner integration (AXA, Allianz, Zurich)",
+            "💳 Financing partner integration (Kredivo, Akulaku, Home Credit)",
+            "🤝 Partner Management dashboard",
+            "📈 Revenue analytics & forecasting",
+            "🔄 Automated follow-up workflows",
+        ]
+    },
     "2.1.0": {
         "date": "2025-11-26",
         "title": "Monetization & Business Features",
