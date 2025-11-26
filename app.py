@@ -163,7 +163,7 @@ def render_sidebar():
         st.markdown("---")
         st.markdown(f"""
         <div style="text-align: center; font-size: 0.75rem; color: #888;">
-            Made with ❤️ by<br>
+            Made with ❤️ by MS Hadianto<br>
             <strong>{DEVELOPER['name'].split()[0]}</strong><br>
             v{__version__}
         </div>
