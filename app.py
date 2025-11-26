@@ -33,6 +33,8 @@ from monetization import (
     render_lead_capture_form, render_quick_quote_widget,
     init_monetization_state, PRICING_TIERS
 )
+from startup import render_startup_features
+from revenue import render_advanced_revenue
 
 # Page configuration
 st.set_page_config(
@@ -146,6 +148,8 @@ def render_sidebar():
                 "✈️ Booking & Reservasi",
                 "🧰 Tools & Fitur",
                 "💼 Business Hub",
+                "🚀 Startup Dashboard",
+                "💎 Revenue Optimization",
                 "⚙️ Pengaturan",
                 "ℹ️ Tentang Aplikasi"
             ]
@@ -1136,6 +1140,14 @@ def main():
         st.header("💼 Business Hub")
         st.markdown("Monetisasi, partnership, dan fitur premium")
         render_monetization_page()
+    elif "Startup" in page:
+        st.header("🚀 Startup Dashboard")
+        st.markdown("Analytics, CRM, dan tools untuk scale bisnis")
+        render_startup_features()
+    elif "Revenue" in page:
+        st.header("💎 Revenue Optimization")
+        st.markdown("Advanced tools untuk maximize revenue")
+        render_advanced_revenue()
     elif "Pengaturan" in page:
         render_settings()
     elif "Tentang" in page:
