@@ -4,7 +4,6 @@
 RAG Agentic AI untuk Simulasi Biaya Perjalanan Umrah
 
 Developed by: M. Sopian Adi Mulyana
-Company: KIM Consulting
 GitHub: https://github.com/mshadianto
 """
 
