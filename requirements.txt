@@ -1,14 +1,12 @@
 # ==============================================
-# Umrah Planner AI - Requirements
-# Python 3.10+ Required | Supabase Database
+# Umrah Planner AI - Requirements (Core)
+# Python 3.10+ Required
+# Supabase optional - see requirements-full.txt
 # ==============================================
 
 # Core Framework
 streamlit==1.29.0
 python-dotenv==1.0.0
-
-# Database - Supabase
-supabase==2.3.4
 
 # LLM - Groq Only
 langchain==0.1.0
