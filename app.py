@@ -2,6 +2,9 @@
 🕋 Umrah Planner AI - Main Application
 ======================================
 RAG Agentic AI untuk Simulasi Biaya Perjalanan Umrah
+
+Developed by: M. Sopian Hadianto
+GitHub: https://github.com/mshadianto
 """
 
 import streamlit as st
@@ -19,6 +22,11 @@ from agents import AgentOrchestrator
 from scenarios import ScenarioPlanner
 from utils import format_currency, format_duration
 from features import render_additional_features
+from booking import render_booking_features
+from version import (
+    __version__, DEVELOPER, APP_INFO, CHANGELOG, TECH_STACK,
+    get_version_badge, get_developer_card, get_changelog_markdown, get_app_age
+)
 
 # Page configuration
 st.set_page_config(
@@ -110,6 +118,7 @@ def render_sidebar():
     with st.sidebar:
         st.markdown("# 🕋")
         st.title("Umrah Planner")
+        st.markdown(get_version_badge(), unsafe_allow_html=True)
         st.markdown("---")
         
         # Navigation
@@ -122,8 +131,10 @@ def render_sidebar():
                 "📅 Analisis Waktu",
                 "🤖 Chat AI",
                 "📋 Buat Rencana",
+                "✈️ Booking & Reservasi",
                 "🧰 Tools & Fitur",
-                "⚙️ Pengaturan"
+                "⚙️ Pengaturan",
+                "ℹ️ Tentang Aplikasi"
             ]
         )
         
@@ -142,8 +153,21 @@ def render_sidebar():
             "Booking 3-4 bulan sebelumnya untuk harga terbaik",
             "Hindari Ramadhan jika budget terbatas",
             "Pilih hotel dekat Haram untuk jamaah lansia",
+            "Bawa obat pribadi yang cukup",
+            "Download peta offline sebelum berangkat",
+            "Tukar uang ke Riyal sebelum berangkat",
         ]
         st.caption(tips[datetime.now().second % len(tips)])
+        
+        # Footer
+        st.markdown("---")
+        st.markdown(f"""
+        <div style="text-align: center; font-size: 0.75rem; color: #888;">
+            Made with ❤️ by<br>
+            <strong>{DEVELOPER['name'].split()[0]}</strong><br>
+            v{__version__}
+        </div>
+        """, unsafe_allow_html=True)
         
         return page
 
@@ -153,7 +177,14 @@ def render_home():
     st.markdown('<h1 class="main-header">🕋 Umrah Planner AI</h1>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Asisten Cerdas untuk Perencanaan Perjalanan Umrah Anda</p>', unsafe_allow_html=True)
     
-    # Feature cards
+    # Version badge
+    st.markdown(f"""
+    <div style="text-align: center; margin-bottom: 1rem;">
+        {get_version_badge()}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Feature cards - Row 1
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -177,6 +208,33 @@ def render_home():
         <div class="metric-card">
             <h3>🤖 AI Assistant</h3>
             <p>Konsultasi dengan AI untuk pertanyaan seputar umrah</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Feature cards - Row 2 (NEW)
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div class="metric-card">
+            <h3>✈️ Booking Tiket</h3>
+            <p>Cari & bandingkan harga tiket pesawat</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="metric-card">
+            <h3>🏨 Hotel & Akomodasi</h3>
+            <p>Temukan hotel terbaik di Makkah & Madinah</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="metric-card">
+            <h3>📦 Paket Travel</h3>
+            <p>Bandingkan paket dari berbagai travel agent</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -233,6 +291,48 @@ def render_home():
         st.markdown("#### ✨ Fasilitas Termasuk:")
         for feature in result.features:
             st.markdown(f"• {feature}")
+    
+    # Why choose us section
+    st.markdown("---")
+    st.markdown("### 🌟 Mengapa Umrah Planner AI?")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown("""
+        <div style="text-align: center;">
+            <h1>🤖</h1>
+            <strong>AI-Powered</strong>
+            <p style="font-size: 0.85rem;">Didukung teknologi AI terdepan</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="text-align: center;">
+            <h1>📊</h1>
+            <strong>Data Akurat</strong>
+            <p style="font-size: 0.85rem;">Estimasi biaya berdasarkan data real</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="text-align: center;">
+            <h1>🇮🇩</h1>
+            <strong>Lokal Indonesia</strong>
+            <p style="font-size: 0.85rem;">Disesuaikan untuk jamaah Indonesia</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style="text-align: center;">
+            <h1>🆓</h1>
+            <strong>100% Gratis</strong>
+            <p style="font-size: 0.85rem;">Gunakan tanpa biaya apapun</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def render_cost_simulation():
@@ -791,19 +891,139 @@ def render_settings():
         initialize_system()
         st.rerun()
     
-    st.markdown("### ℹ️ Tentang Aplikasi")
-    st.info(f"""
-    **{app_config.app_name}** v{app_config.version}
+    st.markdown("### ℹ️ Informasi Aplikasi")
     
-    Aplikasi RAG Agentic AI untuk perencanaan dan simulasi biaya perjalanan umrah.
+    col1, col2 = st.columns(2)
     
-    Fitur:
-    - 💰 Simulasi biaya dengan berbagai skenario
-    - 📊 Scenario planning & comparison
-    - 🤖 AI Assistant berbasis RAG
-    - 📅 Analisis waktu terbaik
-    - 📋 Pembuatan rencana lengkap
-    """)
+    with col1:
+        st.info(f"""
+        **{APP_INFO['name']}** v{__version__}
+        
+        {APP_INFO['tagline']}
+        
+        **Developer:** {DEVELOPER['name']}
+        **Company:** {DEVELOPER['company']}
+        """)
+    
+    with col2:
+        st.info(f"""
+        **Repository:**
+        {APP_INFO['repository']}
+        
+        **Demo:**
+        {APP_INFO['demo_url']}
+        
+        **License:** {APP_INFO['license']}
+        """)
+
+
+def render_about():
+    """Render about page with developer info"""
+    st.markdown('<h1 class="main-header">ℹ️ Tentang Aplikasi</h1>', unsafe_allow_html=True)
+    
+    # App info card
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+    ">
+        <h1 style="margin: 0;">🕋 {APP_INFO['name']}</h1>
+        <p style="font-size: 1.2rem; margin: 0.5rem 0;">{APP_INFO['tagline']}</p>
+        <p style="
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        ">Version {__version__}</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Tabs
+    tab1, tab2, tab3, tab4 = st.tabs(["👨‍💻 Developer", "📋 Changelog", "🔧 Tech Stack", "📊 Stats"])
+    
+    with tab1:
+        st.markdown(get_developer_card(), unsafe_allow_html=True)
+        
+        st.markdown("### 📧 Kontak")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f"📧 **Email**\n\n{DEVELOPER['email']}")
+        with col2:
+            st.markdown(f"🔗 **GitHub**\n\n[mshadianto]({DEVELOPER['github']})")
+        with col3:
+            st.markdown(f"💼 **LinkedIn**\n\n[Profile]({DEVELOPER['linkedin']})")
+        
+        st.markdown("---")
+        st.markdown("### 🏢 Tentang KIM Consulting")
+        st.markdown("""
+        **KIM Consulting** adalah perusahaan konsultan yang berfokus pada:
+        - 📊 Governance, Risk & Compliance (GRC)
+        - 🔍 Internal Audit & Quality Assurance
+        - 🤖 AI-Powered Solutions untuk Audit & Compliance
+        - 📋 Corporate Governance Advisory
+        """)
+    
+    with tab2:
+        st.markdown(get_changelog_markdown())
+    
+    with tab3:
+        st.markdown("### 🔧 Technology Stack")
+        
+        for category, techs in TECH_STACK.items():
+            st.markdown(f"#### {category.replace('_', ' ').title()}")
+            for name, version, desc in techs:
+                st.markdown(f"- **{name}** `{version}` - {desc}")
+        
+        st.markdown("---")
+        st.markdown("### 📦 Source Code")
+        st.code(f"git clone {APP_INFO['repository']}.git", language="bash")
+        st.markdown(f"[📂 View on GitHub]({APP_INFO['repository']})")
+    
+    with tab4:
+        st.markdown("### 📊 Application Statistics")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("📅 Released", get_app_age())
+        with col2:
+            st.metric("🔄 Version", __version__)
+        with col3:
+            st.metric("📦 Modules", "8+")
+        
+        st.markdown("---")
+        st.markdown("### 🌟 Features")
+        
+        features = [
+            ("💰 Cost Simulation", "Simulate umrah costs with multiple scenarios"),
+            ("📊 Scenario Comparison", "Compare economic, standard, premium, VIP packages"),
+            ("🤖 AI Chat", "RAG-powered chatbot for umrah guidance"),
+            ("✈️ Flight Search", "Search and compare flight prices"),
+            ("🏨 Hotel Booking", "Find hotels in Makkah & Madinah"),
+            ("📦 Package Comparison", "Compare travel agent packages"),
+            ("🛂 Visa Tracker", "Track visa processing status"),
+            ("💳 Payment Calculator", "Calculate installment plans"),
+            ("✅ Preparation Checklist", "Interactive preparation checklist"),
+            ("📿 Doa & Manasik", "Complete prayer and ritual guide"),
+        ]
+        
+        col1, col2 = st.columns(2)
+        for i, (name, desc) in enumerate(features):
+            with col1 if i % 2 == 0 else col2:
+                st.markdown(f"**{name}**\n\n{desc}")
+    
+    st.markdown("---")
+    st.markdown(f"""
+    <div style="text-align: center; padding: 1rem; background: #f5f5f5; border-radius: 10px;">
+        <p>📜 Licensed under {APP_INFO['license']}</p>
+        <p>Made with ❤️ in Indonesia 🇮🇩</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def main():
@@ -832,11 +1052,17 @@ def main():
         render_ai_chat()
     elif "Buat Rencana" in page:
         render_create_plan()
+    elif "Booking" in page:
+        st.header("✈️ Booking & Reservasi")
+        st.markdown("Cari penerbangan, hotel, transportasi, dan paket travel terbaik")
+        render_booking_features()
     elif "Tools" in page:
         st.header("🧰 Tools & Fitur Jamaah")
         render_additional_features()
     elif "Pengaturan" in page:
         render_settings()
+    elif "Tentang" in page:
+        render_about()
 
 
 if __name__ == "__main__":
