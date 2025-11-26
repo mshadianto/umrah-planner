@@ -2,6 +2,7 @@
 👥 User Management & Authentication System
 ==========================================
 Multi-tier user system with role-based access control
+Integrated with Supabase Database
 
 Roles:
 - Free User: Basic access
@@ -22,6 +23,9 @@ import json
 import random
 import string
 import os
+
+# Import Supabase database module
+from database import get_db, SupabaseDB, render_supabase_setup
 
 # ============================================
 # USER ROLES & PERMISSIONS
@@ -197,15 +201,13 @@ DEFAULT_SUPERADMIN = {
 }
 
 # ============================================
-# USER DATABASE (In-memory, replace with real DB)
+# USER DATABASE (Supabase Integration)
 # ============================================
 
 def init_user_database():
-    """Initialize user database in session state"""
-    if "users_db" not in st.session_state:
-        st.session_state.users_db = {
-            "superadmin": DEFAULT_SUPERADMIN.copy()
-        }
+    """Initialize user database connection"""
+    if "db" not in st.session_state:
+        st.session_state.db = get_db()
     
     if "current_user" not in st.session_state:
         st.session_state.current_user = None
@@ -235,57 +237,41 @@ def generate_session_token() -> str:
 
 
 # ============================================
-# AUTHENTICATION FUNCTIONS
+# AUTHENTICATION FUNCTIONS (Supabase)
 # ============================================
 
 def register_user(username: str, email: str, password: str, name: str, phone: str = "") -> Dict:
-    """Register new user"""
+    """Register new user using Supabase"""
     init_user_database()
+    db = get_db()
     
     # Validation
-    if username in st.session_state.users_db:
-        return {"success": False, "error": "Username sudah digunakan"}
-    
-    for user in st.session_state.users_db.values():
-        if user.get("email") == email:
-            return {"success": False, "error": "Email sudah terdaftar"}
-    
     if len(password) < 6:
         return {"success": False, "error": "Password minimal 6 karakter"}
     
-    # Create user
-    user_id = generate_user_id()
-    new_user = {
-        "id": user_id,
-        "username": username,
-        "email": email,
-        "password_hash": hash_password(password),
-        "name": name,
-        "phone": phone,
-        "role": "free",
-        "created_at": datetime.now().isoformat(),
-        "last_login": None,
-        "status": "active",
-        "subscription": {
-            "plan": "free",
-            "start_date": None,
-            "end_date": None,
-            "auto_renew": False
-        },
-        "stats": {
-            "ai_chat_today": 0,
-            "last_chat_date": None,
-            "total_saved_plans": 0,
-        }
-    }
+    if len(username) < 3:
+        return {"success": False, "error": "Username minimal 3 karakter"}
     
-    st.session_state.users_db[username] = new_user
-    return {"success": True, "user_id": user_id, "message": "Registrasi berhasil!"}
+    if "@" not in email:
+        return {"success": False, "error": "Email tidak valid"}
+    
+    # Create user via database
+    result = db.create_user(
+        username=username,
+        email=email,
+        password=password,
+        name=name,
+        phone=phone,
+        role="free"
+    )
+    
+    return result
 
 
 def login_user(username: str, password: str) -> Dict:
-    """Login user"""
+    """Login user using Supabase"""
     init_user_database()
+    db = get_db()
     
     # Check login attempts (brute force protection)
     attempts_key = f"attempts_{username}"
@@ -294,13 +280,14 @@ def login_user(username: str, password: str) -> Dict:
         if attempts["count"] >= 5 and (datetime.now() - attempts["last_attempt"]).seconds < 300:
             return {"success": False, "error": "Terlalu banyak percobaan. Coba lagi dalam 5 menit."}
     
-    # Check credentials
-    if username not in st.session_state.users_db:
+    # Get user from database
+    user = db.get_user_by_username(username)
+    
+    if not user:
         return {"success": False, "error": "Username atau password salah"}
     
-    user = st.session_state.users_db[username]
-    
-    if user["password_hash"] != hash_password(password):
+    # Verify password
+    if not db.verify_password(username, password):
         # Track failed attempts
         if attempts_key not in st.session_state.login_attempts:
             st.session_state.login_attempts[attempts_key] = {"count": 0, "last_attempt": datetime.now()}
@@ -308,23 +295,25 @@ def login_user(username: str, password: str) -> Dict:
         st.session_state.login_attempts[attempts_key]["last_attempt"] = datetime.now()
         return {"success": False, "error": "Username atau password salah"}
     
-    if user["status"] != "active":
+    if user.get("status") != "active":
         return {"success": False, "error": "Akun dinonaktifkan. Hubungi admin."}
     
-    # Successful login
-    user["last_login"] = datetime.now().isoformat()
+    # Successful login - update last login
+    if user.get("id"):
+        db.update_last_login(user["id"])
+    
+    # Store current user in session
     st.session_state.current_user = user
     
     # Reset login attempts
     if attempts_key in st.session_state.login_attempts:
         del st.session_state.login_attempts[attempts_key]
     
-    # Reset daily chat counter if new day
-    if user["stats"]["last_chat_date"] != datetime.now().strftime("%Y-%m-%d"):
-        user["stats"]["ai_chat_today"] = 0
-        user["stats"]["last_chat_date"] = datetime.now().strftime("%Y-%m-%d")
+    # Log action
+    if user.get("id"):
+        db.log_action(user["id"], "login", "user", user["id"])
     
-    return {"success": True, "user": user, "message": f"Selamat datang, {user['name']}!"}
+    return {"success": True, "user": user, "message": f"Selamat datang, {user.get('name', username)}!"}
 
 
 def logout_user():
@@ -395,159 +384,180 @@ def increment_usage(usage_type: str):
 
 
 # ============================================
-# SUBSCRIPTION MANAGEMENT
+# SUBSCRIPTION MANAGEMENT (Supabase)
 # ============================================
 
 def upgrade_subscription(username: str, plan: str, months: int = 1) -> Dict:
-    """Upgrade user subscription"""
+    """Upgrade user subscription using Supabase"""
     init_user_database()
-    
-    if username not in st.session_state.users_db:
-        return {"success": False, "error": "User tidak ditemukan"}
+    db = get_db()
     
     if plan not in ["basic", "premium", "vip"]:
         return {"success": False, "error": "Paket tidak valid"}
     
-    user = st.session_state.users_db[username]
+    # Get user
+    user = db.get_user_by_username(username)
+    if not user:
+        return {"success": False, "error": "User tidak ditemukan"}
     
-    start_date = datetime.now()
-    end_date = start_date + timedelta(days=30 * months)
+    # Get price
+    prices = {"basic": 49000, "premium": 149000, "vip": 499000}
+    amount = prices.get(plan, 0) * months
     
-    user["role"] = plan
-    user["subscription"] = {
-        "plan": plan,
-        "start_date": start_date.isoformat(),
-        "end_date": end_date.isoformat(),
-        "auto_renew": False
-    }
+    # Create subscription
+    result = db.create_subscription(
+        user_id=user["id"],
+        plan=plan,
+        months=months,
+        amount=amount
+    )
     
-    # Update current user if same
-    if st.session_state.current_user and st.session_state.current_user["username"] == username:
-        st.session_state.current_user = user
+    if result.get("success"):
+        # Update current user if same
+        if st.session_state.current_user and st.session_state.current_user.get("username") == username:
+            st.session_state.current_user["role"] = plan
+        
+        # Log action
+        db.log_action(user["id"], "upgrade_subscription", "subscription", None, 
+                     {"old_plan": user.get("role")}, {"new_plan": plan})
     
-    return {"success": True, "message": f"Upgrade ke {plan} berhasil!"}
+    return result
 
 
 def downgrade_to_free(username: str) -> Dict:
     """Downgrade user to free"""
     init_user_database()
+    db = get_db()
     
-    if username not in st.session_state.users_db:
+    user = db.get_user_by_username(username)
+    if not user:
         return {"success": False, "error": "User tidak ditemukan"}
     
-    user = st.session_state.users_db[username]
-    user["role"] = "free"
-    user["subscription"] = {
-        "plan": "free",
-        "start_date": None,
-        "end_date": None,
-        "auto_renew": False
-    }
+    # Update user role
+    result = db.update_user(user["id"], {"role": "free"})
+    
+    if result.get("success"):
+        # Update current user if same
+        if st.session_state.current_user and st.session_state.current_user.get("username") == username:
+            st.session_state.current_user["role"] = "free"
     
     return {"success": True, "message": "Downgrade ke Free berhasil"}
 
 
 # ============================================
-# ADMIN FUNCTIONS
+# ADMIN FUNCTIONS (Supabase)
 # ============================================
 
 def get_all_users() -> List[Dict]:
-    """Get all users (admin only)"""
+    """Get all users from Supabase"""
     init_user_database()
-    return list(st.session_state.users_db.values())
+    db = get_db()
+    return db.get_all_users()
 
 
 def update_user_role(username: str, new_role: str, by_admin: str) -> Dict:
-    """Update user role (admin only)"""
+    """Update user role using Supabase"""
     init_user_database()
-    
-    if username not in st.session_state.users_db:
-        return {"success": False, "error": "User tidak ditemukan"}
+    db = get_db()
     
     if new_role not in USER_ROLES:
         return {"success": False, "error": "Role tidak valid"}
     
     # Only superadmin can create admins
     current_user = get_current_user()
-    if new_role in ["admin", "superadmin"] and current_user["role"] != "superadmin":
+    if new_role in ["admin", "superadmin"] and current_user.get("role") != "superadmin":
         return {"success": False, "error": "Hanya Super Admin yang bisa membuat Admin"}
     
-    user = st.session_state.users_db[username]
-    old_role = user["role"]
-    user["role"] = new_role
+    # Get user
+    user = db.get_user_by_username(username)
+    if not user:
+        return {"success": False, "error": "User tidak ditemukan"}
     
-    # Log the change
-    if "role_history" not in user:
-        user["role_history"] = []
-    user["role_history"].append({
-        "from": old_role,
-        "to": new_role,
-        "by": by_admin,
-        "at": datetime.now().isoformat()
-    })
+    old_role = user.get("role")
     
-    return {"success": True, "message": f"Role {username} diubah ke {new_role}"}
+    # Update role
+    result = db.update_user(user["id"], {"role": new_role})
+    
+    if result.get("success"):
+        # Log action
+        db.log_action(
+            current_user.get("id"),
+            "update_user_role",
+            "user",
+            user["id"],
+            {"role": old_role},
+            {"role": new_role}
+        )
+        return {"success": True, "message": f"Role {username} diubah ke {new_role}"}
+    
+    return result
 
 
 def toggle_user_status(username: str) -> Dict:
-    """Toggle user active/inactive"""
+    """Toggle user active/inactive using Supabase"""
     init_user_database()
-    
-    if username not in st.session_state.users_db:
-        return {"success": False, "error": "User tidak ditemukan"}
+    db = get_db()
     
     if username == "superadmin":
         return {"success": False, "error": "Tidak bisa menonaktifkan Super Admin"}
     
-    user = st.session_state.users_db[username]
-    user["status"] = "inactive" if user["status"] == "active" else "active"
+    user = db.get_user_by_username(username)
+    if not user:
+        return {"success": False, "error": "User tidak ditemukan"}
     
-    return {"success": True, "message": f"Status {username}: {user['status']}"}
+    new_status = "inactive" if user.get("status") == "active" else "active"
+    
+    result = db.update_user(user["id"], {"status": new_status})
+    
+    if result.get("success"):
+        current_user = get_current_user()
+        db.log_action(
+            current_user.get("id"),
+            "toggle_user_status",
+            "user",
+            user["id"],
+            {"status": user.get("status")},
+            {"status": new_status}
+        )
+        return {"success": True, "message": f"Status {username}: {new_status}"}
+    
+    return result
 
 
 def delete_user(username: str) -> Dict:
-    """Delete user (superadmin only)"""
+    """Delete user using Supabase"""
     init_user_database()
-    
-    if username not in st.session_state.users_db:
-        return {"success": False, "error": "User tidak ditemukan"}
+    db = get_db()
     
     if username == "superadmin":
         return {"success": False, "error": "Tidak bisa menghapus Super Admin"}
     
-    del st.session_state.users_db[username]
-    return {"success": True, "message": f"User {username} dihapus"}
+    user = db.get_user_by_username(username)
+    if not user:
+        return {"success": False, "error": "User tidak ditemukan"}
+    
+    current_user = get_current_user()
+    
+    result = db.delete_user(user["id"])
+    
+    if result.get("success"):
+        db.log_action(
+            current_user.get("id"),
+            "delete_user",
+            "user",
+            user["id"],
+            {"username": username},
+            None
+        )
+    
+    return result
 
 
 def get_user_stats() -> Dict:
-    """Get user statistics"""
+    """Get user statistics from Supabase"""
     init_user_database()
-    
-    users = list(st.session_state.users_db.values())
-    
-    stats = {
-        "total": len(users),
-        "by_role": {},
-        "by_status": {"active": 0, "inactive": 0},
-        "new_today": 0,
-        "new_this_month": 0,
-    }
-    
-    today = datetime.now().strftime("%Y-%m-%d")
-    this_month = datetime.now().strftime("%Y-%m")
-    
-    for user in users:
-        role = user.get("role", "free")
-        stats["by_role"][role] = stats["by_role"].get(role, 0) + 1
-        stats["by_status"][user.get("status", "active")] += 1
-        
-        created = user.get("created_at", "")
-        if created.startswith(today):
-            stats["new_today"] += 1
-        if created.startswith(this_month):
-            stats["new_this_month"] += 1
-    
-    return stats
+    db = get_db()
+    return db.get_user_stats_summary()
 
 
 # ============================================
@@ -712,30 +722,37 @@ def render_admin_dashboard():
     """Render admin dashboard"""
     user = get_current_user()
     
-    if not user or user["role"] not in ["admin", "superadmin"]:
+    if not user or user.get("role") not in ["admin", "superadmin"]:
         render_access_denied()
         return
     
     st.markdown("## 🛡️ Admin Dashboard")
+    
+    # Database status
+    db = get_db()
+    if db.is_connected:
+        st.success("✅ Database: Supabase Connected")
+    else:
+        st.warning("⚠️ Database: Fallback Mode (In-Memory)")
     
     # Stats overview
     stats = get_user_stats()
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("👥 Total Users", stats["total"])
+        st.metric("👥 Total Users", stats.get("total", 0))
     with col2:
-        st.metric("📈 New Today", stats["new_today"])
+        st.metric("📈 New Today", stats.get("new_today", 0))
     with col3:
-        st.metric("📅 This Month", stats["new_this_month"])
+        st.metric("📅 This Month", stats.get("new_this_month", 0))
     with col4:
-        st.metric("✅ Active", stats["by_status"].get("active", 0))
+        st.metric("✅ Active", stats.get("by_status", {}).get("active", 0))
     
     st.markdown("---")
     
     # Admin tabs
-    if user["role"] == "superadmin":
-        tabs = st.tabs(["👥 Users", "📊 Analytics", "⚙️ Settings", "🔐 Security", "💰 Revenue"])
+    if user.get("role") == "superadmin":
+        tabs = st.tabs(["👥 Users", "📊 Analytics", "⚙️ Settings", "🔐 Security", "🗄️ Database", "💰 Revenue"])
     else:
         tabs = st.tabs(["👥 Users", "📊 Analytics", "💰 Revenue"])
     
@@ -748,16 +765,18 @@ def render_admin_dashboard():
         render_admin_analytics(stats)
     
     # Revenue Tab (for both admin and superadmin)
-    revenue_tab_index = 2 if user["role"] != "superadmin" else 4
-    with tabs[revenue_tab_index if user["role"] == "superadmin" else 2]:
-        render_revenue_analytics()
-    
-    # Superadmin only tabs
-    if user["role"] == "superadmin":
+    if user.get("role") == "superadmin":
         with tabs[2]:
             render_system_settings()
         with tabs[3]:
             render_security_settings()
+        with tabs[4]:
+            render_supabase_setup()  # Database setup page
+        with tabs[5]:
+            render_revenue_analytics()
+    else:
+        with tabs[2]:
+            render_revenue_analytics()
 
 
 def render_user_management():
