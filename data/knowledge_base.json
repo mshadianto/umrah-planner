@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2024-12-01",
+    "description": "Knowledge base komprehensif tentang perjalanan umrah"
+  },
+  "documents": [
+    {
+      "id": "umrah_overview_001",
+      "category": "overview",
+      "title": "Pengertian dan Rukun Umrah",
+      "content": "Umrah adalah ibadah mengunjungi Baitullah (Ka'bah) di Masjidil Haram, Makkah, untuk melaksanakan thawaf, sa'i, dan tahallul dengan niat ibadah pada waktu yang tidak ditentukan. Berbeda dengan haji yang wajib dan memiliki waktu tertentu, umrah dapat dilakukan kapan saja sepanjang tahun. Rukun umrah meliputi: (1) Ihram yaitu niat memasuki ibadah umrah, (2) Thawaf yaitu mengelilingi Ka'bah sebanyak 7 kali, (3) Sa'i yaitu berjalan atau berlari kecil antara bukit Shafa dan Marwah sebanyak 7 kali, (4) Tahallul yaitu mencukur atau memotong rambut minimal 3 helai. Wajib umrah adalah ihram dari miqat (batas wilayah). Pelaksanaan umrah dimulai dengan berpakaian ihram di miqat, kemudian niat, lalu menuju Masjidil Haram untuk thawaf, dilanjutkan dengan sa'i, dan diakhiri dengan tahallul."
+    },
+    {
+      "id": "umrah_overview_002",
+      "category": "overview",
+      "title": "Perbedaan Umrah dan Haji",
+      "content": "Perbedaan utama antara umrah dan haji terletak pada waktu pelaksanaan, rukun, dan hukumnya. Haji wajib dilaksanakan sekali seumur hidup bagi yang mampu dan hanya bisa dilakukan pada bulan Dzulhijjah, sedangkan umrah sunah muakkad dan bisa dilakukan kapan saja. Rukun haji lebih banyak termasuk wukuf di Arafah, mabit di Muzdalifah dan Mina, serta melontar jumrah, yang tidak ada dalam umrah. Durasi haji biasanya 40 hari sedangkan umrah bisa selesai dalam 7-14 hari. Biaya haji reguler di Indonesia sekitar Rp 50-60 juta dengan masa tunggu antrian, sedangkan umrah bisa berangkat kapan saja dengan biaya mulai Rp 25-200 juta tergantung paket."
+    },
+    {
+      "id": "visa_001",
+      "category": "visa",
+      "title": "Persyaratan Visa Umrah Indonesia",
+      "content": "Visa umrah untuk WNI memiliki persyaratan utama: (1) Paspor dengan masa berlaku minimal 6 bulan, (2) Foto berwarna ukuran 4x6 dengan latar belakang putih, (3) Kartu kuning vaksin meningitis, (4) Surat keterangan sehat dari dokter, (5) Buku nikah asli bagi yang sudah menikah, (6) Akta kelahiran untuk anak di bawah 18 tahun, (7) Surat izin mahram bagi wanita di bawah 45 tahun yang tidak bersama mahram. Biaya visa umrah sekitar USD 100-150 atau Rp 1,5-2,5 juta. Proses pengurusan visa memakan waktu 3-7 hari kerja melalui travel agent yang terdaftar di PPIU (Penyelenggara Perjalanan Ibadah Umrah) Kementerian Agama. Visa umrah berlaku untuk single entry dengan masa tinggal maksimal 30 hari."
+    },
+    {
+      "id": "tiket_001",
+      "category": "transportasi",
+      "title": "Tiket Pesawat Indonesia ke Arab Saudi",
+      "content": "Penerbangan umrah dari Indonesia ke Arab Saudi tersedia dalam dua opsi: langsung (direct) dan transit. Penerbangan langsung tersedia dari Jakarta dan Surabaya ke Jeddah atau Madinah dengan maskapai Garuda Indonesia, Saudi Arabian Airlines, dan beberapa maskapai lain. Durasi penerbangan langsung sekitar 8-9 jam. Penerbangan transit biasanya via Dubai, Doha, atau Abu Dhabi dengan maskapai Emirates, Qatar Airways, atau Etihad. Harga tiket PP bervariasi: ekonomi Rp 8-15 juta, bisnis Rp 25-40 juta, first class Rp 50-100 juta. Harga melonjak 30-80% saat musim Ramadhan dan liburan sekolah. Tips mendapat harga murah: booking 3-4 bulan sebelumnya, pilih penerbangan tengah pekan, dan bandingkan harga antar maskapai."
+    },
+    {
+      "id": "hotel_makkah_001",
+      "category": "akomodasi",
+      "title": "Hotel di Makkah Berdasarkan Jarak ke Masjidil Haram",
+      "content": "Hotel di Makkah dikategorikan berdasarkan jarak ke Masjidil Haram yang sangat mempengaruhi harga dan kenyamanan. Kategori premium (0-200m): Raffles Makkah Palace, Fairmont Clock Tower, Swissotel Al Maqam dengan harga Rp 5-25 juta per malam, akses langsung ke Haram tanpa perlu transportasi. Kategori menengah (200-500m): Hilton Suites, Makkah Towers, Pullman Zamzam dengan harga Rp 1,5-5 juta per malam, jalan kaki 5-10 menit. Kategori ekonomis (500-1500m): Al Marwa Rayhaan, Elaf Hotels, Gloria dengan harga Rp 400rb-1,5 juta per malam, perlu shuttle bus atau jalan kaki 15-30 menit. Pertimbangan memilih hotel: jarak untuk jamaah lansia/disabilitas, ketersediaan shuttle, fasilitas kamar, dan view Ka'bah jika penting."
+    },
+    {
+      "id": "hotel_madinah_001",
+      "category": "akomodasi",
+      "title": "Hotel di Madinah Berdasarkan Jarak ke Masjid Nabawi",
+      "content": "Hotel di Madinah umumnya lebih terjangkau dibanding Makkah dengan kualitas setara. Kategori premium (0-200m): The Oberoi, Dar Al Taqwa, Anwar Al Madinah dengan harga Rp 3-20 juta per malam, view langsung Masjid Nabawi. Kategori menengah (200-500m): Crowne Plaza, Millennium, Madinah Hilton dengan harga Rp 1-3 juta per malam, akses mudah jalan kaki. Kategori ekonomis (500-1000m): Dallah Taibah, Grand Mercure, Royal Inn dengan harga Rp 300rb-1 juta per malam. Madinah memiliki cuaca lebih sejuk dibanding Makkah. Waktu ideal mengunjungi Madinah adalah 3-4 hari untuk ziarah ke Raudhah, makam Rasulullah, makam Baqi, dan masjid-masjid bersejarah seperti Quba dan Qiblatain."
+    },
+    {
+      "id": "transportasi_001",
+      "category": "transportasi",
+      "title": "Transportasi Selama di Arab Saudi",
+      "content": "Transportasi selama umrah mencakup beberapa moda: (1) Bus AC - transportasi standar untuk rombongan, kapasitas 40-50 orang, biaya termasuk dalam paket. (2) VIP Bus - bus mewah dengan kursi lebih lega, entertainment system, kapasitas 25-30 orang, tambahan Rp 1-2 juta. (3) Private Car - mobil pribadi untuk keluarga kecil, fleksibilitas tinggi, biaya Rp 500rb-1 juta per hari. (4) Kereta Haramain - high-speed train Makkah-Madinah via Jeddah, durasi 2 jam, tiket ekonomi 250 SAR (Rp 1 juta), bisnis 500 SAR. (5) Taksi/Uber - tersedia untuk perjalanan independen, tarif mulai 20 SAR. Jarak Jeddah-Makkah 80 km (1 jam), Makkah-Madinah 450 km (4-5 jam darat atau 2 jam kereta)."
+    },
+    {
+      "id": "makan_001",
+      "category": "konsumsi",
+      "title": "Biaya Makan dan Restoran di Arab Saudi",
+      "content": "Biaya makan di Arab Saudi bervariasi tergantung lokasi dan jenis makanan. Makanan Indonesia tersedia di banyak restoran dan katering: nasi padang Rp 50-80rb, ayam goreng Rp 40-60rb, mi goreng Rp 35-50rb. Makanan Arab: nasi kebuli Rp 60-100rb, shawarma Rp 30-50rb, falafel Rp 25-40rb. Fast food internasional: McDonald's/KFC Rp 50-80rb per paket. Air zamzam gratis di area masjid. Buah-buahan segar: kurma Rp 100-500rb per kg, jeruk/apel Rp 30-50rb per kg. Tips hemat: makan di area Misfalah (Makkah) atau area pasar tradisional, bawa bekal snack dari Indonesia, manfaatkan sarapan hotel. Paket makan dalam travel biasanya 3x sehari dengan menu prasmanan Indonesia atau campuran."
+    },
+    {
+      "id": "musim_001",
+      "category": "waktu",
+      "title": "Musim Terbaik dan Termahal untuk Umrah",
+      "content": "Waktu umrah mempengaruhi biaya dan pengalaman secara signifikan. Musim puncak (peak season): Ramadhan terutama 10 hari terakhir, biaya naik 50-100%, sangat ramai tapi berkah berlipat. Liburan sekolah Juni-Juli dan Desember-Januari, biaya naik 30-50%, banyak keluarga. Musim sedang: Maulid Nabi, Isra Miraj, biaya naik 20-30%. Musim sepi (low season): Februari-Mei (selain Ramadhan), September-November, biaya paling murah, cuaca nyaman. Suhu Makkah: Desember-Februari 15-25°C, Juni-Agustus 35-45°C. Rekomendasi: untuk biaya hemat pilih low season, untuk pengalaman spiritual maksimal pilih Ramadhan dengan persiapan fisik dan finansial matang."
+    },
+    {
+      "id": "perlengkapan_001",
+      "category": "perlengkapan",
+      "title": "Perlengkapan Wajib dan Opsional Umrah",
+      "content": "Perlengkapan umrah wajib: (1) Pakaian ihram pria 2-3 set (Rp 100-300rb/set), (2) Mukena wanita 2-3 set (Rp 150-500rb/set), (3) Sandal jepit untuk thawaf, (4) Tas selempang kecil, (5) Obat-obatan pribadi, (6) Kacamata hitam dan pelindung matahari, (7) Handphone dan charger, (8) Uang tunai SAR. Perlengkapan opsional: koper ukuran 20-24 inch, tas ransel, payung lipat, bantal leher, masker, hand sanitizer, sajadah travel, buku doa umrah, power bank, adapter universal. Total budget perlengkapan: ekonomis Rp 500rb-1 juta, standar Rp 1-2 juta, lengkap Rp 2-3 juta. Tips: beli perlengkapan di Indonesia lebih murah kecuali kurma dan oleh-oleh Arab."
+    },
+    {
+      "id": "oleh_oleh_001",
+      "category": "perlengkapan",
+      "title": "Oleh-Oleh Khas dari Tanah Suci",
+      "content": "Oleh-oleh populer dari Arab Saudi: (1) Kurma - Ajwa (paling mahal, Rp 500rb-1jt/kg), Sukkari (Rp 200-400rb/kg), Safawi (Rp 150-300rb/kg), Medjool (Rp 300-500rb/kg). (2) Air zamzam - gratis ambil di masjid, bisa bawa 5-10 liter. (3) Parfum Arab - oud/bakhoor Rp 100-500rb, attar Rp 50-200rb. (4) Sajadah - Turki/Arab Rp 50-200rb. (5) Tasbih - kayu/batu Rp 30-100rb. (6) Kain/jilbab - abaya Rp 100-500rb, syal Rp 50-150rb. (7) Coklat Arab - Patchi, Galaxy Rp 100-300rb. (8) Emas - perhiasan emas 22 karat tanpa pajak. Tempat belanja: Misfalah dan area Haram (Makkah), Quba dan Central Area (Madinah). Budget oleh-oleh realistis: Rp 2-5 juta untuk keluarga dan kerabat."
+    },
+    {
+      "id": "paket_travel_001",
+      "category": "paket",
+      "title": "Jenis Paket Umrah dari Travel Agent",
+      "content": "Travel agent umrah menawarkan berbagai paket: (1) Paket Ekonomis Rp 25-32 juta - hotel bintang 3, jarak 800-1500m dari Haram, makan prasmanan, durasi 9 hari, bus reguler. (2) Paket Standard Rp 35-45 juta - hotel bintang 4, jarak 300-500m, makan prasmanan plus, durasi 12 hari, bus AC. (3) Paket Premium Rp 55-85 juta - hotel bintang 5, jarak 100-300m, makan menu pilihan, durasi 14 hari, VIP bus. (4) Paket VIP/Exclusive Rp 100-200 juta - hotel bintang 5 terbaik, view Haram, layanan private, durasi fleksibel. Komponen paket biasanya: tiket pesawat, visa, hotel, makan, transportasi lokal, muthawwif, perlengkapan dasar. Yang tidak termasuk: handling bagasi berlebih, laundry, oleh-oleh, tips."
+    },
+    {
+      "id": "tips_hemat_001",
+      "category": "tips",
+      "title": "Tips Menghemat Biaya Umrah",
+      "content": "Strategi hemat biaya umrah: (1) Booking jauh hari 4-6 bulan sebelumnya untuk harga early bird. (2) Pilih musim sepi (low season) Februari-Mei atau September-November. (3) Bentuk rombongan 15-20 orang untuk diskon grup. (4) Pilih hotel agak jauh tapi sehat untuk jalan kaki, hemat dan dapat pahala. (5) Bawa bekal makanan ringan dari Indonesia. (6) Manfaatkan promo travel agent saat pameran wisata. (7) Bandingkan minimal 3-5 travel sebelum memutuskan. (8) Pilih transit flight untuk hemat tiket pesawat. (9) Sharing kamar 4 orang untuk biaya akomodasi lebih murah. (10) Tukar uang di Indonesia dengan rate lebih baik. Potensi penghematan total: Rp 5-15 juta dibanding harga reguler."
+    },
+    {
+      "id": "travel_legal_001",
+      "category": "travel",
+      "title": "Memilih Travel Umrah yang Legal dan Terpercaya",
+      "content": "Kriteria travel umrah legal: (1) Terdaftar sebagai PPIU di Kemenag - cek di siskopatuh.kemenag.go.id. (2) Memiliki izin operasional dari Kemenag RI. (3) Jaminan asuransi perjalanan. (4) Rekening atas nama perusahaan, bukan pribadi. (5) Kontrak jelas dengan rincian fasilitas. (6) Track record baik, cek testimoni jamaah sebelumnya. (7) Kantor fisik yang bisa dikunjungi. (8) Tidak menjanjikan DP terlalu kecil atau cicilan tanpa bunga mencurigakan. Red flag: harga terlalu murah dari pasar, minta transfer ke rekening pribadi, tidak ada kontrak tertulis, desakan membayar cepat. Rekomendasi: pilih travel dengan pengalaman minimal 5 tahun dan sudah memberangkatkan ribuan jamaah."
+    },
+    {
+      "id": "kesehatan_001",
+      "category": "kesehatan",
+      "title": "Persiapan Kesehatan untuk Umrah",
+      "content": "Persiapan kesehatan sebelum umrah: (1) Vaksinasi wajib meningitis minimal 10 hari sebelum berangkat. (2) Vaksinasi COVID-19 sesuai ketentuan terbaru Arab Saudi. (3) Medical check-up terutama untuk usia 50+. (4) Latihan fisik jalan kaki 3-5 km per hari selama sebulan sebelumnya. (5) Bawa obat pribadi dengan resep dokter. Risiko kesehatan di tanah suci: dehidrasi karena cuaca panas, kelelahan karena aktivitas padat, flu dan ISPA karena kerumunan, lecet kaki karena banyak jalan. Tips menjaga kesehatan: minum air minimal 3 liter per hari, istirahat cukup, gunakan masker saat thawaf, pakai sandal nyaman, bawa vitamin dan suplemen, jangan memaksakan diri saat tidak fit."
+    },
+    {
+      "id": "ziarah_001",
+      "category": "ibadah",
+      "title": "Tempat Ziarah di Makkah dan Madinah",
+      "content": "Tempat ziarah di Makkah: (1) Masjidil Haram dan Ka'bah - pusat ibadah umrah. (2) Jabal Rahmah - gunung tempat pertemuan Adam dan Hawa. (3) Jabal Tsur - gua tempat Rasulullah bersembunyi saat hijrah. (4) Jabal Nur dan Gua Hira - tempat turunnya wahyu pertama. (5) Mina, Muzdalifah, Arafah - lokasi manasik haji. (6) Pemakaman Ma'la - makam Khadijah dan keluarga Rasulullah. Tempat ziarah di Madinah: (1) Masjid Nabawi dan Raudhah - makam Rasulullah. (2) Pemakaman Baqi - makam sahabat dan keluarga Nabi. (3) Masjid Quba - masjid pertama dalam Islam. (4) Masjid Qiblatain - masjid dua kiblat. (5) Jabal Uhud - lokasi perang Uhud dan makam Hamzah. Ziarah biasanya sudah termasuk dalam paket umrah."
+    },
+    {
+      "id": "financing_001",
+      "category": "keuangan",
+      "title": "Opsi Pembiayaan Umrah",
+      "content": "Opsi pembiayaan umrah bagi yang belum cukup dana: (1) Tabungan umrah bank syariah - setoran bulanan mulai Rp 500rb, bagi hasil, tanpa riba. (2) Arisan umrah - sistem gotong royong 20-30 orang, dapat giliran berangkat. (3) Cicilan travel - beberapa travel menawarkan cicilan 6-12 bulan. (4) Pembiayaan syariah - akad murabahah atau ijarah dari bank syariah, margin 10-15%. (5) Jual aset tidak produktif - tanah atau kendaraan yang jarang dipakai. (6) Dana pensiun dini - bagi yang akan pensiun. Tips: hindari pinjaman ribawi, lebih baik menunda sampai cukup dana halal, niatkan ibadah bukan gengsi sosial. Perencanaan ideal: mulai menabung 2-3 tahun sebelumnya dengan target jelas."
+    },
+    {
+      "id": "dokumen_001",
+      "category": "dokumen",
+      "title": "Dokumen yang Diperlukan untuk Umrah",
+      "content": "Daftar dokumen umrah lengkap: (1) Paspor asli minimal 6 bulan berlaku, minimal 2 halaman kosong. (2) KTP asli dan fotokopi. (3) Kartu Keluarga fotokopi. (4) Buku nikah asli (bagi pasangan). (5) Akta kelahiran anak (bagi yang bawa anak). (6) Akta cerai/kematian (bagi janda/duda). (7) Foto 4x6 latar putih 6 lembar (hijab syar'i bagi wanita). (8) Surat izin mahram (wanita <45 tahun tanpa mahram). (9) Kartu kuning vaksinasi meningitis. (10) Bukti vaksinasi COVID-19. (11) Surat keterangan sehat. (12) Formulir pendaftaran travel. Dokumen diserahkan ke travel 1-2 bulan sebelum keberangkatan. Pengurusan paspor baru: 3-4 minggu, biaya Rp 650rb. Perpanjangan paspor: 4-5 hari, biaya Rp 350rb."
+    },
+    {
+      "id": "manasik_001", 
+      "category": "ibadah",
+      "title": "Manasik Umrah dan Persiapan Ibadah",
+      "content": "Manasik umrah adalah latihan praktek pelaksanaan ibadah umrah sebelum berangkat. Materi manasik: (1) Tata cara mandi ihram dan memakai pakaian ihram. (2) Niat dan doa-doa umrah. (3) Praktik thawaf 7 putaran mengelilingi Ka'bah. (4) Praktik sa'i 7 kali antara Shafa-Marwah. (5) Tata cara tahallul (potong rambut). (6) Larangan-larangan dalam ihram. (7) Doa-doa khusus di tempat mustajab. (8) Adab di tanah suci. Manasik biasanya dilakukan 1-2 kali oleh travel sebelum keberangkatan. Tips persiapan spiritual: perbanyak ibadah sunnah, baca Al-Quran, hafal doa-doa, niatkan ikhlas karena Allah, minta maaf kepada keluarga dan tetangga, lunasi hutang jika ada, buat wasiat sederhana."
+    },
+    {
+      "id": "asuransi_001",
+      "category": "keuangan",
+      "title": "Asuransi Perjalanan Umrah",
+      "content": "Asuransi perjalanan umrah penting untuk proteksi risiko: (1) Asuransi kesehatan - menanggung biaya rawat inap, darurat medis, evakuasi, dengan limit Rp 500 juta - 2 miliar. (2) Asuransi kecelakaan - santunan meninggal atau cacat tetap. (3) Asuransi bagasi - ganti rugi kehilangan atau kerusakan bagasi. (4) Asuransi pembatalan - refund jika batal berangkat karena force majeure. Premi asuransi: basic Rp 150-300rb, standard Rp 300-500rb, comprehensive Rp 500rb-1 juta. Arab Saudi mewajibkan asuransi kesehatan untuk jamaah umrah. Biasanya travel sudah include asuransi basic, tapi bisa upgrade untuk coverage lebih luas. Perusahaan asuransi syariah: Takaful, Prudential Syariah, Allianz Syariah, AXA Mandiri Syariah."
+    }
+  ]
+}
