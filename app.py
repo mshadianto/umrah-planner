@@ -1,11 +1,22 @@
 """
-🕋 Umrah Planner AI - Main Application
-======================================
-RAG Agentic AI untuk Simulasi Biaya Perjalanan Umrah
+================================================================================
+🕋 UMRAH PLANNER AI - Main Application
+================================================================================
 
-Developed by: MS Hadianto
-Email: sopian.hadianto@gmail.com
-GitHub: https://github.com/mshadianto
+Copyright (c) 2025 MS Hadianto. All Rights Reserved.
+
+This software is proprietary and confidential. Unauthorized copying,
+modification, distribution, or use of this software is strictly prohibited.
+
+See LICENSE and COPYRIGHT files for full terms.
+
+================================================================================
+Platform: RAG Agentic AI untuk Simulasi Biaya Perjalanan Umrah
+Version:  2.5.0
+Author:   MS Hadianto
+Email:    sopian.hadianto@gmail.com
+GitHub:   https://github.com/mshadianto
+================================================================================
 """
 
 import streamlit as st
