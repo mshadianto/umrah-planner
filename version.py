@@ -9,8 +9,8 @@ from datetime import datetime
 from typing import Optional
 
 # Application Version
-__version__ = "2.0.0"
-__version_info__ = (2, 0, 0)
+__version__ = "2.1.0"
+__version_info__ = (2, 1, 0)
 
 # Build Information
 BUILD_DATE = "2025-11-26"
@@ -18,14 +18,13 @@ BUILD_NUMBER = os.getenv("BUILD_NUMBER", "local")
 
 # Developer Information
 DEVELOPER = {
-    "name": "M. Sopian Hadianto",
+    "name": "MS Hadianto",
     "title": "SE, Ak, M.M., CACP®, CCFA®, QIA®, CA®, GRCP®, GRCA®, CGP®",
     "role": "Founder & Lead Developer",
-    "company": "KIM Consulting",
     "email": "sopian.hadianto@gmail.com",
+    "whatsapp": "628159658833",
     "github": "https://github.com/mshadianto",
-    "linkedin": "https://www.linkedin.com/in/m-sopian-hadianto-se-ak-m-m-cacp%C2%AE-ccfa%C2%AE-qia%C2%AE-ca%C2%AE-grcp%C2%AE-grca%C2%AE-cgp%C2%AE-2ab1a718/",
-    "website": "https://kimconsulting.id"
+    "linkedin": "https://linkedin.com/in/sopian-adi-mulyana"
 }
 
 # Application Metadata
@@ -44,6 +43,21 @@ APP_INFO = {
 
 # Changelog
 CHANGELOG = {
+    "2.1.0": {
+        "date": "2025-11-26",
+        "title": "Monetization & Business Features",
+        "changes": [
+            "💎 Added subscription tiers (Free, Basic, Premium, VIP)",
+            "📝 Lead generation system with partner integration",
+            "🤝 Affiliate partner directory with tracking",
+            "🎁 Referral program with rewards",
+            "🏢 B2B white label partnership page",
+            "🔔 Price alert system for premium users",
+            "💼 Business Hub dashboard",
+            "💬 Quick quote widget in sidebar",
+            "📊 Revenue analytics foundation",
+        ]
+    },
     "2.0.0": {
         "date": "2025-11-26",
         "title": "Major Feature Release",
@@ -125,6 +139,7 @@ def get_version_badge() -> str:
 def get_developer_card() -> str:
     """Get developer info card HTML"""
     dev = DEVELOPER
+    wa_link = f"https://wa.me/{dev['whatsapp']}"
     return f"""
     <div style="
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -137,10 +152,10 @@ def get_developer_card() -> str:
         <h3 style="margin: 0;">👨‍💻 {dev['name']}</h3>
         <p style="font-size: 0.85rem; opacity: 0.9; margin: 0.5rem 0;">{dev['title']}</p>
         <p style="font-size: 0.9rem; margin: 0.5rem 0;"><strong>{dev['role']}</strong></p>
-        <p style="font-size: 0.9rem; margin: 0.5rem 0;">🏢 {dev['company']}</p>
         <div style="margin-top: 1rem;">
             <a href="{dev['github']}" target="_blank" style="color: white; margin: 0 10px;">🔗 GitHub</a>
             <a href="{dev['linkedin']}" target="_blank" style="color: white; margin: 0 10px;">💼 LinkedIn</a>
+            <a href="{wa_link}" target="_blank" style="color: white; margin: 0 10px;">💬 WhatsApp</a>
         </div>
     </div>
     """
