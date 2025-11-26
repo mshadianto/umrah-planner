@@ -3,7 +3,8 @@
 ======================================
 RAG Agentic AI untuk Simulasi Biaya Perjalanan Umrah
 
-Developed by: M. Sopian Hadianto
+Developed by: M. Sopian Adi Mulyana
+Company: KIM Consulting
 GitHub: https://github.com/mshadianto
 """
 
@@ -26,6 +27,11 @@ from booking import render_booking_features
 from version import (
     __version__, DEVELOPER, APP_INFO, CHANGELOG, TECH_STACK,
     get_version_badge, get_developer_card, get_changelog_markdown, get_app_age
+)
+from monetization import (
+    render_monetization_page, render_monetization_sidebar,
+    render_lead_capture_form, render_quick_quote_widget,
+    init_monetization_state, PRICING_TIERS
 )
 
 # Page configuration
@@ -121,6 +127,12 @@ def render_sidebar():
         st.markdown(get_version_badge(), unsafe_allow_html=True)
         st.markdown("---")
         
+        # User tier badge
+        init_monetization_state()
+        render_monetization_sidebar()
+        
+        st.markdown("---")
+        
         # Navigation
         page = st.radio(
             "📍 Navigasi",
@@ -133,10 +145,16 @@ def render_sidebar():
                 "📋 Buat Rencana",
                 "✈️ Booking & Reservasi",
                 "🧰 Tools & Fitur",
+                "💼 Business Hub",
                 "⚙️ Pengaturan",
                 "ℹ️ Tentang Aplikasi"
             ]
         )
+        
+        st.markdown("---")
+        
+        # Quick quote widget
+        render_quick_quote_widget()
         
         st.markdown("---")
         
@@ -163,7 +181,7 @@ def render_sidebar():
         st.markdown("---")
         st.markdown(f"""
         <div style="text-align: center; font-size: 0.75rem; color: #888;">
-            Made with ❤️ by MS Hadianto<br>
+            Made with ❤️ by<br>
             <strong>{DEVELOPER['name'].split()[0]}</strong><br>
             v{__version__}
         </div>
@@ -333,6 +351,58 @@ def render_home():
             <p style="font-size: 0.85rem;">Gunakan tanpa biaya apapun</p>
         </div>
         """, unsafe_allow_html=True)
+    
+    # Lead capture CTA
+    st.markdown("---")
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+        margin: 1rem 0;
+    ">
+        <h2 style="margin: 0;">🎯 Dapatkan Penawaran Terbaik GRATIS!</h2>
+        <p style="font-size: 1.1rem; margin: 1rem 0;">
+            Travel agent terpercaya siap memberikan penawaran khusus untuk Anda
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        with st.form("home_lead_form"):
+            col_a, col_b = st.columns(2)
+            with col_a:
+                lead_name = st.text_input("Nama", placeholder="Nama lengkap")
+            with col_b:
+                lead_phone = st.text_input("WhatsApp", placeholder="08xxxxxxxxxx")
+            
+            if st.form_submit_button("📞 Hubungi Saya", use_container_width=True, type="primary"):
+                if lead_name and lead_phone:
+                    st.success(f"✅ Terima kasih {lead_name}! Tim kami akan menghubungi Anda segera.")
+                else:
+                    st.error("Mohon isi nama dan nomor WhatsApp")
+    
+    # Partner logos
+    st.markdown("---")
+    st.markdown("### 🤝 Partner Travel Terpercaya")
+    
+    col1, col2, col3, col4, col5 = st.columns(5)
+    partners = ["🏢 Patuna", "🕌 Al Khalid", "⭐ Arminareka", "🌙 Maktour", "☪️ Ebad"]
+    for i, partner in enumerate(partners):
+        with [col1, col2, col3, col4, col5][i]:
+            st.markdown(f"""
+            <div style="
+                background: #f5f5f5;
+                padding: 1rem;
+                border-radius: 10px;
+                text-align: center;
+            ">
+                <strong>{partner}</strong>
+            </div>
+            """, unsafe_allow_html=True)
 
 
 def render_cost_simulation():
@@ -1059,6 +1129,10 @@ def main():
     elif "Tools" in page:
         st.header("🧰 Tools & Fitur Jamaah")
         render_additional_features()
+    elif "Business" in page:
+        st.header("💼 Business Hub")
+        st.markdown("Monetisasi, partnership, dan fitur premium")
+        render_monetization_page()
     elif "Pengaturan" in page:
         render_settings()
     elif "Tentang" in page:
