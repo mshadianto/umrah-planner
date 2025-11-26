@@ -26,7 +26,8 @@ try:
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
-    print("Warning: supabase-py not installed. Run: pip install supabase")
+    Client = Any  # Fallback type hint
+    print("Warning: supabase-py not installed. Using fallback mode.")
 
 # ============================================
 # SUPABASE CONFIGURATION
