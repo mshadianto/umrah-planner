@@ -9,8 +9,8 @@ from datetime import datetime
 from typing import Optional
 
 # Application Version
-__version__ = "2.3.0"
-__version_info__ = (2, 3, 0)
+__version__ = "2.5.0"
+__version_info__ = (2, 5, 0)
 
 # Build Information
 BUILD_DATE = "2025-11-26"
@@ -42,6 +42,34 @@ APP_INFO = {
 
 # Changelog
 CHANGELOG = {
+    "2.5.0": {
+        "date": "2025-11-26",
+        "title": "Supabase Database Integration",
+        "changes": [
+            "🗄️ Supabase PostgreSQL database integration",
+            "👥 Complete user authentication system",
+            "🔐 Role-based access control (6 levels)",
+            "🛡️ Admin & Super Admin dashboard",
+            "📊 User analytics & audit logs",
+            "💳 Subscription management",
+            "📝 Lead tracking system",
+            "🛒 Order management",
+            "🔄 Auto-fallback to in-memory storage",
+            "🔒 Row Level Security (RLS) support"
+        ]
+    },
+    "2.4.0": {
+        "date": "2025-11-26",
+        "title": "User Authentication System",
+        "changes": [
+            "🔐 Login & Register system",
+            "👥 6 user levels (Free → Super Admin)",
+            "🛡️ Admin dashboard",
+            "📊 User management",
+            "🔒 Brute force protection",
+            "👤 User profile page"
+        ]
+    },
     "2.3.0": {
         "date": "2025-11-26",
         "title": "Advanced Revenue Optimization",
