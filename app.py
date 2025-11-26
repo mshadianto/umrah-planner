@@ -3,7 +3,8 @@
 ======================================
 RAG Agentic AI untuk Simulasi Biaya Perjalanan Umrah
 
-Developed by: M. Sopian Adi Mulyana
+Developed by: MS Hadianto
+Email: sopian.hadianto@gmail.com
 GitHub: https://github.com/mshadianto
 """
 
@@ -181,7 +182,7 @@ def render_sidebar():
         st.markdown(f"""
         <div style="text-align: center; font-size: 0.75rem; color: #888;">
             Made with ❤️ by<br>
-            <strong>{DEVELOPER['name'].split()[0]}</strong><br>
+            <strong>{DEVELOPER['name']}</strong><br>
             v{__version__}
         </div>
         """, unsafe_allow_html=True)
@@ -971,7 +972,7 @@ def render_settings():
         {APP_INFO['tagline']}
         
         **Developer:** {DEVELOPER['name']}
-        **Company:** {DEVELOPER['company']}
+        **Email:** {DEVELOPER['email']}
         """)
     
     with col2:
@@ -1019,22 +1020,25 @@ def render_about():
         st.markdown(get_developer_card(), unsafe_allow_html=True)
         
         st.markdown("### 📧 Kontak")
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.markdown(f"📧 **Email**\n\n{DEVELOPER['email']}")
         with col2:
-            st.markdown(f"🔗 **GitHub**\n\n[mshadianto]({DEVELOPER['github']})")
+            wa_link = f"https://wa.me/{DEVELOPER['whatsapp']}"
+            st.markdown(f"💬 **WhatsApp**\n\n[Chat]({wa_link})")
         with col3:
+            st.markdown(f"🔗 **GitHub**\n\n[mshadianto]({DEVELOPER['github']})")
+        with col4:
             st.markdown(f"💼 **LinkedIn**\n\n[Profile]({DEVELOPER['linkedin']})")
         
         st.markdown("---")
-        st.markdown("### 🏢 Tentang KIM Consulting")
+        st.markdown("### 🎯 Keahlian Developer")
         st.markdown("""
-        **KIM Consulting** adalah perusahaan konsultan yang berfokus pada:
         - 📊 Governance, Risk & Compliance (GRC)
         - 🔍 Internal Audit & Quality Assurance
-        - 🤖 AI-Powered Solutions untuk Audit & Compliance
+        - 🤖 AI-Powered Solutions
         - 📋 Corporate Governance Advisory
+        - 💻 Full-Stack Development
         """)
     
     with tab2:
