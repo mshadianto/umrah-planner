@@ -439,11 +439,12 @@ class SupabaseDB:
             self._init_demo_users()
     
     def _init_demo_users(self):
-        """Initialize demo users in session state"""
+        """Initialize demo users in session state - force update default users"""
         if "users_db" not in st.session_state:
             st.session_state.users_db = {}
         
         # Default demo users - using pre-computed hashes
+        # Passwords: demo=DemoLabbaik25, admin=AdminLabbaik25, superadmin=SuperLabbaik25
         default_users = {
             "superadmin": {
                 "id": "superadmin-001",
@@ -483,7 +484,7 @@ class SupabaseDB:
             }
         }
         
-        # Add/update demo users
+        # ALWAYS force update default users (overwrite to ensure correct passwords)
         for uname, udata in default_users.items():
             st.session_state.users_db[uname] = udata
     
