@@ -432,8 +432,13 @@ def render_sidebar():
         
         # Debug: Show login status
         with st.expander("🔧 Debug"):
-            st.write("current_user:", st.session_state.get("current_user"))
-            st.write("is_logged_in:", is_logged_in())
+            st.write("**current_user:**", st.session_state.get("current_user"))
+            st.write("**is_logged_in:**", is_logged_in())
+            if is_logged_in():
+                user = get_current_user()
+                st.success(f"✅ Logged in as: {user.get('name')} ({user.get('role')})")
+            else:
+                st.warning("❌ Not logged in")
         
         # Build navigation based on user role
         user = get_current_user()
