@@ -568,6 +568,20 @@ def render_login_page():
     """Render login page"""
     st.markdown("## 🔐 Login")
     
+    # Debug info - show current session state
+    with st.expander("🔧 Debug Info (untuk troubleshooting)"):
+        st.write("Session State Keys:", list(st.session_state.keys()))
+        st.write("Current User:", st.session_state.get("current_user"))
+        st.write("Is Logged In:", is_logged_in())
+        
+        # Test database connection
+        db = get_db()
+        st.write("Database Mode:", "Fallback (in-memory)" if db._fallback_mode else "Supabase")
+        
+        # Show available users
+        if "users_db" in st.session_state:
+            st.write("Available Users:", list(st.session_state.users_db.keys()))
+    
     tab1, tab2 = st.tabs(["Login", "Register"])
     
     with tab1:
@@ -583,12 +597,29 @@ def render_login_page():
             
             if st.form_submit_button("🔑 Login", type="primary", use_container_width=True):
                 if username and password:
+                    # Debug: show what we're trying
+                    st.info(f"🔍 Mencoba login sebagai: {username}")
+                    
                     result = login_user(username, password)
+                    
+                    # Debug: show result
                     if result["success"]:
                         st.success(result["message"])
+                        st.balloons()
+                        # Force page reload
+                        import time
+                        time.sleep(1)
                         st.rerun()
                     else:
                         st.error(result["error"])
+                        # Debug: show more info
+                        db = get_db()
+                        user = db.get_user_by_username(username)
+                        if user:
+                            st.warning(f"User ditemukan: {user.get('name')} (role: {user.get('role')})")
+                            st.warning("Password tidak cocok!")
+                        else:
+                            st.warning("User tidak ditemukan di database")
                 else:
                     st.error("Masukkan username dan password")
     
