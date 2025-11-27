@@ -931,13 +931,13 @@ class SupabaseDB:
     def _fallback_get_user(self, username: str) -> Optional[Dict]:
         """Fallback get user"""
         if "users_db" not in st.session_state:
-            # Add default users (superadmin and demo admin)
+            # Add default users
             st.session_state.users_db = {
                 "superadmin": {
                     "id": "superadmin-001",
                     "username": "superadmin",
                     "email": "sopian.hadianto@gmail.com",
-                    "password_hash": hashlib.sha256("Labbaik@2025!".encode()).hexdigest(),
+                    "password_hash": hashlib.sha256("super123".encode()).hexdigest(),
                     "name": "MS Hadianto",
                     "phone": "628159658833",
                     "role": "superadmin",
@@ -949,7 +949,7 @@ class SupabaseDB:
                     "id": "admin-001",
                     "username": "admin",
                     "email": "admin@labbaik.ai",
-                    "password_hash": hashlib.sha256("Labbaik#Admin1".encode()).hexdigest(),
+                    "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
                     "name": "Admin LABBAIK",
                     "phone": "",
                     "role": "admin",
@@ -961,7 +961,7 @@ class SupabaseDB:
                     "id": "demo-001",
                     "username": "demo",
                     "email": "demo@labbaik.ai",
-                    "password_hash": hashlib.sha256("DemoLabbaik1".encode()).hexdigest(),
+                    "password_hash": hashlib.sha256("demo123".encode()).hexdigest(),
                     "name": "Demo User",
                     "phone": "",
                     "role": "free",
