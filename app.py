@@ -1,7 +1,9 @@
 """
 ================================================================================
-🕋 UMRAH PLANNER AI - Main Application
+لَبَّيْكَ LABBAIK - Main Application
 ================================================================================
+
+Labbaik Allahumma Labbaik - Aku Datang Memenuhi Panggilan-Mu
 
 Copyright (c) 2025 MS Hadianto. All Rights Reserved.
 
@@ -11,10 +13,12 @@ modification, distribution, or use of this software is strictly prohibited.
 See LICENSE and COPYRIGHT files for full terms.
 
 ================================================================================
-Platform: RAG Agentic AI untuk Simulasi Biaya Perjalanan Umrah
-Version:  2.5.0
+Platform: AI-Powered Umrah Planning Platform
+Version:  3.0.0
+Codename: Labbaik
 Author:   MS Hadianto
 Email:    sopian.hadianto@gmail.com
+Website:  labbaik.ai
 GitHub:   https://github.com/mshadianto
 ================================================================================
 """
@@ -50,57 +54,316 @@ from auth import (
     USER_ROLES, logout_user
 )
 
+# ============================================
+# LABBAIK BRAND CONSTANTS
+# ============================================
+
+BRAND = {
+    "name": "LABBAIK",
+    "arabic": "لَبَّيْكَ",
+    "talbiyah": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ",
+    "tagline": "Panggilan-Nya, Langkahmu",
+    "description": "Platform AI Perencanaan Umrah #1 Indonesia",
+    "full_tagline": "Labbaik Allahumma Labbaik - Aku Datang Memenuhi Panggilan-Mu",
+    "version": "3.0.0",
+}
+
+COLORS = {
+    "black": "#1A1A1A",
+    "gold": "#D4AF37",
+    "gold_light": "#F5E6C8",
+    "green": "#006B3C",
+    "white": "#FFFFFF",
+    "sand": "#C9A86C",
+    "blue": "#1E3A5F",
+    "gray": "#666666",
+}
+
+CONTACT = {
+    "email": "sopian.hadianto@gmail.com",
+    "whatsapp": "+62 815 9658 833",
+    "website": "labbaik.ai",
+}
+
 # Page configuration
 st.set_page_config(
-    page_title=app_config.app_name,
+    page_title=f"{BRAND['name']} - {BRAND['description']}",
     page_icon="🕋",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
-st.markdown("""
+# LABBAIK Brand CSS
+st.markdown(f"""
 <style>
-    .main-header {
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
+    
+    /* ===== CSS Variables ===== */
+    :root {{
+        --brand-black: {COLORS['black']};
+        --brand-gold: {COLORS['gold']};
+        --brand-gold-light: {COLORS['gold_light']};
+        --brand-green: {COLORS['green']};
+        --brand-white: {COLORS['white']};
+        --brand-sand: {COLORS['sand']};
+        --brand-blue: {COLORS['blue']};
+        --brand-gray: {COLORS['gray']};
+    }}
+    
+    /* ===== Sidebar ===== */
+    [data-testid="stSidebar"] {{
+        background: linear-gradient(180deg, {COLORS['black']} 0%, #2D2D2D 100%);
+    }}
+    
+    [data-testid="stSidebar"] * {{
+        color: white !important;
+    }}
+    
+    [data-testid="stSidebar"] .stRadio label {{
+        color: white !important;
+    }}
+    
+    [data-testid="stSidebar"] hr {{
+        border-color: #333 !important;
+    }}
+    
+    /* ===== Buttons ===== */
+    .stButton > button {{
+        background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%);
+        color: {COLORS['black']};
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.3s ease;
+    }}
+    
+    .stButton > button:hover {{
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        transform: translateY(-2px);
+    }}
+    
+    .stButton > button[kind="secondary"] {{
+        background: transparent;
+        border: 2px solid {COLORS['gold']};
+        color: {COLORS['gold']};
+    }}
+    
+    /* ===== Metrics ===== */
+    [data-testid="stMetricValue"] {{
+        color: {COLORS['gold']} !important;
+        font-weight: 700;
+    }}
+    
+    /* ===== Tabs ===== */
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+    }}
+    
+    .stTabs [data-baseweb="tab"] {{
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+    }}
+    
+    .stTabs [aria-selected="true"] {{
+        background: {COLORS['gold']};
+        color: {COLORS['black']};
+    }}
+    
+    /* ===== Headers ===== */
+    .main-header {{
+        font-family: 'Poppins', sans-serif;
         font-size: 2.5rem;
         font-weight: bold;
-        color: #1E88E5;
+        color: {COLORS['black']};
         text-align: center;
         padding: 1rem;
-    }
-    .sub-header {
+    }}
+    
+    .sub-header {{
         font-size: 1.2rem;
-        color: #666;
+        color: {COLORS['gray']};
         text-align: center;
         margin-bottom: 2rem;
-    }
-    .metric-card {
-        background-color: #f0f2f6;
-        border-radius: 10px;
-        padding: 1rem;
+    }}
+    
+    /* ===== Brand Header ===== */
+    .labbaik-hero {{
+        background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 50%, {COLORS['black']} 100%);
+        padding: 40px 30px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+    }}
+    
+    .labbaik-arabic {{
+        font-family: 'Noto Naskh Arabic', serif;
+        font-size: 3rem;
+        color: {COLORS['gold']};
+        text-shadow: 0 2px 15px rgba(212, 175, 55, 0.3);
+        margin-bottom: 8px;
+    }}
+    
+    .labbaik-name {{
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+        letter-spacing: 0.3em;
+        margin-bottom: 8px;
+    }}
+    
+    .labbaik-tagline {{
+        color: {COLORS['sand']};
+        font-size: 1rem;
+    }}
+    
+    /* ===== Cards ===== */
+    .metric-card {{
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
         margin: 0.5rem 0;
-    }
-    .highlight-box {
-        background-color: #e3f2fd;
-        border-left: 4px solid #1E88E5;
+        border: 2px solid #E0E0E0;
+        transition: all 0.3s ease;
+    }}
+    
+    .metric-card:hover {{
+        border-color: {COLORS['gold']};
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.15);
+        transform: translateY(-3px);
+    }}
+    
+    .metric-card h3 {{
+        color: {COLORS['black']};
+        margin-bottom: 0.5rem;
+    }}
+    
+    .metric-card p {{
+        color: {COLORS['gray']};
+        font-size: 0.9rem;
+    }}
+    
+    /* ===== Feature Card ===== */
+    .feature-card {{
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        border: 2px solid #E0E0E0;
+        transition: all 0.3s ease;
+        height: 100%;
+    }}
+    
+    .feature-card:hover {{
+        border-color: {COLORS['gold']};
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        transform: translateY(-5px);
+    }}
+    
+    .feature-icon {{
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }}
+    
+    .feature-title {{
+        font-weight: 700;
+        color: {COLORS['black']};
+        margin-bottom: 8px;
+    }}
+    
+    .feature-desc {{
+        color: {COLORS['gray']};
+        font-size: 0.9rem;
+    }}
+    
+    /* ===== Highlight Boxes ===== */
+    .highlight-box {{
+        background-color: rgba(212, 175, 55, 0.1);
+        border-left: 4px solid {COLORS['gold']};
         padding: 1rem;
         margin: 1rem 0;
         border-radius: 0 10px 10px 0;
-    }
-    .warning-box {
+    }}
+    
+    .warning-box {{
         background-color: #fff3e0;
         border-left: 4px solid #ff9800;
         padding: 1rem;
         margin: 1rem 0;
         border-radius: 0 10px 10px 0;
-    }
-    .success-box {
-        background-color: #e8f5e9;
-        border-left: 4px solid #4caf50;
+    }}
+    
+    .success-box {{
+        background-color: rgba(0, 107, 60, 0.1);
+        border-left: 4px solid {COLORS['green']};
         padding: 1rem;
         margin: 1rem 0;
         border-radius: 0 10px 10px 0;
-    }
+    }}
+    
+    /* ===== Gold Accent ===== */
+    .gold-text {{
+        color: {COLORS['gold']};
+    }}
+    
+    .gold-bg {{
+        background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%);
+        color: {COLORS['black']};
+    }}
+    
+    /* ===== Stats Bar ===== */
+    .stats-bar {{
+        background: {COLORS['black']};
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-around;
+        margin: 20px 0;
+    }}
+    
+    .stat-item {{
+        text-align: center;
+    }}
+    
+    .stat-value {{
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: {COLORS['gold']};
+    }}
+    
+    .stat-label {{
+        font-size: 0.85rem;
+        color: {COLORS['sand']};
+    }}
+    
+    /* ===== Footer ===== */
+    .labbaik-footer {{
+        background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%);
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        margin-top: 40px;
+    }}
+    
+    /* ===== Animations ===== */
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(15px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
+    
+    @keyframes pulse {{
+        0%, 100% {{ opacity: 1; }}
+        50% {{ opacity: 0.8; }}
+    }}
+    
+    .animate-fadeIn {{
+        animation: fadeIn 0.5s ease-out;
+    }}
+    
+    .animate-pulse {{
+        animation: pulse 2s infinite;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -136,12 +399,27 @@ def initialize_system():
 
 
 def render_sidebar():
-    """Render sidebar with settings and navigation"""
+    """Render sidebar with LABBAIK branding and navigation"""
     with st.sidebar:
-        st.markdown("# 🕋")
-        st.title("Umrah Planner")
-        st.markdown(get_version_badge(), unsafe_allow_html=True)
-        st.markdown("---")
+        # LABBAIK Brand Header
+        st.markdown(f"""
+        <div style="text-align: center; padding: 25px 15px; border-bottom: 1px solid #333; margin-bottom: 15px;">
+            <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2rem; color: {COLORS['gold']}; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);">
+                {BRAND['arabic']}
+            </div>
+            <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin-top: 5px;">
+                {BRAND['name']}
+            </div>
+            <div style="font-size: 0.8rem; color: {COLORS['sand']}; margin-top: 8px; font-style: italic;">
+                {BRAND['tagline']}
+            </div>
+            <div style="margin-top: 10px;">
+                <span style="background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%); color: {COLORS['black']}; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">
+                    v{BRAND['version']}
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Initialize systems
         init_user_database()
@@ -194,14 +472,20 @@ def render_sidebar():
         st.markdown("---")
         
         # Quick info
-        st.markdown("### 📌 Info Cepat")
-        st.info(f"""
-        **Provider LLM:** {llm_config.provider.upper()}
-        **Model:** {llm_config.groq_model if llm_config.provider == 'groq' else llm_config.openai_model}
-        """)
+        st.markdown(f"""
+        <div style="background: rgba(212, 175, 55, 0.1); padding: 12px; border-radius: 10px; border: 1px solid {COLORS['gold']}40;">
+            <div style="font-size: 0.85rem; font-weight: 600; color: {COLORS['gold']}; margin-bottom: 8px;">📌 Info Cepat</div>
+            <div style="font-size: 0.75rem; color: {COLORS['sand']};">
+                <strong>Provider:</strong> {llm_config.provider.upper()}<br>
+                <strong>Model:</strong> {llm_config.groq_model if llm_config.provider == 'groq' else llm_config.openai_model}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("---")
-        st.markdown("### 💡 Tips")
+        
+        # Tips
+        st.markdown(f"<div style='font-size: 0.85rem; font-weight: 600; color: {COLORS['gold']};'>💡 Tips</div>", unsafe_allow_html=True)
         tips = [
             "Booking 3-4 bulan sebelumnya untuk harga terbaik",
             "Hindari Ramadhan jika budget terbatas",
@@ -215,10 +499,20 @@ def render_sidebar():
         # Footer
         st.markdown("---")
         st.markdown(f"""
-        <div style="text-align: center; font-size: 0.75rem; color: #888;">
-            Made with ❤️ by<br>
-            <strong>{DEVELOPER['name']}</strong><br>
-            v{__version__}
+        <div style="text-align: center; padding: 15px 0;">
+            <div style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1rem;">
+                {BRAND['arabic']}
+            </div>
+            <div style="color: white; font-weight: 600; letter-spacing: 0.15em; font-size: 0.85rem; margin: 5px 0;">
+                {BRAND['name']}
+            </div>
+            <div style="color: {COLORS['sand']}; font-size: 0.7rem;">
+                {BRAND['tagline']}
+            </div>
+            <div style="color: #666; font-size: 0.65rem; margin-top: 10px;">
+                © 2025 {CONTACT['website']}<br>
+                Made with ❤️ by {DEVELOPER['name']}
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -226,75 +520,114 @@ def render_sidebar():
 
 
 def render_home():
-    """Render home page"""
-    st.markdown('<h1 class="main-header">🕋 Umrah Planner AI</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Asisten Cerdas untuk Perencanaan Perjalanan Umrah Anda</p>', unsafe_allow_html=True)
+    """Render home page with LABBAIK branding"""
     
-    # Version badge
+    # Hero Section
     st.markdown(f"""
-    <div style="text-align: center; margin-bottom: 1rem;">
-        {get_version_badge()}
+    <div class="labbaik-hero animate-fadeIn">
+        <div class="labbaik-arabic">{BRAND['talbiyah']}</div>
+        <div class="labbaik-name">{BRAND['name']}</div>
+        <div class="labbaik-tagline">{BRAND['tagline']}</div>
+        <p style="color: {COLORS['sand']}; margin-top: 15px; font-size: 1.1rem;">
+            {BRAND['description']}
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Stats Bar
+    st.markdown(f"""
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div style="font-size: 1.5rem;">👥</div>
+            <div class="stat-value">15,000+</div>
+            <div class="stat-label">Jamaah Terbantu</div>
+        </div>
+        <div class="stat-item">
+            <div style="font-size: 1.5rem;">🤝</div>
+            <div class="stat-value">50+</div>
+            <div class="stat-label">Travel Partner</div>
+        </div>
+        <div class="stat-item">
+            <div style="font-size: 1.5rem;">⭐</div>
+            <div class="stat-value">4.9</div>
+            <div class="stat-label">Rating</div>
+        </div>
+        <div class="stat-item">
+            <div style="font-size: 1.5rem;">💰</div>
+            <div class="stat-value">30%</div>
+            <div class="stat-label">Hemat</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
     # Feature cards - Row 1
+    st.markdown(f"<h3 style='text-align: center; color: {COLORS['black']}; margin: 30px 0 20px;'>✨ Fitur Utama</h3>", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("""
-        <div class="metric-card">
-            <h3>💰 Simulasi Biaya</h3>
-            <p>Hitung estimasi biaya umrah dengan berbagai skenario</p>
+        st.markdown(f"""
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <div class="feature-title">AI Assistant 24/7</div>
+            <div class="feature-desc">Tanya apapun tentang umrah, AI siap membantu kapan saja</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
-        <div class="metric-card">
-            <h3>📊 Scenario Planning</h3>
-            <p>Bandingkan opsi Ekonomis, Standard, Premium, dan VIP</p>
+        st.markdown(f"""
+        <div class="feature-card">
+            <div class="feature-icon">💰</div>
+            <div class="feature-title">Simulasi Biaya</div>
+            <div class="feature-desc">Hitung estimasi biaya dengan berbagai skenario</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
-        st.markdown("""
-        <div class="metric-card">
-            <h3>🤖 AI Assistant</h3>
-            <p>Konsultasi dengan AI untuk pertanyaan seputar umrah</p>
+        st.markdown(f"""
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Bandingkan Paket</div>
+            <div class="feature-desc">Bandingkan opsi Ekonomis, Standard, Premium, VIP</div>
         </div>
         """, unsafe_allow_html=True)
     
-    # Feature cards - Row 2 (NEW)
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Feature cards - Row 2
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("""
-        <div class="metric-card">
-            <h3>✈️ Booking Tiket</h3>
-            <p>Cari & bandingkan harga tiket pesawat</p>
+        st.markdown(f"""
+        <div class="feature-card">
+            <div class="feature-icon">✈️</div>
+            <div class="feature-title">Booking Terintegrasi</div>
+            <div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
-        <div class="metric-card">
-            <h3>🏨 Hotel & Akomodasi</h3>
-            <p>Temukan hotel terbaik di Makkah & Madinah</p>
+        st.markdown(f"""
+        <div class="feature-card">
+            <div class="feature-icon">🏨</div>
+            <div class="feature-title">Hotel & Akomodasi</div>
+            <div class="feature-desc">Temukan hotel terbaik di Makkah & Madinah</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
-        st.markdown("""
-        <div class="metric-card">
-            <h3>📦 Paket Travel</h3>
-            <p>Bandingkan paket dari berbagai travel agent</p>
+        st.markdown(f"""
+        <div class="feature-card">
+            <div class="feature-icon">📦</div>
+            <div class="feature-title">Paket Travel</div>
+            <div class="feature-desc">Bandingkan paket dari berbagai travel agent terpercaya</div>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
     # Quick start
-    st.markdown("### 🚀 Mulai Cepat")
+    st.markdown(f"### 🚀 Mulai Perencanaan Umrah Anda")
     
     col1, col2 = st.columns(2)
     
