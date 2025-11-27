@@ -569,22 +569,73 @@ def render_login_page():
     st.markdown("## 🔐 Login")
     
     # Debug info - show current session state
-    with st.expander("🔧 Debug Info (untuk troubleshooting)"):
-        st.write("Session State Keys:", list(st.session_state.keys()))
-        st.write("Current User:", st.session_state.get("current_user"))
-        st.write("Is Logged In:", is_logged_in())
+    with st.expander("🔧 Debug Info (untuk troubleshooting)", expanded=True):
+        st.write("**Session State Keys:**", list(st.session_state.keys())[:10], "...")
+        st.write("**Current User:**", st.session_state.get("current_user"))
+        st.write("**Is Logged In:**", is_logged_in())
         
         # Test database connection
         db = get_db()
-        st.write("Database Mode:", "Fallback (in-memory)" if db._fallback_mode else "Supabase")
+        st.write("**Database Mode:**", "Fallback (in-memory)" if db._fallback_mode else "Supabase")
         
-        # Show available users
+        # Show available users with their hashes
         if "users_db" in st.session_state:
-            st.write("Available Users:", list(st.session_state.users_db.keys()))
+            st.write("**Available Users:**")
+            for uname, udata in st.session_state.users_db.items():
+                st.write(f"  - `{uname}` (role: {udata.get('role')}, hash: {udata.get('password_hash', 'N/A')[:20]}...)")
+        
+        # Test hash comparison
+        st.write("---")
+        st.write("**🧪 Test Password Hash:**")
+        test_pwd = st.text_input("Test password:", value="DemoLabbaik25", key="test_pwd")
+        if test_pwd:
+            import hashlib
+            computed = hashlib.sha256(test_pwd.encode()).hexdigest()
+            st.code(f"Input: {test_pwd}\nHash:  {computed}")
+            
+            # Compare with demo user
+            if "users_db" in st.session_state and "demo" in st.session_state.users_db:
+                stored = st.session_state.users_db["demo"]["password_hash"]
+                st.write(f"Stored hash: `{stored}`")
+                if computed == stored:
+                    st.success("✅ Hash MATCH!")
+                else:
+                    st.error("❌ Hash MISMATCH!")
     
     tab1, tab2 = st.tabs(["Login", "Register"])
     
     with tab1:
+        # Quick login buttons for testing
+        st.markdown("### ⚡ Quick Login (Testing)")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("Login as Demo", key="quick_demo"):
+                result = login_user("demo", "DemoLabbaik25")
+                if result["success"]:
+                    st.success(result["message"])
+                    st.rerun()
+                else:
+                    st.error(result["error"])
+        with col2:
+            if st.button("Login as Admin", key="quick_admin"):
+                result = login_user("admin", "AdminLabbaik25")
+                if result["success"]:
+                    st.success(result["message"])
+                    st.rerun()
+                else:
+                    st.error(result["error"])
+        with col3:
+            if st.button("Login as SuperAdmin", key="quick_super"):
+                result = login_user("superadmin", "SuperLabbaik25")
+                if result["success"]:
+                    st.success(result["message"])
+                    st.rerun()
+                else:
+                    st.error(result["error"])
+        
+        st.markdown("---")
+        st.markdown("### 📝 Manual Login")
+        
         with st.form("login_form"):
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
