@@ -672,11 +672,11 @@ def render_home():
             <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
                 <div style="text-align: center;">
                     <div style="color: white; font-weight: 600;">👤 User Demo</div>
-                    <div style="color: {COLORS['sand']}; font-family: monospace; margin-top: 5px;">demo / demo123</div>
+                    <div style="color: {COLORS['sand']}; font-family: monospace; margin-top: 5px;">demo / DemoLabbaik1</div>
                 </div>
                 <div style="text-align: center;">
                     <div style="color: white; font-weight: 600;">👨‍💼 Admin Demo</div>
-                    <div style="color: {COLORS['sand']}; font-family: monospace; margin-top: 5px;">admin / admin123</div>
+                    <div style="color: {COLORS['sand']}; font-family: monospace; margin-top: 5px;">admin / Labbaik#Admin1</div>
                 </div>
             </div>
         </div>
