@@ -621,25 +621,14 @@ def render_login_page():
                     else:
                         st.error(result["error"])
     
-    # Demo accounts info
+    # Registration success message area
     st.markdown("---")
-    st.markdown("### 🔑 Demo Accounts")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("**👨‍💼 Admin Access:**")
-        st.code("""
-admin / Labbaik#Admin1
-superadmin / Labbaik@2025!
-        """, language=None)
-    with col2:
-        st.markdown("**👤 User Access:**")
-        st.code("""
-demo / DemoLabbaik1
-(atau Register baru)
-        """, language=None)
-    
-    st.caption("💡 Login sebagai **admin** untuk akses Business Hub")
+    st.markdown(f"""
+    <div style="text-align: center; color: #666; font-size: 0.9rem;">
+        <p>🔐 Belum punya akun? Daftar di tab <strong>Register</strong></p>
+        <p>💡 Gratis untuk fitur dasar perencanaan umrah</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def render_user_badge():
