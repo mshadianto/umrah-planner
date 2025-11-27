@@ -660,28 +660,6 @@ def render_home():
         
         st.markdown("---")
         
-        # Demo Accounts Info
-        st.markdown(f"""
-        <div style="
-            background: {COLORS['black']};
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-        ">
-            <h4 style="color: {COLORS['gold']}; text-align: center; margin-bottom: 15px;">🔑 Demo Accounts</h4>
-            <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
-                <div style="text-align: center;">
-                    <div style="color: white; font-weight: 600;">👤 User Demo</div>
-                    <div style="color: {COLORS['sand']}; font-family: monospace; margin-top: 5px;">demo / DemoLabbaik1</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="color: white; font-weight: 600;">👨‍💼 Admin Demo</div>
-                    <div style="color: {COLORS['sand']}; font-family: monospace; margin-top: 5px;">admin / Labbaik#Admin1</div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
         # Why choose us section
         st.markdown("---")
         st.markdown(f"<h3 style='text-align: center; color: {COLORS['black']};'>🌟 Mengapa LABBAIK?</h3>", unsafe_allow_html=True)
