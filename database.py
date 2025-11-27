@@ -397,12 +397,12 @@ $$ LANGUAGE plpgsql;
 -- DEFAULT DATA
 -- =============================================
 
--- Insert default super admin (password: Admin@123)
+-- Insert default super admin
 INSERT INTO users (username, email, password_hash, name, phone, role, status)
 VALUES (
     'superadmin',
     'sopian.hadianto@gmail.com',
-    '240be518fabd2724ddb6f04eeb9d5b0c5e0d7e576d3f2a7d0dc6f1f9e8a7b6c5', -- SHA256 of Admin@123
+    '76b590bb5e4a2c3d141486c92d28dd797a99a0a22bd1d28d965f9cae6d09fdd0',
     'MS Hadianto',
     '628159658833',
     'superadmin',
@@ -930,13 +930,13 @@ class SupabaseDB:
     
     def _fallback_get_user(self, username: str) -> Optional[Dict]:
         """Fallback get user"""
-        # Default demo users - always ensure these exist with correct passwords
+        # Default demo users - using pre-computed hashes
         default_users = {
             "superadmin": {
                 "id": "superadmin-001",
                 "username": "superadmin",
                 "email": "sopian.hadianto@gmail.com",
-                "password_hash": hashlib.sha256("SuperLabbaik25".encode()).hexdigest(),
+                "password_hash": "76b590bb5e4a2c3d141486c92d28dd797a99a0a22bd1d28d965f9cae6d09fdd0",
                 "name": "MS Hadianto",
                 "phone": "628159658833",
                 "role": "superadmin",
@@ -948,7 +948,7 @@ class SupabaseDB:
                 "id": "admin-001",
                 "username": "admin",
                 "email": "admin@labbaik.ai",
-                "password_hash": hashlib.sha256("AdminLabbaik25".encode()).hexdigest(),
+                "password_hash": "d890355b06a9ed537774f57f8d21b3a665c2550d540bb5b1efc88e2ca3d3457e",
                 "name": "Admin LABBAIK",
                 "phone": "",
                 "role": "admin",
@@ -960,7 +960,7 @@ class SupabaseDB:
                 "id": "demo-001",
                 "username": "demo",
                 "email": "demo@labbaik.ai",
-                "password_hash": hashlib.sha256("DemoLabbaik25".encode()).hexdigest(),
+                "password_hash": "256c23969b50dfc20faf4ef2b39c2bf055273e6b4e1af3a0ba6921a6612e59f4",
                 "name": "Demo User",
                 "phone": "",
                 "role": "free",
