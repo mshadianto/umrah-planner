@@ -624,10 +624,22 @@ def render_login_page():
     # Demo accounts info
     st.markdown("---")
     st.markdown("### 🔑 Demo Accounts")
-    st.code("""
-Super Admin: superadmin / Admin@123
-(Untuk testing, buat akun baru via Register)
-    """)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("**👨‍💼 Admin Access:**")
+        st.code("""
+admin / admin123
+superadmin / Admin@123
+        """, language=None)
+    with col2:
+        st.markdown("**👤 User Access:**")
+        st.code("""
+demo / demo123
+(atau Register baru)
+        """, language=None)
+    
+    st.caption("💡 Login sebagai **admin** untuk akses Business Hub")
 
 
 def render_user_badge():
