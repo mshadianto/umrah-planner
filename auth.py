@@ -568,6 +568,19 @@ def render_login_page():
     """Render login page"""
     st.markdown("## 🔐 Login")
     
+    # Handle pending login from quick buttons
+    if st.session_state.get("pending_login"):
+        username = st.session_state.pending_login.get("username")
+        password = st.session_state.pending_login.get("password")
+        st.session_state.pending_login = None  # Clear pending
+        
+        result = login_user(username, password)
+        if result["success"]:
+            st.success(result["message"])
+            st.balloons()
+        else:
+            st.error(result["error"])
+    
     # Debug info - show current session state
     with st.expander("🔧 Debug Info (untuk troubleshooting)", expanded=True):
         st.write("**Session State Keys:**", list(st.session_state.keys())[:10], "...")
@@ -607,68 +620,29 @@ def render_login_page():
     with tab1:
         # Quick login buttons for testing
         st.markdown("### ⚡ Quick Login (Testing)")
+        st.caption("Klik tombol, lalu klik lagi untuk konfirmasi login")
+        
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("Login as Demo", key="quick_demo"):
-                st.info("🔄 Mencoba login sebagai demo...")
-                result = login_user("demo", "DemoLabbaik25")
-                st.write("Result:", result)
-                if result["success"]:
-                    st.success(result["message"])
-                    st.balloons()
-                    import time
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error(result["error"])
+            if st.button("🆓 Demo User", key="quick_demo", use_container_width=True):
+                st.session_state.pending_login = {"username": "demo", "password": "DemoLabbaik25"}
+                st.rerun()
         with col2:
-            if st.button("Login as Admin", key="quick_admin"):
-                st.info("🔄 Mencoba login sebagai admin...")
-                # Debug: show what we're doing
-                db = get_db()
-                admin_user = db.get_user_by_username("admin")
-                st.write("Admin user found:", admin_user is not None)
-                if admin_user:
-                    st.write("Stored hash:", admin_user.get("password_hash"))
-                    import hashlib
-                    computed = hashlib.sha256("AdminLabbaik25".encode()).hexdigest()
-                    st.write("Computed hash:", computed)
-                    st.write("Match:", admin_user.get("password_hash") == computed)
-                
-                result = login_user("admin", "AdminLabbaik25")
-                st.write("Login result:", result)
-                if result["success"]:
-                    st.success(result["message"])
-                    st.balloons()
-                    import time
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error(result["error"])
+            if st.button("👨‍💼 Admin", key="quick_admin", use_container_width=True):
+                st.session_state.pending_login = {"username": "admin", "password": "AdminLabbaik25"}
+                st.rerun()
         with col3:
-            if st.button("Login as SuperAdmin", key="quick_super"):
-                st.info("🔄 Mencoba login sebagai superadmin...")
-                # Debug: show what we're doing
-                db = get_db()
-                super_user = db.get_user_by_username("superadmin")
-                st.write("Superadmin user found:", super_user is not None)
-                if super_user:
-                    st.write("Stored hash:", super_user.get("password_hash"))
-                    import hashlib
-                    computed = hashlib.sha256("SuperLabbaik25".encode()).hexdigest()
-                    st.write("Computed hash:", computed)
-                    st.write("Match:", super_user.get("password_hash") == computed)
-                
-                result = login_user("superadmin", "SuperLabbaik25")
-                st.write("Login result:", result)
-                if result["success"]:
-                    st.success(result["message"])
-                    st.balloons()
-                    import time
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error(result["error"])
+            if st.button("👑 SuperAdmin", key="quick_super", use_container_width=True):
+                st.session_state.pending_login = {"username": "superadmin", "password": "SuperLabbaik25"}
+                st.rerun()
+        
+        # Show current login state
+        if is_logged_in():
+            user = get_current_user()
+            st.success(f"✅ Sudah login sebagai: **{user.get('name')}** ({user.get('role')})")
+            if st.button("🏠 Ke Beranda", type="primary", use_container_width=True):
+                st.rerun()
+            return  # Don't show login form if already logged in
         
         st.markdown("---")
         st.markdown("### 📝 Manual Login")
@@ -683,33 +657,20 @@ def render_login_page():
             with col2:
                 st.markdown("[Lupa password?](#)")
             
-            if st.form_submit_button("🔑 Login", type="primary", use_container_width=True):
-                if username and password:
-                    # Debug: show what we're trying
-                    st.info(f"🔍 Mencoba login sebagai: {username}")
-                    
-                    result = login_user(username, password)
-                    
-                    # Debug: show result
-                    if result["success"]:
-                        st.success(result["message"])
-                        st.balloons()
-                        # Force page reload
-                        import time
-                        time.sleep(1)
-                        st.rerun()
-                    else:
-                        st.error(result["error"])
-                        # Debug: show more info
-                        db = get_db()
-                        user = db.get_user_by_username(username)
-                        if user:
-                            st.warning(f"User ditemukan: {user.get('name')} (role: {user.get('role')})")
-                            st.warning("Password tidak cocok!")
-                        else:
-                            st.warning("User tidak ditemukan di database")
+            submitted = st.form_submit_button("🔑 Login", type="primary", use_container_width=True)
+            
+        # Handle form submission OUTSIDE the form
+        if submitted:
+            if username and password:
+                result = login_user(username, password)
+                if result["success"]:
+                    st.success(result["message"])
+                    st.balloons()
+                    st.rerun()
                 else:
-                    st.error("Masukkan username dan password")
+                    st.error(result["error"])
+            else:
+                st.error("Masukkan username dan password")
     
     with tab2:
         with st.form("register_form"):
