@@ -430,6 +430,11 @@ def render_sidebar():
         
         st.markdown("---")
         
+        # Debug: Show login status
+        with st.expander("🔧 Debug"):
+            st.write("current_user:", st.session_state.get("current_user"))
+            st.write("is_logged_in:", is_logged_in())
+        
         # Build navigation based on user role
         user = get_current_user()
         
