@@ -433,7 +433,7 @@ def render_sidebar():
         # Build navigation based on user role
         user = get_current_user()
         
-        # Base navigation items
+        # Base navigation items (for all users)
         nav_items = [
             "🏠 Beranda",
             "💰 Simulasi Biaya",
@@ -443,15 +443,15 @@ def render_sidebar():
             "📋 Buat Rencana",
             "✈️ Booking & Reservasi",
             "🧰 Tools & Fitur",
-            "💼 Business Hub",
         ]
         
         # Add auth-related items
         if not is_logged_in():
             nav_items.append("🔐 Login / Register")
         else:
-            # Add admin dashboard for admin/superadmin
+            # Add admin-only items for admin/superadmin
             if user and user.get("role") in ["admin", "superadmin"]:
+                nav_items.append("💼 Business Hub")  # Admin only
                 nav_items.append("🛡️ Admin Dashboard")
             nav_items.append("👤 Profil Saya")
         
@@ -1553,15 +1553,28 @@ def main():
         st.header("🧰 Tools & Fitur Jamaah")
         render_additional_features()
     elif "Business" in page:
-        st.markdown(f"""
-        <div style="text-align: center; margin-bottom: 20px;">
-            <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
-            <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
-        </div>
-        """, unsafe_allow_html=True)
-        st.header("💼 Business Hub")
-        st.markdown("Monetisasi, partnership, dan fitur premium")
-        render_monetization_page()
+        # Admin-only access control
+        user = get_current_user()
+        if not user or user.get("role") not in ["admin", "superadmin"]:
+            st.error("🚫 Akses Ditolak")
+            st.warning("Halaman Business Hub hanya tersedia untuk **Administrator**.")
+            st.info("Silakan login dengan akun admin untuk mengakses halaman ini.")
+            if not is_logged_in():
+                st.markdown("---")
+                if st.button("🔐 Login sebagai Admin", type="primary"):
+                    st.session_state.redirect_to_login = True
+                    st.rerun()
+        else:
+            st.markdown(f"""
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
+                <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
+            </div>
+            """, unsafe_allow_html=True)
+            st.header("💼 Business Hub")
+            st.caption("🔐 Admin Access Only")
+            st.markdown("Monetisasi, partnership, dan fitur premium")
+            render_monetization_page()
     elif "Login" in page:
         render_login_page()
     elif "Admin" in page:
