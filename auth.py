@@ -629,13 +629,13 @@ def render_login_page():
     with col1:
         st.markdown("**👨‍💼 Admin Access:**")
         st.code("""
-admin / admin123
-superadmin / Admin@123
+admin / Labbaik#Admin1
+superadmin / Labbaik@2025!
         """, language=None)
     with col2:
         st.markdown("**👤 User Access:**")
         st.code("""
-demo / demo123
+demo / DemoLabbaik1
 (atau Register baru)
         """, language=None)
     
