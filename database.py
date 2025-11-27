@@ -433,6 +433,59 @@ class SupabaseDB:
         self.client = get_supabase_client()
         self.admin_client = get_supabase_admin_client()
         self._fallback_mode = self.client is None
+        
+        # Initialize demo users if in fallback mode
+        if self._fallback_mode:
+            self._init_demo_users()
+    
+    def _init_demo_users(self):
+        """Initialize demo users in session state"""
+        if "users_db" not in st.session_state:
+            st.session_state.users_db = {}
+        
+        # Default demo users - using pre-computed hashes
+        default_users = {
+            "superadmin": {
+                "id": "superadmin-001",
+                "username": "superadmin",
+                "email": "sopian.hadianto@gmail.com",
+                "password_hash": "76b590bb5e4a2c3d141486c92d28dd797a99a0a22bd1d28d965f9cae6d09fdd0",
+                "name": "MS Hadianto",
+                "phone": "628159658833",
+                "role": "superadmin",
+                "status": "active",
+                "created_at": "2025-11-26T00:00:00",
+                "last_login": None
+            },
+            "admin": {
+                "id": "admin-001",
+                "username": "admin",
+                "email": "admin@labbaik.ai",
+                "password_hash": "d890355b06a9ed537774f57f8d21b3a665c2550d540bb5b1efc88e2ca3d3457e",
+                "name": "Admin LABBAIK",
+                "phone": "",
+                "role": "admin",
+                "status": "active",
+                "created_at": "2025-11-27T00:00:00",
+                "last_login": None
+            },
+            "demo": {
+                "id": "demo-001",
+                "username": "demo",
+                "email": "demo@labbaik.ai",
+                "password_hash": "256c23969b50dfc20faf4ef2b39c2bf055273e6b4e1af3a0ba6921a6612e59f4",
+                "name": "Demo User",
+                "phone": "",
+                "role": "free",
+                "status": "active",
+                "created_at": "2025-11-27T00:00:00",
+                "last_login": None
+            }
+        }
+        
+        # Add/update demo users
+        for uname, udata in default_users.items():
+            st.session_state.users_db[uname] = udata
     
     @property
     def is_connected(self) -> bool:
@@ -930,64 +983,12 @@ class SupabaseDB:
     
     def _fallback_get_user(self, username: str) -> Optional[Dict]:
         """Fallback get user"""
-        # Default demo users - using pre-computed hashes
-        default_users = {
-            "superadmin": {
-                "id": "superadmin-001",
-                "username": "superadmin",
-                "email": "sopian.hadianto@gmail.com",
-                "password_hash": "76b590bb5e4a2c3d141486c92d28dd797a99a0a22bd1d28d965f9cae6d09fdd0",
-                "name": "MS Hadianto",
-                "phone": "628159658833",
-                "role": "superadmin",
-                "status": "active",
-                "created_at": "2025-11-26T00:00:00",
-                "last_login": None
-            },
-            "admin": {
-                "id": "admin-001",
-                "username": "admin",
-                "email": "admin@labbaik.ai",
-                "password_hash": "d890355b06a9ed537774f57f8d21b3a665c2550d540bb5b1efc88e2ca3d3457e",
-                "name": "Admin LABBAIK",
-                "phone": "",
-                "role": "admin",
-                "status": "active",
-                "created_at": "2025-11-27T00:00:00",
-                "last_login": None
-            },
-            "demo": {
-                "id": "demo-001",
-                "username": "demo",
-                "email": "demo@labbaik.ai",
-                "password_hash": "256c23969b50dfc20faf4ef2b39c2bf055273e6b4e1af3a0ba6921a6612e59f4",
-                "name": "Demo User",
-                "phone": "",
-                "role": "free",
-                "status": "active",
-                "created_at": "2025-11-27T00:00:00",
-                "last_login": None
-            }
-        }
-        
-        # Initialize or update users_db
-        if "users_db" not in st.session_state:
-            st.session_state.users_db = default_users.copy()
-        else:
-            # Always ensure default users exist with correct passwords
-            for uname, udata in default_users.items():
-                if uname not in st.session_state.users_db:
-                    st.session_state.users_db[uname] = udata
-                else:
-                    # Update password hash for default users (in case it changed)
-                    st.session_state.users_db[uname]["password_hash"] = udata["password_hash"]
-        
+        self._init_demo_users()
         return st.session_state.users_db.get(username)
     
     def _fallback_get_all_users(self) -> List[Dict]:
         """Fallback get all users"""
-        if "users_db" not in st.session_state:
-            self._fallback_get_user("superadmin")
+        self._init_demo_users()
         return list(st.session_state.users_db.values())
     
     def _fallback_get_stats(self) -> Dict:
