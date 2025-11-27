@@ -930,46 +930,57 @@ class SupabaseDB:
     
     def _fallback_get_user(self, username: str) -> Optional[Dict]:
         """Fallback get user"""
-        if "users_db" not in st.session_state:
-            # Add default users
-            st.session_state.users_db = {
-                "superadmin": {
-                    "id": "superadmin-001",
-                    "username": "superadmin",
-                    "email": "sopian.hadianto@gmail.com",
-                    "password_hash": hashlib.sha256("super123".encode()).hexdigest(),
-                    "name": "MS Hadianto",
-                    "phone": "628159658833",
-                    "role": "superadmin",
-                    "status": "active",
-                    "created_at": "2025-11-26T00:00:00",
-                    "last_login": None
-                },
-                "admin": {
-                    "id": "admin-001",
-                    "username": "admin",
-                    "email": "admin@labbaik.ai",
-                    "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
-                    "name": "Admin LABBAIK",
-                    "phone": "",
-                    "role": "admin",
-                    "status": "active",
-                    "created_at": "2025-11-27T00:00:00",
-                    "last_login": None
-                },
-                "demo": {
-                    "id": "demo-001",
-                    "username": "demo",
-                    "email": "demo@labbaik.ai",
-                    "password_hash": hashlib.sha256("demo123".encode()).hexdigest(),
-                    "name": "Demo User",
-                    "phone": "",
-                    "role": "free",
-                    "status": "active",
-                    "created_at": "2025-11-27T00:00:00",
-                    "last_login": None
-                }
+        # Default demo users - always ensure these exist with correct passwords
+        default_users = {
+            "superadmin": {
+                "id": "superadmin-001",
+                "username": "superadmin",
+                "email": "sopian.hadianto@gmail.com",
+                "password_hash": hashlib.sha256("super123".encode()).hexdigest(),
+                "name": "MS Hadianto",
+                "phone": "628159658833",
+                "role": "superadmin",
+                "status": "active",
+                "created_at": "2025-11-26T00:00:00",
+                "last_login": None
+            },
+            "admin": {
+                "id": "admin-001",
+                "username": "admin",
+                "email": "admin@labbaik.ai",
+                "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
+                "name": "Admin LABBAIK",
+                "phone": "",
+                "role": "admin",
+                "status": "active",
+                "created_at": "2025-11-27T00:00:00",
+                "last_login": None
+            },
+            "demo": {
+                "id": "demo-001",
+                "username": "demo",
+                "email": "demo@labbaik.ai",
+                "password_hash": hashlib.sha256("demo123".encode()).hexdigest(),
+                "name": "Demo User",
+                "phone": "",
+                "role": "free",
+                "status": "active",
+                "created_at": "2025-11-27T00:00:00",
+                "last_login": None
             }
+        }
+        
+        # Initialize or update users_db
+        if "users_db" not in st.session_state:
+            st.session_state.users_db = default_users.copy()
+        else:
+            # Always ensure default users exist with correct passwords
+            for uname, udata in default_users.items():
+                if uname not in st.session_state.users_db:
+                    st.session_state.users_db[uname] = udata
+                else:
+                    # Update password hash for default users (in case it changed)
+                    st.session_state.users_db[uname]["password_hash"] = udata["password_hash"]
         
         return st.session_state.users_db.get(username)
     
