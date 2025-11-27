@@ -610,25 +610,62 @@ def render_login_page():
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("Login as Demo", key="quick_demo"):
+                st.info("🔄 Mencoba login sebagai demo...")
                 result = login_user("demo", "DemoLabbaik25")
+                st.write("Result:", result)
                 if result["success"]:
                     st.success(result["message"])
+                    st.balloons()
+                    import time
+                    time.sleep(1)
                     st.rerun()
                 else:
                     st.error(result["error"])
         with col2:
             if st.button("Login as Admin", key="quick_admin"):
+                st.info("🔄 Mencoba login sebagai admin...")
+                # Debug: show what we're doing
+                db = get_db()
+                admin_user = db.get_user_by_username("admin")
+                st.write("Admin user found:", admin_user is not None)
+                if admin_user:
+                    st.write("Stored hash:", admin_user.get("password_hash"))
+                    import hashlib
+                    computed = hashlib.sha256("AdminLabbaik25".encode()).hexdigest()
+                    st.write("Computed hash:", computed)
+                    st.write("Match:", admin_user.get("password_hash") == computed)
+                
                 result = login_user("admin", "AdminLabbaik25")
+                st.write("Login result:", result)
                 if result["success"]:
                     st.success(result["message"])
+                    st.balloons()
+                    import time
+                    time.sleep(1)
                     st.rerun()
                 else:
                     st.error(result["error"])
         with col3:
             if st.button("Login as SuperAdmin", key="quick_super"):
+                st.info("🔄 Mencoba login sebagai superadmin...")
+                # Debug: show what we're doing
+                db = get_db()
+                super_user = db.get_user_by_username("superadmin")
+                st.write("Superadmin user found:", super_user is not None)
+                if super_user:
+                    st.write("Stored hash:", super_user.get("password_hash"))
+                    import hashlib
+                    computed = hashlib.sha256("SuperLabbaik25".encode()).hexdigest()
+                    st.write("Computed hash:", computed)
+                    st.write("Match:", super_user.get("password_hash") == computed)
+                
                 result = login_user("superadmin", "SuperLabbaik25")
+                st.write("Login result:", result)
                 if result["success"]:
                     st.success(result["message"])
+                    st.balloons()
+                    import time
+                    time.sleep(1)
                     st.rerun()
                 else:
                     st.error(result["error"])
