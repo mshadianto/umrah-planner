@@ -593,42 +593,52 @@ def render_login_page():
         user = get_current_user()
         st.success(f"✅ Anda sudah login sebagai **{user.get('name')}** ({user.get('role')})")
         st.info("Silakan pilih menu di sidebar untuk mengakses fitur.")
-        
-        # Clear any login messages
-        st.session_state.login_error = None
-        st.session_state.login_success = None
         return
-    
-    # Show login success message if any
-    if st.session_state.login_success:
-        st.success(st.session_state.login_success)
-        st.session_state.login_success = None
-        st.rerun()  # Rerun to show logged-in state
     
     st.markdown("## 🔐 Login")
     
-    # Show login error if any
+    # Show messages
     if st.session_state.login_error:
         st.error(st.session_state.login_error)
-        st.session_state.login_error = None
+    if st.session_state.login_success:
+        st.success(st.session_state.login_success)
     
     tab1, tab2 = st.tabs(["Login", "Register"])
     
     with tab1:
-        username = st.text_input("Username", key="login_username_input")
-        password = st.text_input("Password", type="password", key="login_password_input")
+        # Use form to prevent auto-rerun on input
+        with st.form("login_form", clear_on_submit=False):
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                remember = st.checkbox("Ingat saya")
+            with col2:
+                st.markdown("[Lupa password?](#)")
+            
+            submitted = st.form_submit_button("🔑 Login", type="primary", use_container_width=True)
         
-        col1, col2 = st.columns(2)
-        with col1:
-            remember = st.checkbox("Ingat saya")
-        with col2:
-            st.markdown("[Lupa password?](#)")
-        
-        if st.button("🔑 Login", type="primary", use_container_width=True, key="login_btn"):
+        # Handle form submission OUTSIDE the form
+        if submitted:
+            # Clear previous messages
+            st.session_state.login_error = None
+            st.session_state.login_success = None
+            
             if username and password:
                 # Perform login
                 do_login(username, password)
-                st.rerun()  # Rerun to show result
+                
+                # Check result and show feedback
+                if is_logged_in():
+                    user = get_current_user()
+                    st.success(f"✅ Login berhasil! Selamat datang, {user.get('name')}!")
+                    st.balloons()
+                    # Clear show_login_page to go back to main navigation
+                    st.session_state.show_login_page = False
+                    st.rerun()
+                elif st.session_state.login_error:
+                    st.error(st.session_state.login_error)
             else:
                 st.error("Masukkan username dan password")
     
