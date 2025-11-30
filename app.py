@@ -1452,7 +1452,6 @@ def render_about():
         - 🔍 Internal Audit & Quality Assurance
         - 🤖 AI-Powered Solutions
         - 📋 Corporate Governance Advisory
-        - 💻 Full-Stack Development
         """)
     
     with tab2:
