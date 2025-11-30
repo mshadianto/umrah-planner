@@ -1549,11 +1549,40 @@ def main():
     """Main application entry point"""
     init_session_state()
     
-    # Handle login redirect from landing page
+    # Initialize show_login_page state
+    if "show_login_page" not in st.session_state:
+        st.session_state.show_login_page = False
+    
+    # Handle login redirect from landing page button
     if st.session_state.get("nav_to_login"):
         st.session_state.nav_to_login = False
+        st.session_state.show_login_page = True
+    
+    # If showing login page (before sidebar), render it and return
+    if st.session_state.show_login_page and not is_logged_in():
+        # Mini header
+        st.markdown(f"""
+        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%); border-radius: 10px; margin-bottom: 20px;">
+            <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.5rem; color: {COLORS['gold']};">
+                {BRAND['arabic']}
+            </div>
+            <div style="font-size: 1rem; font-weight: 700; color: white; letter-spacing: 0.2em;">
+                {BRAND['name']}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
         render_login_page()
+        
+        # Back button
+        if st.button("← Kembali ke Beranda"):
+            st.session_state.show_login_page = False
+            st.rerun()
         return
+    
+    # Clear show_login_page if logged in
+    if is_logged_in():
+        st.session_state.show_login_page = False
     
     # Sidebar navigation
     page = render_sidebar()
