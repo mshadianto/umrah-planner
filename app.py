@@ -368,6 +368,48 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
+# ============================================
+# VISITOR TRACKING
+# ============================================
+
+def get_visitor_count():
+    """Get total visitor count using CountAPI"""
+    try:
+        import urllib.request
+        import json
+        
+        # Use CountAPI for simple visitor tracking
+        # Namespace: labbaik, Key: visitors
+        url = "https://api.countapi.xyz/hit/labbaik-umrah/visitors"
+        
+        # Only count once per session
+        if "visitor_counted" not in st.session_state:
+            with urllib.request.urlopen(url, timeout=3) as response:
+                data = json.loads(response.read().decode())
+                st.session_state.visitor_counted = True
+                st.session_state.visitor_count = data.get("value", 0)
+        
+        return st.session_state.get("visitor_count", 0)
+    except:
+        # Fallback if API fails
+        return st.session_state.get("visitor_count", 100)
+
+
+def track_page_view(page_name: str):
+    """Track individual page views"""
+    if "page_views" not in st.session_state:
+        st.session_state.page_views = {}
+    
+    if page_name not in st.session_state.page_views:
+        st.session_state.page_views[page_name] = 0
+    
+    st.session_state.page_views[page_name] += 1
+
+
+# ============================================
+# SESSION STATE INITIALIZATION
+# ============================================
+
 # Initialize session state
 def init_session_state():
     """Initialize session state variables"""
@@ -1452,6 +1494,7 @@ def render_about():
         - 🔍 Internal Audit & Quality Assurance
         - 🤖 AI-Powered Solutions
         - 📋 Corporate Governance Advisory
+        - 💻 Full-Stack Development
         """)
     
     with tab2:
@@ -1513,7 +1556,11 @@ def render_about():
 
 
 def render_labbaik_footer():
-    """Render LABBAIK branded footer"""
+    """Render LABBAIK branded footer with disclaimer"""
+    
+    # Get visitor count
+    visitor_count = get_visitor_count()
+    
     st.markdown(f"""
     <div style="
         background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%);
@@ -1531,14 +1578,49 @@ def render_labbaik_footer():
         <div style="color: {COLORS['sand']}; font-size: 0.95rem; margin-bottom: 20px;">
             {BRAND['tagline']}
         </div>
+        
+        <!-- Visitor Counter -->
+        <div style="
+            background: rgba(212, 175, 55, 0.15);
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        ">
+            <span style="color: {COLORS['gold']}; font-size: 0.85rem;">
+                👥 Total Pengunjung: <strong>{visitor_count:,}</strong>
+            </span>
+        </div>
+        
         <div style="color: #888; font-size: 0.85rem; margin-bottom: 15px;">
             📧 {CONTACT['email']} &nbsp;|&nbsp; 
             📱 {CONTACT['whatsapp']} &nbsp;|&nbsp; 
             🌐 {CONTACT['website']}
         </div>
+        
+        <!-- Disclaimer -->
+        <div style="
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 20px auto;
+            max-width: 600px;
+        ">
+            <div style="color: {COLORS['gold']}; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">
+                ⚠️ Disclaimer
+            </div>
+            <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">
+                Aplikasi ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI 
+                (Claude AI, ChatGPT, dll). Informasi yang disajikan bersifat simulasi dan estimasi. 
+                Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.
+            </div>
+        </div>
+        
         <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; color: #666; font-size: 0.8rem;">
             © 2025 {BRAND['name']}. Hak Cipta Dilindungi.<br>
-            <span style="color: {COLORS['gold']};">Made with ❤️ by {DEVELOPER['name']}</span>
+            <span style="color: {COLORS['gold']};">Made with ❤️ & AI by {DEVELOPER['name']}</span><br>
+            <span style="color: #555; font-size: 0.7rem;">v{BRAND['version']} Beta • Powered by Streamlit & Groq AI</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1688,6 +1770,205 @@ def main():
     elif "Tentang" in page:
         render_about()
         render_labbaik_footer()
+
+
+def render_donation_page():
+    """Render donation/infak page"""
+    st.markdown(f"""
+    <div style="text-align: center; padding: 30px 0;">
+        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2rem; color: {COLORS['gold']};">
+            بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
+        </div>
+        <h1 style="color: {COLORS['black']}; margin-top: 15px;">🤲 Dukung Pengembangan LABBAIK</h1>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Main message
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(135deg, {COLORS['green']}15, {COLORS['gold']}15);
+        border: 2px solid {COLORS['gold']}44;
+        border-radius: 20px;
+        padding: 30px;
+        margin: 20px 0;
+    ">
+        <h3 style="color: {COLORS['green']}; margin-bottom: 15px;">💚 Tentang Proyek Ini</h3>
+        <p style="font-size: 1.1rem; line-height: 1.8; color: #333;">
+            <strong>LABBAIK</strong> adalah platform AI perencanaan umrah yang dikembangkan dengan niat 
+            untuk membantu umat Muslim Indonesia merencanakan perjalanan ibadah mereka dengan lebih mudah dan terencana.
+        </p>
+        <p style="font-size: 1.1rem; line-height: 1.8; color: #333;">
+            Aplikasi ini <strong style="color: {COLORS['green']};">GRATIS selamanya</strong> dan akan terus dikembangkan 
+            dengan fitur-fitur baru yang bermanfaat.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Donation Methods
+    st.markdown(f"<h3 style='text-align: center; color: {COLORS['black']}; margin: 30px 0;'>💝 Cara Berinfak</h3>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # QRIS
+        st.markdown(f"""
+        <div style="
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid {COLORS['gold']}44;
+            text-align: center;
+            height: 100%;
+        ">
+            <h4 style="color: {COLORS['gold']}; margin-bottom: 15px;">📱 Scan QRIS</h4>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">
+                Scan dengan aplikasi e-wallet atau mobile banking
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Display QRIS image
+        try:
+            st.image("assets/qris-labbaik.png", use_container_width=True)
+        except:
+            st.info("📱 QRIS akan ditampilkan di sini")
+        
+        st.caption("Scan dengan GoPay, OVO, DANA, ShopeePay, LinkAja, atau Mobile Banking")
+    
+    with col2:
+        # Bank Transfer
+        st.markdown(f"""
+        <div style="
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid {COLORS['gold']}44;
+            text-align: center;
+        ">
+            <h4 style="color: {COLORS['gold']}; margin-bottom: 15px;">🏦 Transfer Bank</h4>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
+                Transfer langsung ke rekening berikut
+            </p>
+            
+            <div style="
+                background: linear-gradient(135deg, #0060AF, #004080);
+                padding: 25px;
+                border-radius: 12px;
+                color: white;
+            ">
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Bank BCA</div>
+                <div style="font-size: 1.8rem; font-weight: 700; letter-spacing: 2px; margin: 10px 0;">
+                    6090221475
+                </div>
+                <div style="font-size: 1rem; font-weight: 600;">
+                    M SOPIAN HADIANTO
+                </div>
+            </div>
+            
+            <p style="color: #888; font-size: 0.8rem; margin-top: 15px;">
+                ✅ Tanpa potongan admin<br>
+                ✅ 100% sampai ke pengembang
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Copy button for account number
+        if st.button("📋 Salin No. Rekening", use_container_width=True):
+            st.code("6090221475")
+            st.success("Salin nomor di atas!")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Why donate
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div style="background: #f9f9f9; padding: 25px; border-radius: 15px; height: 100%;">
+            <h4 style="color: {COLORS['gold']};">💡 Mengapa Berinfak?</h4>
+            <ul style="color: #555; line-height: 2;">
+                <li>Membantu biaya server & hosting</li>
+                <li>Mendukung pengembangan fitur baru</li>
+                <li>Menjaga aplikasi tetap gratis untuk semua</li>
+                <li>Ikut andil dalam memudahkan ibadah umrah umat</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div style="background: #f9f9f9; padding: 25px; border-radius: 15px; height: 100%;">
+            <h4 style="color: {COLORS['gold']};">🎯 Rencana Pengembangan</h4>
+            <ul style="color: #555; line-height: 2;">
+                <li>Integrasi booking langsung</li>
+                <li>Panduan ibadah interaktif</li>
+                <li>Fitur grup jamaah</li>
+                <li>Notifikasi & reminder perjalanan</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Hadith about sadaqah
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(135deg, {COLORS['gold']}22, {COLORS['sand']}22);
+        border-left: 4px solid {COLORS['gold']};
+        padding: 25px;
+        border-radius: 0 15px 15px 0;
+        margin: 30px 0;
+    ">
+        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.4rem; color: {COLORS['black']}; text-align: center; margin-bottom: 15px;">
+            مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ
+        </div>
+        <div style="text-align: center; color: #555; font-style: italic;">
+            "Sedekah tidak akan mengurangi harta"
+        </div>
+        <div style="text-align: center; color: {COLORS['gold']}; font-weight: 600; margin-top: 10px;">
+            — HR. Muslim
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Other ways to support
+    st.markdown(f"""
+    <div style="background: #f9f9f9; padding: 25px; border-radius: 15px; margin-top: 20px;">
+        <h4 style="color: {COLORS['black']};">🌟 Cara Lain Mendukung</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+            <div style="text-align: center; padding: 15px;">
+                <div style="font-size: 2rem;">📢</div>
+                <div style="font-weight: 600;">Share ke Teman</div>
+                <div style="font-size: 0.85rem; color: #666;">Bantu sebarkan aplikasi ini</div>
+            </div>
+            <div style="text-align: center; padding: 15px;">
+                <div style="font-size: 2rem;">⭐</div>
+                <div style="font-weight: 600;">Beri Rating</div>
+                <div style="font-size: 0.85rem; color: #666;">Review positif sangat membantu</div>
+            </div>
+            <div style="text-align: center; padding: 15px;">
+                <div style="font-size: 2rem;">💬</div>
+                <div style="font-weight: 600;">Feedback</div>
+                <div style="font-size: 0.85rem; color: #666;">Saran untuk perbaikan</div>
+            </div>
+            <div style="text-align: center; padding: 15px;">
+                <div style="font-size: 2rem;">🤲</div>
+                <div style="font-weight: 600;">Doakan</div>
+                <div style="font-size: 0.85rem; color: #666;">Doa terbaik untuk pengembang</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Thank you message
+    st.markdown(f"""
+    <div style="text-align: center; padding: 30px 0; margin-top: 20px;">
+        <div style="font-size: 1.2rem; color: {COLORS['green']}; font-weight: 600;">
+            جَزَاكُمُ اللَّهُ خَيْرًا
+        </div>
+        <div style="color: #666; margin-top: 10px;">
+            Jazakumullahu Khairan - Semoga Allah membalas kebaikan Anda
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def render_user_profile():
