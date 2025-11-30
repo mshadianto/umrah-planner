@@ -1494,7 +1494,6 @@ def render_about():
         - 🔍 Internal Audit & Quality Assurance
         - 🤖 AI-Powered Solutions
         - 📋 Corporate Governance Advisory
-        - 💻 Full-Stack Development
         """)
     
     with tab2:
@@ -1560,26 +1559,27 @@ def render_labbaik_footer():
     
     # Get visitor count
     visitor_count = get_visitor_count()
+    visitor_str = f"{visitor_count:,}" if visitor_count else "0"
     
-    st.markdown(f"""
+    # Build HTML separately to avoid f-string issues
+    footer_html = f"""
     <div style="
-        background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%);
+        background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
         padding: 40px;
         border-radius: 20px;
         text-align: center;
         margin-top: 50px;
     ">
-        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: {COLORS['gold']};">
-            {BRAND['talbiyah']}
+        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: #D4AF37;">
+            لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ
         </div>
         <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin: 12px 0;">
-            {BRAND['name']}
+            LABBAIK
         </div>
-        <div style="color: {COLORS['sand']}; font-size: 0.95rem; margin-bottom: 20px;">
-            {BRAND['tagline']}
+        <div style="color: #C9A86C; font-size: 0.95rem; margin-bottom: 20px;">
+            Panggilan-Nya, Langkahmu
         </div>
         
-        <!-- Visitor Counter -->
         <div style="
             background: rgba(212, 175, 55, 0.15);
             display: inline-block;
@@ -1587,18 +1587,17 @@ def render_labbaik_footer():
             border-radius: 20px;
             margin-bottom: 20px;
         ">
-            <span style="color: {COLORS['gold']}; font-size: 0.85rem;">
-                👥 Total Pengunjung: <strong>{visitor_count:,}</strong>
+            <span style="color: #D4AF37; font-size: 0.85rem;">
+                👥 Total Pengunjung: <strong>{visitor_str}</strong>
             </span>
         </div>
         
         <div style="color: #888; font-size: 0.85rem; margin-bottom: 15px;">
-            📧 {CONTACT['email']} &nbsp;|&nbsp; 
-            📱 {CONTACT['whatsapp']} &nbsp;|&nbsp; 
-            🌐 {CONTACT['website']}
+            📧 sopian.hadianto@gmail.com &nbsp;|&nbsp; 
+            📱 +62 815 9658 833 &nbsp;|&nbsp; 
+            🌐 labbaik.ai
         </div>
         
-        <!-- Disclaimer -->
         <div style="
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1607,23 +1606,25 @@ def render_labbaik_footer():
             margin: 20px auto;
             max-width: 600px;
         ">
-            <div style="color: {COLORS['gold']}; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">
+            <div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">
                 ⚠️ Disclaimer
             </div>
             <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">
                 Aplikasi ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI 
-                (Claude AI, ChatGPT, dll). Informasi yang disajikan bersifat simulasi dan estimasi. 
+                (Claude AI, GEMINI, dll). Informasi yang disajikan bersifat simulasi dan estimasi. 
                 Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.
             </div>
         </div>
         
         <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; color: #666; font-size: 0.8rem;">
-            © 2025 {BRAND['name']}. Hak Cipta Dilindungi.<br>
-            <span style="color: {COLORS['gold']};">Made with ❤️ & AI by {DEVELOPER['name']}</span><br>
-            <span style="color: #555; font-size: 0.7rem;">v{BRAND['version']} Beta • Powered by Streamlit & Groq AI</span>
+            © 2025 LABBAIK. Hak Cipta Dilindungi.<br>
+            <span style="color: #D4AF37;">Made with ❤️ & AI by MS Hadianto</span><br>
+            <span style="color: #555; font-size: 0.7rem;">v3.0.0 Beta • Powered by Streamlit & Groq AI</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    
+    st.markdown(footer_html, unsafe_allow_html=True)
 
 
 def main():
