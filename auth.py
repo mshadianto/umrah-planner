@@ -268,9 +268,18 @@ def register_user(username: str, email: str, password: str, name: str, phone: st
     return result
 
 
-def login_user(username: str, password: str) -> Dict:
-    """Login user using Supabase"""
-    init_user_database()
+def do_login(username: str, password: str):
+    """Perform login - called as callback"""
+    if not username or not password:
+        st.session_state.login_error = "Masukkan username dan password"
+        return
+    
+    # Initialize if not done
+    if "current_user" not in st.session_state:
+        st.session_state.current_user = None
+    if "login_attempts" not in st.session_state:
+        st.session_state.login_attempts = {}
+    
     db = get_db()
     
     # Check login attempts (brute force protection)
@@ -278,13 +287,15 @@ def login_user(username: str, password: str) -> Dict:
     if attempts_key in st.session_state.login_attempts:
         attempts = st.session_state.login_attempts[attempts_key]
         if attempts["count"] >= 5 and (datetime.now() - attempts["last_attempt"]).seconds < 300:
-            return {"success": False, "error": "Terlalu banyak percobaan. Coba lagi dalam 5 menit."}
+            st.session_state.login_error = "Terlalu banyak percobaan. Coba lagi dalam 5 menit."
+            return
     
     # Get user from database
     user = db.get_user_by_username(username)
     
     if not user:
-        return {"success": False, "error": "Username atau password salah"}
+        st.session_state.login_error = "Username tidak ditemukan"
+        return
     
     # Verify password
     if not db.verify_password(username, password):
@@ -293,27 +304,31 @@ def login_user(username: str, password: str) -> Dict:
             st.session_state.login_attempts[attempts_key] = {"count": 0, "last_attempt": datetime.now()}
         st.session_state.login_attempts[attempts_key]["count"] += 1
         st.session_state.login_attempts[attempts_key]["last_attempt"] = datetime.now()
-        return {"success": False, "error": "Username atau password salah"}
+        st.session_state.login_error = "Password salah"
+        return
     
     if user.get("status") != "active":
-        return {"success": False, "error": "Akun dinonaktifkan. Hubungi admin."}
+        st.session_state.login_error = "Akun dinonaktifkan. Hubungi admin."
+        return
     
-    # Successful login - update last login
-    if user.get("id"):
-        db.update_last_login(user["id"])
-    
-    # Store current user in session
+    # Successful login - store in session state
     st.session_state.current_user = user
+    st.session_state.login_error = None
+    st.session_state.login_success = f"Selamat datang, {user.get('name', username)}!"
     
     # Reset login attempts
     if attempts_key in st.session_state.login_attempts:
         del st.session_state.login_attempts[attempts_key]
+
+
+def login_user(username: str, password: str) -> Dict:
+    """Login user - wrapper for compatibility"""
+    do_login(username, password)
     
-    # Log action
-    if user.get("id"):
-        db.log_action(user["id"], "login", "user", user["id"])
-    
-    return {"success": True, "user": user, "message": f"Selamat datang, {user.get('name', username)}!"}
+    if st.session_state.get("login_error"):
+        return {"success": False, "error": st.session_state.login_error}
+    else:
+        return {"success": True, "user": st.session_state.current_user, "message": st.session_state.get("login_success", "Login berhasil!")}
 
 
 def logout_user():
@@ -566,109 +581,54 @@ def get_user_stats() -> Dict:
 
 def render_login_page():
     """Render login page"""
+    
+    # Initialize session state for login
+    if "login_error" not in st.session_state:
+        st.session_state.login_error = None
+    if "login_success" not in st.session_state:
+        st.session_state.login_success = None
+    
+    # Check if already logged in
+    if is_logged_in():
+        user = get_current_user()
+        st.success(f"✅ Anda sudah login sebagai **{user.get('name')}** ({user.get('role')})")
+        st.info("Silakan pilih menu di sidebar untuk mengakses fitur.")
+        
+        # Clear any login messages
+        st.session_state.login_error = None
+        st.session_state.login_success = None
+        return
+    
+    # Show login success message if any
+    if st.session_state.login_success:
+        st.success(st.session_state.login_success)
+        st.session_state.login_success = None
+        st.rerun()  # Rerun to show logged-in state
+    
     st.markdown("## 🔐 Login")
     
-    # Handle pending login from quick buttons
-    if st.session_state.get("pending_login"):
-        username = st.session_state.pending_login.get("username")
-        password = st.session_state.pending_login.get("password")
-        st.session_state.pending_login = None  # Clear pending
-        
-        result = login_user(username, password)
-        if result["success"]:
-            st.success(result["message"])
-            st.balloons()
-        else:
-            st.error(result["error"])
-    
-    # Debug info - show current session state
-    with st.expander("🔧 Debug Info (untuk troubleshooting)", expanded=True):
-        st.write("**Session State Keys:**", list(st.session_state.keys())[:10], "...")
-        st.write("**Current User:**", st.session_state.get("current_user"))
-        st.write("**Is Logged In:**", is_logged_in())
-        
-        # Test database connection
-        db = get_db()
-        st.write("**Database Mode:**", "Fallback (in-memory)" if db._fallback_mode else "Supabase")
-        
-        # Show available users with their hashes
-        if "users_db" in st.session_state:
-            st.write("**Available Users:**")
-            for uname, udata in st.session_state.users_db.items():
-                st.write(f"  - `{uname}` (role: {udata.get('role')}, hash: {udata.get('password_hash', 'N/A')[:20]}...)")
-        
-        # Test hash comparison
-        st.write("---")
-        st.write("**🧪 Test Password Hash:**")
-        test_pwd = st.text_input("Test password:", value="DemoLabbaik25", key="test_pwd")
-        if test_pwd:
-            import hashlib
-            computed = hashlib.sha256(test_pwd.encode()).hexdigest()
-            st.code(f"Input: {test_pwd}\nHash:  {computed}")
-            
-            # Compare with demo user
-            if "users_db" in st.session_state and "demo" in st.session_state.users_db:
-                stored = st.session_state.users_db["demo"]["password_hash"]
-                st.write(f"Stored hash: `{stored}`")
-                if computed == stored:
-                    st.success("✅ Hash MATCH!")
-                else:
-                    st.error("❌ Hash MISMATCH!")
+    # Show login error if any
+    if st.session_state.login_error:
+        st.error(st.session_state.login_error)
+        st.session_state.login_error = None
     
     tab1, tab2 = st.tabs(["Login", "Register"])
     
     with tab1:
-        # Quick login buttons for testing
-        st.markdown("### ⚡ Quick Login (Testing)")
-        st.caption("Klik tombol, lalu klik lagi untuk konfirmasi login")
+        username = st.text_input("Username", key="login_username_input")
+        password = st.text_input("Password", type="password", key="login_password_input")
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
-            if st.button("🆓 Demo User", key="quick_demo", use_container_width=True):
-                st.session_state.pending_login = {"username": "demo", "password": "DemoLabbaik25"}
-                st.rerun()
+            remember = st.checkbox("Ingat saya")
         with col2:
-            if st.button("👨‍💼 Admin", key="quick_admin", use_container_width=True):
-                st.session_state.pending_login = {"username": "admin", "password": "AdminLabbaik25"}
-                st.rerun()
-        with col3:
-            if st.button("👑 SuperAdmin", key="quick_super", use_container_width=True):
-                st.session_state.pending_login = {"username": "superadmin", "password": "SuperLabbaik25"}
-                st.rerun()
+            st.markdown("[Lupa password?](#)")
         
-        # Show current login state
-        if is_logged_in():
-            user = get_current_user()
-            st.success(f"✅ Sudah login sebagai: **{user.get('name')}** ({user.get('role')})")
-            if st.button("🏠 Ke Beranda", type="primary", use_container_width=True):
-                st.rerun()
-            return  # Don't show login form if already logged in
-        
-        st.markdown("---")
-        st.markdown("### 📝 Manual Login")
-        
-        with st.form("login_form"):
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                remember = st.checkbox("Ingat saya")
-            with col2:
-                st.markdown("[Lupa password?](#)")
-            
-            submitted = st.form_submit_button("🔑 Login", type="primary", use_container_width=True)
-            
-        # Handle form submission OUTSIDE the form
-        if submitted:
+        if st.button("🔑 Login", type="primary", use_container_width=True, key="login_btn"):
             if username and password:
-                result = login_user(username, password)
-                if result["success"]:
-                    st.success(result["message"])
-                    st.balloons()
-                    st.rerun()
-                else:
-                    st.error(result["error"])
+                # Perform login
+                do_login(username, password)
+                st.rerun()  # Rerun to show result
             else:
                 st.error("Masukkan username dan password")
     
