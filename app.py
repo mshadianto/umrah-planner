@@ -443,25 +443,18 @@ def initialize_system():
 def render_sidebar():
     """Render sidebar with LABBAIK branding and navigation"""
     with st.sidebar:
-        # LABBAIK Brand Header
-        st.markdown(f"""
-        <div style="text-align: center; padding: 25px 15px; border-bottom: 1px solid #333; margin-bottom: 15px;">
-            <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2rem; color: {COLORS['gold']}; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);">
-                {BRAND['arabic']}
-            </div>
-            <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin-top: 5px;">
-                {BRAND['name']}
-            </div>
-            <div style="font-size: 0.8rem; color: {COLORS['sand']}; margin-top: 8px; font-style: italic;">
-                {BRAND['tagline']}
-            </div>
-            <div style="margin-top: 10px;">
-                <span style="background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%); color: {COLORS['black']}; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">
-                    v{BRAND['version']}
-                </span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # LABBAIK Brand Header - FIXED
+        sidebar_header = f"""
+<div style="text-align: center; padding: 25px 15px; border-bottom: 1px solid #333; margin-bottom: 15px;">
+    <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2rem; color: {COLORS['gold']}; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);">{BRAND['arabic']}</div>
+    <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin-top: 5px;">{BRAND['name']}</div>
+    <div style="font-size: 0.8rem; color: {COLORS['sand']}; margin-top: 8px; font-style: italic;">{BRAND['tagline']}</div>
+    <div style="margin-top: 10px;">
+        <span style="background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%); color: {COLORS['black']}; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">v{BRAND['version']}</span>
+    </div>
+</div>
+"""
+        st.markdown(sidebar_header, unsafe_allow_html=True)
         
         # Initialize systems
         init_user_database()
@@ -517,16 +510,17 @@ def render_sidebar():
         
         st.markdown("---")
         
-        # Quick info
-        st.markdown(f"""
-        <div style="background: rgba(212, 175, 55, 0.1); padding: 12px; border-radius: 10px; border: 1px solid {COLORS['gold']}40;">
-            <div style="font-size: 0.85rem; font-weight: 600; color: {COLORS['gold']}; margin-bottom: 8px;">📌 Info Cepat</div>
-            <div style="font-size: 0.75rem; color: {COLORS['sand']};">
-                <strong>Provider:</strong> {llm_config.provider.upper()}<br>
-                <strong>Model:</strong> {llm_config.groq_model if llm_config.provider == 'groq' else llm_config.openai_model}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # Quick info - FIXED
+        quick_info = f"""
+<div style="background: rgba(212, 175, 55, 0.1); padding: 12px; border-radius: 10px; border: 1px solid {COLORS['gold']}40;">
+    <div style="font-size: 0.85rem; font-weight: 600; color: {COLORS['gold']}; margin-bottom: 8px;">📌 Info Cepat</div>
+    <div style="font-size: 0.75rem; color: {COLORS['sand']};">
+        <strong>Provider:</strong> {llm_config.provider.upper()}<br>
+        <strong>Model:</strong> {llm_config.groq_model if llm_config.provider == 'groq' else llm_config.openai_model}
+    </div>
+</div>
+"""
+        st.markdown(quick_info, unsafe_allow_html=True)
         
         st.markdown("---")
         
@@ -542,25 +536,20 @@ def render_sidebar():
         ]
         st.caption(tips[datetime.now().second % len(tips)])
         
-        # Footer
+        # Footer - FIXED
+        sidebar_footer = f"""
+<div style="text-align: center; padding: 15px 0;">
+    <div style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1rem;">{BRAND['arabic']}</div>
+    <div style="color: white; font-weight: 600; letter-spacing: 0.15em; font-size: 0.85rem; margin: 5px 0;">{BRAND['name']}</div>
+    <div style="color: {COLORS['sand']}; font-size: 0.7rem;">{BRAND['tagline']}</div>
+    <div style="color: #666; font-size: 0.65rem; margin-top: 10px;">
+        © 2025 {CONTACT['website']}<br>
+        Made with ❤️ by {DEVELOPER['name']}
+    </div>
+</div>
+"""
         st.markdown("---")
-        st.markdown(f"""
-        <div style="text-align: center; padding: 15px 0;">
-            <div style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1rem;">
-                {BRAND['arabic']}
-            </div>
-            <div style="color: white; font-weight: 600; letter-spacing: 0.15em; font-size: 0.85rem; margin: 5px 0;">
-                {BRAND['name']}
-            </div>
-            <div style="color: {COLORS['sand']}; font-size: 0.7rem;">
-                {BRAND['tagline']}
-            </div>
-            <div style="color: #666; font-size: 0.65rem; margin-top: 10px;">
-                © 2025 {CONTACT['website']}<br>
-                Made with ❤️ by {DEVELOPER['name']}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(sidebar_footer, unsafe_allow_html=True)
         
         return page
 
@@ -568,43 +557,43 @@ def render_sidebar():
 def render_home():
     """Render home page with LABBAIK branding - different view for guest vs logged-in"""
     
-    # Hero Section (for everyone)
-    st.markdown(f"""
-    <div class="labbaik-hero animate-fadeIn">
-        <div class="labbaik-arabic">{BRAND['talbiyah']}</div>
-        <div class="labbaik-name">{BRAND['name']}</div>
-        <div class="labbaik-tagline">{BRAND['tagline']}</div>
-        <p style="color: {COLORS['sand']}; margin-top: 15px; font-size: 1.1rem;">
-            {BRAND['description']}
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Hero Section (for everyone) - FIXED
+    hero_html = f"""
+<div class="labbaik-hero animate-fadeIn">
+    <div class="labbaik-arabic">{BRAND['talbiyah']}</div>
+    <div class="labbaik-name">{BRAND['name']}</div>
+    <div class="labbaik-tagline">{BRAND['tagline']}</div>
+    <p style="color: {COLORS['sand']}; margin-top: 15px; font-size: 1.1rem;">{BRAND['description']}</p>
+</div>
+"""
+    st.markdown(hero_html, unsafe_allow_html=True)
     
-    # Stats Bar - Realistic for Beta/MVP
-    st.markdown(f"""
-    <div class="stats-bar">
-        <div class="stat-item">
-            <div style="font-size: 1.5rem;">🤖</div>
-            <div class="stat-value">24/7</div>
-            <div class="stat-label">AI Assistant</div>
-        </div>
-        <div class="stat-item">
-            <div style="font-size: 1.5rem;">🏙️</div>
-            <div class="stat-value">10+</div>
-            <div class="stat-label">Kota Keberangkatan</div>
-        </div>
-        <div class="stat-item">
-            <div style="font-size: 1.5rem;">📊</div>
-            <div class="stat-value">5+</div>
-            <div class="stat-label">Skenario Paket</div>
-        </div>
-        <div class="stat-item">
-            <div style="font-size: 1.5rem;">🆓</div>
-            <div class="stat-value">GRATIS</div>
-            <div class="stat-label">Beta Access</div>
-        </div>
+    # Stats Bar - Realistic for Beta/MVP - FIXED
+    stats_bar_html = f"""
+<div class="stats-bar">
+    <div class="stat-item">
+        <div style="font-size: 1.5rem;">🤖</div>
+        <div class="stat-value">24/7</div>
+        <div class="stat-label">AI Assistant</div>
     </div>
-    """, unsafe_allow_html=True)
+    <div class="stat-item">
+        <div style="font-size: 1.5rem;">🏙️</div>
+        <div class="stat-value">10+</div>
+        <div class="stat-label">Kota Keberangkatan</div>
+    </div>
+    <div class="stat-item">
+        <div style="font-size: 1.5rem;">📊</div>
+        <div class="stat-value">5+</div>
+        <div class="stat-label">Skenario Paket</div>
+    </div>
+    <div class="stat-item">
+        <div style="font-size: 1.5rem;">🆓</div>
+        <div class="stat-value">GRATIS</div>
+        <div class="stat-label">Beta Access</div>
+    </div>
+</div>
+"""
+    st.markdown(stats_bar_html, unsafe_allow_html=True)
     
     # Check if user is logged in
     if not is_logged_in():
@@ -612,22 +601,14 @@ def render_home():
         # GUEST LANDING PAGE - Encourage Login
         # ============================================
         
-        # Login CTA
-        st.markdown(f"""
-        <div style="
-            background: linear-gradient(135deg, {COLORS['gold']}22, {COLORS['sand']}22);
-            border: 2px solid {COLORS['gold']};
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            margin: 30px 0;
-        ">
-            <h3 style="color: {COLORS['black']}; margin-bottom: 10px;">🔐 Login untuk Akses Penuh</h3>
-            <p style="color: {COLORS['gray']};">
-                Daftar GRATIS atau login untuk mengakses semua fitur perencanaan umrah
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Login CTA - FIXED
+        login_cta = f"""
+<div style="background: linear-gradient(135deg, {COLORS['gold']}22, {COLORS['sand']}22); border: 2px solid {COLORS['gold']}; border-radius: 15px; padding: 30px; text-align: center; margin: 30px 0;">
+    <h3 style="color: {COLORS['black']}; margin-bottom: 10px;">🔐 Login untuk Akses Penuh</h3>
+    <p style="color: {COLORS['gray']};">Daftar GRATIS atau login untuk mengakses semua fitur perencanaan umrah</p>
+</div>
+"""
+        st.markdown(login_cta, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
@@ -643,62 +624,62 @@ def render_home():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">🤖</div>
-                <div class="feature-title">AI Assistant 24/7</div>
-                <div class="feature-desc">Tanya apapun tentang umrah, AI siap membantu kapan saja</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">🤖</div>
+    <div class="feature-title">AI Assistant 24/7</div>
+    <div class="feature-desc">Tanya apapun tentang umrah, AI siap membantu kapan saja</div>
+</div>
+""", unsafe_allow_html=True)
         
         with col2:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">💰</div>
-                <div class="feature-title">Simulasi Biaya</div>
-                <div class="feature-desc">Hitung estimasi biaya dengan berbagai skenario</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">💰</div>
+    <div class="feature-title">Simulasi Biaya</div>
+    <div class="feature-desc">Hitung estimasi biaya dengan berbagai skenario</div>
+</div>
+""", unsafe_allow_html=True)
         
         with col3:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <div class="feature-title">Bandingkan Paket</div>
-                <div class="feature-desc">Bandingkan opsi Ekonomis, Standard, Premium, VIP</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">📊</div>
+    <div class="feature-title">Bandingkan Paket</div>
+    <div class="feature-desc">Bandingkan opsi Ekonomis, Standard, Premium, VIP</div>
+</div>
+""", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">✈️</div>
-                <div class="feature-title">Booking Terintegrasi</div>
-                <div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">✈️</div>
+    <div class="feature-title">Booking Terintegrasi</div>
+    <div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div>
+</div>
+""", unsafe_allow_html=True)
         
         with col2:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">🏨</div>
-                <div class="feature-title">Hotel & Akomodasi</div>
-                <div class="feature-desc">Temukan hotel terbaik di Makkah & Madinah</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">🏨</div>
+    <div class="feature-title">Hotel & Akomodasi</div>
+    <div class="feature-desc">Temukan hotel terbaik di Makkah & Madinah</div>
+</div>
+""", unsafe_allow_html=True)
         
         with col3:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">📦</div>
-                <div class="feature-title">Paket Travel</div>
-                <div class="feature-desc">Bandingkan paket dari berbagai travel agent terpercaya</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">📦</div>
+    <div class="feature-title">Paket Travel</div>
+    <div class="feature-desc">Bandingkan paket dari berbagai travel agent terpercaya</div>
+</div>
+""", unsafe_allow_html=True)
         
         st.markdown("---")
         
@@ -709,40 +690,44 @@ def render_home():
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.markdown(f"""
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 2.5rem;">🤖</div>
-                <div style="font-weight: 700; color: {COLORS['black']};">AI-Powered</div>
-                <div style="font-size: 0.85rem; color: {COLORS['gray']};">Teknologi AI terdepan</div>
-            </div>
-            """, unsafe_allow_html=True)
+            why_feature_1 = """
+<div style="text-align: center; padding: 15px;">
+    <div style="font-size: 2.5rem;">🤖</div>
+    <div style="font-weight: 700; color: #1A1A1A;">AI-Powered</div>
+    <div style="font-size: 0.85rem; color: #666;">Teknologi AI terdepan</div>
+</div>
+"""
+            st.markdown(why_feature_1, unsafe_allow_html=True)
         
         with col2:
-            st.markdown(f"""
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 2.5rem;">📊</div>
-                <div style="font-weight: 700; color: {COLORS['black']};">Data Akurat</div>
-                <div style="font-size: 0.85rem; color: {COLORS['gray']};">Estimasi biaya real</div>
-            </div>
-            """, unsafe_allow_html=True)
+            why_feature_2 = """
+<div style="text-align: center; padding: 15px;">
+    <div style="font-size: 2.5rem;">📊</div>
+    <div style="font-weight: 700; color: #1A1A1A;">Data Akurat</div>
+    <div style="font-size: 0.85rem; color: #666;">Estimasi biaya real</div>
+</div>
+"""
+            st.markdown(why_feature_2, unsafe_allow_html=True)
         
         with col3:
-            st.markdown(f"""
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 2.5rem;">🇮🇩</div>
-                <div style="font-weight: 700; color: {COLORS['black']};">Lokal Indonesia</div>
-                <div style="font-size: 0.85rem; color: {COLORS['gray']};">Untuk jamaah Indonesia</div>
-            </div>
-            """, unsafe_allow_html=True)
+            why_feature_3 = """
+<div style="text-align: center; padding: 15px;">
+    <div style="font-size: 2.5rem;">🇮🇩</div>
+    <div style="font-weight: 700; color: #1A1A1A;">Lokal Indonesia</div>
+    <div style="font-size: 0.85rem; color: #666;">Untuk jamaah Indonesia</div>
+</div>
+"""
+            st.markdown(why_feature_3, unsafe_allow_html=True)
         
         with col4:
-            st.markdown(f"""
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 2.5rem;">💯</div>
-                <div style="font-weight: 700; color: {COLORS['black']};">100% Gratis</div>
-                <div style="font-size: 0.85rem; color: {COLORS['gray']};">Daftar tanpa biaya</div>
-            </div>
-            """, unsafe_allow_html=True)
+            why_feature_4 = """
+<div style="text-align: center; padding: 15px;">
+    <div style="font-size: 2.5rem;">💯</div>
+    <div style="font-weight: 700; color: #1A1A1A;">100% Gratis</div>
+    <div style="font-size: 0.85rem; color: #666;">Daftar tanpa biaya</div>
+</div>
+"""
+            st.markdown(why_feature_4, unsafe_allow_html=True)
         
     else:
         # ============================================
@@ -752,20 +737,15 @@ def render_home():
         user = get_current_user()
         role_info = get_user_role_info()
         
-        # Welcome message
-        st.markdown(f"""
-        <div style="
-            background: linear-gradient(135deg, {role_info['color']}22, {role_info['color']}11);
-            border-left: 4px solid {role_info['color']};
-            padding: 15px 20px;
-            border-radius: 0 10px 10px 0;
-            margin-bottom: 20px;
-        ">
-            <span style="font-size: 1.5rem;">{role_info['badge']}</span>
-            <span style="font-weight: 600; margin-left: 10px;">Assalamualaikum, {user.get('name', 'User')}!</span>
-            <span style="color: {COLORS['gray']}; margin-left: 10px;">({role_info['name']})</span>
-        </div>
-        """, unsafe_allow_html=True)
+        # Welcome message - FIXED
+        welcome_html = f"""
+<div style="background: linear-gradient(135deg, {role_info['color']}22, {role_info['color']}11); border-left: 4px solid {role_info['color']}; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px;">
+    <span style="font-size: 1.5rem;">{role_info['badge']}</span>
+    <span style="font-weight: 600; margin-left: 10px;">Assalamualaikum, {user.get('name', 'User')}!</span>
+    <span style="color: {COLORS['gray']}; margin-left: 10px;">({role_info['name']})</span>
+</div>
+"""
+        st.markdown(welcome_html, unsafe_allow_html=True)
         
         # Feature cards
         st.markdown(f"<h3 style='color: {COLORS['black']}; margin: 20px 0;'>✨ Fitur Utama</h3>", unsafe_allow_html=True)
@@ -773,31 +753,31 @@ def render_home():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">🤖</div>
-                <div class="feature-title">AI Assistant 24/7</div>
-                <div class="feature-desc">Tanya apapun tentang umrah</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">🤖</div>
+    <div class="feature-title">AI Assistant 24/7</div>
+    <div class="feature-desc">Tanya apapun tentang umrah</div>
+</div>
+""", unsafe_allow_html=True)
         
         with col2:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">💰</div>
-                <div class="feature-title">Simulasi Biaya</div>
-                <div class="feature-desc">Hitung estimasi biaya umrah</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">💰</div>
+    <div class="feature-title">Simulasi Biaya</div>
+    <div class="feature-desc">Hitung estimasi biaya umrah</div>
+</div>
+""", unsafe_allow_html=True)
         
         with col3:
-            st.markdown(f"""
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <div class="feature-title">Bandingkan Paket</div>
-                <div class="feature-desc">Ekonomis hingga VIP</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""
+<div class="feature-card">
+    <div class="feature-icon">📊</div>
+    <div class="feature-title">Bandingkan Paket</div>
+    <div class="feature-desc">Ekonomis hingga VIP</div>
+</div>
+""", unsafe_allow_html=True)
         
         st.markdown("---")
         
@@ -947,12 +927,13 @@ def render_cost_simulation():
                 break
         
         if season_info and season_info["multiplier"] > 1:
-            st.markdown(f"""
-            <div class="warning-box">
-                ⚠️ <strong>Perhatian:</strong> Bulan {departure_month} termasuk musim {season_info['name']} 
-                dengan kenaikan harga sekitar {int((season_info['multiplier']-1)*100)}%
-            </div>
-            """, unsafe_allow_html=True)
+            warning_html = f"""
+<div class="warning-box">
+    ⚠️ <strong>Perhatian:</strong> Bulan {departure_month} termasuk musim {season_info['name']} 
+    dengan kenaikan harga sekitar {int((season_info['multiplier']-1)*100)}%
+</div>
+"""
+            st.markdown(warning_html, unsafe_allow_html=True)
         
         # Detailed breakdown visualization
         st.markdown("### 📈 Visualisasi Biaya")
@@ -1106,17 +1087,18 @@ def render_scenario_comparison():
         st.plotly_chart(fig, use_container_width=True)
         
         # Recommendation
-        st.markdown("""
-        <div class="highlight-box">
-            <h4>💡 Rekomendasi</h4>
-            <ul>
-                <li><strong>Budget < Rp 35 juta:</strong> Pilih Ekonomis</li>
-                <li><strong>Keseimbangan:</strong> Pilih Standard</li>
-                <li><strong>Prioritas Kenyamanan:</strong> Pilih Premium</li>
-                <li><strong>Pengalaman Terbaik:</strong> Pilih VIP</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        recommendation_html = """
+<div class="highlight-box">
+    <h4>💡 Rekomendasi</h4>
+    <ul>
+        <li><strong>Budget < Rp 35 juta:</strong> Pilih Ekonomis</li>
+        <li><strong>Keseimbangan:</strong> Pilih Standard</li>
+        <li><strong>Prioritas Kenyamanan:</strong> Pilih Premium</li>
+        <li><strong>Pengalaman Terbaik:</strong> Pilih VIP</li>
+    </ul>
+</div>
+"""
+        st.markdown(recommendation_html, unsafe_allow_html=True)
 
 
 def render_time_analysis():
@@ -1143,14 +1125,15 @@ def render_time_analysis():
         cols = st.columns(3)
         for i, month_data in enumerate(analysis["best_months"]):
             with cols[i]:
-                st.markdown(f"""
-                <div class="success-box">
-                    <h4>#{i+1} {month_data['month_name']}</h4>
-                    <p>🌡️ Cuaca: {month_data['weather']}</p>
-                    <p>💰 Multiplier: {month_data['price_multiplier']}x</p>
-                    <p>👥 Keramaian: {month_data['crowd_level']}</p>
-                </div>
-                """, unsafe_allow_html=True)
+                best_month_html = f"""
+<div class="success-box">
+    <h4>#{i+1} {month_data['month_name']}</h4>
+    <p>🌡️ Cuaca: {month_data['weather']}</p>
+    <p>💰 Multiplier: {month_data['price_multiplier']}x</p>
+    <p>👥 Keramaian: {month_data['crowd_level']}</p>
+</div>
+"""
+                st.markdown(best_month_html, unsafe_allow_html=True)
         
         # Avoid months
         st.markdown("### ⚠️ Bulan yang Perlu Dipertimbangkan")
@@ -1158,14 +1141,15 @@ def render_time_analysis():
         cols = st.columns(3)
         for i, month_data in enumerate(analysis["avoid_months"]):
             with cols[i]:
-                st.markdown(f"""
-                <div class="warning-box">
-                    <h4>{month_data['month_name']}</h4>
-                    <p>🌡️ Cuaca: {month_data['weather']}</p>
-                    <p>💰 Multiplier: {month_data['price_multiplier']}x</p>
-                    <p>👥 Keramaian: {month_data['crowd_level']}</p>
-                </div>
-                """, unsafe_allow_html=True)
+                avoid_month_html = f"""
+<div class="warning-box">
+    <h4>{month_data['month_name']}</h4>
+    <p>🌡️ Cuaca: {month_data['weather']}</p>
+    <p>💰 Multiplier: {month_data['price_multiplier']}x</p>
+    <p>👥 Keramaian: {month_data['crowd_level']}</p>
+</div>
+"""
+                st.markdown(avoid_month_html, unsafe_allow_html=True)
         
         # Full year chart
         st.markdown("### 📈 Analisis Sepanjang Tahun")
@@ -1439,35 +1423,19 @@ def render_settings():
 def render_about():
     """Render about page with LABBAIK branding and developer info"""
     
-    # LABBAIK Brand Header
-    st.markdown(f"""
-    <div style="
-        background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 50%, {COLORS['black']} 100%);
-        color: white;
-        padding: 40px;
-        border-radius: 20px;
-        text-align: center;
-        margin-bottom: 30px;
-    ">
-        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2.5rem; color: {COLORS['gold']}; text-shadow: 0 2px 15px rgba(212, 175, 55, 0.4);">
-            {BRAND['talbiyah']}
-        </div>
-        <div style="font-size: 2rem; font-weight: 700; letter-spacing: 0.3em; margin: 15px 0;">
-            {BRAND['name']}
-        </div>
-        <div style="color: {COLORS['sand']}; font-size: 1.1rem; margin-bottom: 15px;">
-            {BRAND['tagline']}
-        </div>
-        <div style="color: {COLORS['sand']}; font-size: 0.95rem;">
-            {BRAND['description']}
-        </div>
-        <div style="margin-top: 20px;">
-            <span style="background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%); color: {COLORS['black']}; padding: 8px 20px; border-radius: 20px; font-weight: 700;">
-                Version {BRAND['version']}
-            </span>
-        </div>
+    # LABBAIK Brand Header - FIXED
+    about_header = f"""
+<div style="background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 50%, {COLORS['black']} 100%); color: white; padding: 40px; border-radius: 20px; text-align: center; margin-bottom: 30px;">
+    <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2.5rem; color: {COLORS['gold']}; text-shadow: 0 2px 15px rgba(212, 175, 55, 0.4);">{BRAND['talbiyah']}</div>
+    <div style="font-size: 2rem; font-weight: 700; letter-spacing: 0.3em; margin: 15px 0;">{BRAND['name']}</div>
+    <div style="color: {COLORS['sand']}; font-size: 1.1rem; margin-bottom: 15px;">{BRAND['tagline']}</div>
+    <div style="color: {COLORS['sand']}; font-size: 0.95rem;">{BRAND['description']}</div>
+    <div style="margin-top: 20px;">
+        <span style="background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%); color: {COLORS['black']}; padding: 8px 20px; border-radius: 20px; font-weight: 700;">Version {BRAND['version']}</span>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+"""
+    st.markdown(about_header, unsafe_allow_html=True)
     
     # Tabs
     tab1, tab2, tab3, tab4 = st.tabs(["👨‍💻 Developer", "📋 Changelog", "🔧 Tech Stack", "📊 Stats"])
@@ -1494,6 +1462,7 @@ def render_about():
         - 🔍 Internal Audit & Quality Assurance
         - 🤖 AI-Powered Solutions
         - 📋 Corporate Governance Advisory
+        - 💻 Full-Stack Development
         """)
     
     with tab2:
@@ -1546,12 +1515,13 @@ def render_about():
                 st.markdown(f"**{name}**\n\n{desc}")
     
     st.markdown("---")
-    st.markdown(f"""
-    <div style="text-align: center; padding: 1rem; background: #f5f5f5; border-radius: 10px;">
-        <p>📜 Licensed under {APP_INFO['license']}</p>
-        <p>Made with ❤️ in Indonesia 🇮🇩</p>
-    </div>
-    """, unsafe_allow_html=True)
+    footer_license = f"""
+<div style="text-align: center; padding: 1rem; background: #f5f5f5; border-radius: 10px;">
+    <p>📜 Licensed under {APP_INFO['license']}</p>
+    <p>Made with ❤️ in Indonesia 🇮🇩</p>
+</div>
+"""
+    st.markdown(footer_license, unsafe_allow_html=True)
 
 
 def render_labbaik_footer():
@@ -1561,415 +1531,24 @@ def render_labbaik_footer():
     visitor_count = get_visitor_count()
     visitor_str = f"{visitor_count:,}" if visitor_count else "0"
     
-    # Build HTML separately to avoid f-string issues
+    # Footer container - FIXED
     footer_html = f"""
-    <div style="
-        background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
-        padding: 40px;
-        border-radius: 20px;
-        text-align: center;
-        margin-top: 50px;
-    ">
-        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: #D4AF37;">
-            لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ
-        </div>
-        <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin: 12px 0;">
-            LABBAIK
-        </div>
-        <div style="color: #C9A86C; font-size: 0.95rem; margin-bottom: 20px;">
-            Panggilan-Nya, Langkahmu
-        </div>
-        
-        <div style="
-            background: rgba(212, 175, 55, 0.15);
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-        ">
-            <span style="color: #D4AF37; font-size: 0.85rem;">
-                👥 Total Pengunjung: <strong>{visitor_str}</strong>
-            </span>
-        </div>
-        
-        <div style="color: #888; font-size: 0.85rem; margin-bottom: 15px;">
-            📧 sopian.hadianto@gmail.com &nbsp;|&nbsp; 
-            📱 +62 815 9658 833 &nbsp;|&nbsp; 
-            🌐 labbaik.ai
-        </div>
-        
-        <div style="
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px 20px;
-            margin: 20px auto;
-            max-width: 600px;
-        ">
-            <div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">
-                ⚠️ Disclaimer
-            </div>
-            <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">
-                Aplikasi ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI 
-                (Claude AI, GEMINI, dll). Informasi yang disajikan bersifat simulasi dan estimasi. 
-                Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.
-            </div>
-        </div>
-        
-        <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; color: #666; font-size: 0.8rem;">
-            © 2025 LABBAIK. Hak Cipta Dilindungi.<br>
-            <span style="color: #D4AF37;">Made with ❤️ & AI by MS Hadianto</span><br>
-            <span style="color: #555; font-size: 0.7rem;">v3.0.0 Beta • Powered by Streamlit & Groq AI</span>
-        </div>
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 40px; border-radius: 20px; text-align: center; margin-top: 50px;">
+    <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: #D4AF37;">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
+    <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin: 12px 0;">LABBAIK</div>
+    <div style="color: #C9A86C; font-size: 0.95rem; margin-bottom: 20px;">Panggilan-Nya, Langkahmu</div>
+    <div style="background: rgba(212, 175, 55, 0.15); display: inline-block; padding: 8px 20px; border-radius: 20px; margin-bottom: 20px;">
+        <span style="color: #D4AF37; font-size: 0.85rem;">👥 Total Pengunjung: <strong>{visitor_str}</strong></span>
     </div>
-    """
-    
+    <div style="color: #888; font-size: 0.85rem; margin-bottom: 15px;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div>
+    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px 20px; margin: 20px auto; max-width: 600px;">
+        <div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">⚠️ Disclaimer</div>
+        <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">Aplikasi ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI (Claude, Gemini, dll). Informasi yang disajikan bersifat simulasi dan estimasi. Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.</div>
+    </div>
+    <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; color: #666; font-size: 0.8rem;">© 2025 LABBAIK. Hak Cipta Dilindungi.<br><span style="color: #D4AF37;">Made with ❤️ & AI by MS Hadianto</span><br><span style="color: #555; font-size: 0.7rem;">v3.0.0 Beta • Powered by Streamlit & Groq AI</span></div>
+</div>
+"""
     st.markdown(footer_html, unsafe_allow_html=True)
-
-
-def main():
-    """Main application entry point"""
-    init_session_state()
-    
-    # Initialize show_login_page state
-    if "show_login_page" not in st.session_state:
-        st.session_state.show_login_page = False
-    
-    # Handle login redirect from landing page button
-    if st.session_state.get("nav_to_login"):
-        st.session_state.nav_to_login = False
-        st.session_state.show_login_page = True
-    
-    # If showing login page (before sidebar), render it and return
-    if st.session_state.show_login_page and not is_logged_in():
-        # Mini header
-        st.markdown(f"""
-        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%); border-radius: 10px; margin-bottom: 20px;">
-            <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.5rem; color: {COLORS['gold']};">
-                {BRAND['arabic']}
-            </div>
-            <div style="font-size: 1rem; font-weight: 700; color: white; letter-spacing: 0.2em;">
-                {BRAND['name']}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        render_login_page()
-        
-        # Back button
-        if st.button("← Kembali ke Beranda"):
-            st.session_state.show_login_page = False
-            st.rerun()
-        return
-    
-    # Clear show_login_page if logged in
-    if is_logged_in():
-        st.session_state.show_login_page = False
-    
-    # Sidebar navigation
-    page = render_sidebar()
-    
-    # Initialize system on first load
-    if not st.session_state.initialized:
-        # Check if API key is available
-        if llm_config.groq_api_key or llm_config.openai_api_key:
-            initialize_system()
-    
-    # Route to appropriate page
-    if "Beranda" in page:
-        render_home()
-        render_labbaik_footer()
-    elif "Simulasi Biaya" in page:
-        # Check login for features
-        if not is_logged_in():
-            st.warning("🔐 Silakan login untuk mengakses fitur ini")
-            render_login_page()
-        else:
-            render_cost_simulation()
-    elif "Perbandingan" in page:
-        if not is_logged_in():
-            st.warning("🔐 Silakan login untuk mengakses fitur ini")
-            render_login_page()
-        else:
-            render_scenario_comparison()
-    elif "Analisis Waktu" in page:
-        if not is_logged_in():
-            st.warning("🔐 Silakan login untuk mengakses fitur ini")
-            render_login_page()
-        else:
-            render_time_analysis()
-    elif "Chat AI" in page:
-        if not is_logged_in():
-            st.warning("🔐 Silakan login untuk mengakses fitur ini")
-            render_login_page()
-        else:
-            render_ai_chat()
-    elif "Buat Rencana" in page:
-        if not is_logged_in():
-            st.warning("🔐 Silakan login untuk mengakses fitur ini")
-            render_login_page()
-        else:
-            render_create_plan()
-    elif "Booking" in page:
-        if not is_logged_in():
-            st.warning("🔐 Silakan login untuk mengakses fitur ini")
-            render_login_page()
-        else:
-            st.markdown(f"""
-            <div style="text-align: center; margin-bottom: 20px;">
-                <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
-                <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
-            </div>
-            """, unsafe_allow_html=True)
-            st.header("✈️ Booking & Reservasi")
-            st.markdown("Cari penerbangan, hotel, transportasi, dan paket travel terbaik")
-            render_booking_features()
-    elif "Tools" in page:
-        if not is_logged_in():
-            st.warning("🔐 Silakan login untuk mengakses fitur ini")
-            render_login_page()
-        else:
-            st.markdown(f"""
-            <div style="text-align: center; margin-bottom: 20px;">
-                <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
-                <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
-            </div>
-            """, unsafe_allow_html=True)
-            st.header("🧰 Tools & Fitur Jamaah")
-            render_additional_features()
-    elif "Business" in page:
-        # Admin-only access control
-        user = get_current_user()
-        if not user or user.get("role") not in ["admin", "superadmin"]:
-            st.error("🚫 Akses Ditolak")
-            st.warning("Halaman Business Hub hanya tersedia untuk **Administrator**.")
-            st.info("Silakan login dengan akun admin untuk mengakses halaman ini.")
-            if not is_logged_in():
-                st.markdown("---")
-                if st.button("🔐 Login sebagai Admin", type="primary"):
-                    st.session_state.redirect_to_login = True
-                    st.rerun()
-        else:
-            st.markdown(f"""
-            <div style="text-align: center; margin-bottom: 20px;">
-                <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
-                <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
-            </div>
-            """, unsafe_allow_html=True)
-            st.header("💼 Business Hub")
-            st.caption("🔐 Admin Access Only")
-            st.markdown("Monetisasi, partnership, dan fitur premium")
-            render_monetization_page()
-    elif "Login" in page:
-        render_login_page()
-    elif "Admin" in page:
-        render_admin_dashboard()
-    elif "Profil" in page:
-        render_user_profile()
-    elif "Pengaturan" in page:
-        render_settings()
-    elif "Tentang" in page:
-        render_about()
-        render_labbaik_footer()
-
-
-def render_donation_page():
-    """Render donation/infak page"""
-    st.markdown(f"""
-    <div style="text-align: center; padding: 30px 0;">
-        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2rem; color: {COLORS['gold']};">
-            بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
-        </div>
-        <h1 style="color: {COLORS['black']}; margin-top: 15px;">🤲 Dukung Pengembangan LABBAIK</h1>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Main message
-    st.markdown(f"""
-    <div style="
-        background: linear-gradient(135deg, {COLORS['green']}15, {COLORS['gold']}15);
-        border: 2px solid {COLORS['gold']}44;
-        border-radius: 20px;
-        padding: 30px;
-        margin: 20px 0;
-    ">
-        <h3 style="color: {COLORS['green']}; margin-bottom: 15px;">💚 Tentang Proyek Ini</h3>
-        <p style="font-size: 1.1rem; line-height: 1.8; color: #333;">
-            <strong>LABBAIK</strong> adalah platform AI perencanaan umrah yang dikembangkan dengan niat 
-            untuk membantu umat Muslim Indonesia merencanakan perjalanan ibadah mereka dengan lebih mudah dan terencana.
-        </p>
-        <p style="font-size: 1.1rem; line-height: 1.8; color: #333;">
-            Aplikasi ini <strong style="color: {COLORS['green']};">GRATIS selamanya</strong> dan akan terus dikembangkan 
-            dengan fitur-fitur baru yang bermanfaat.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Donation Methods
-    st.markdown(f"<h3 style='text-align: center; color: {COLORS['black']}; margin: 30px 0;'>💝 Cara Berinfak</h3>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # QRIS
-        st.markdown(f"""
-        <div style="
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px solid {COLORS['gold']}44;
-            text-align: center;
-            height: 100%;
-        ">
-            <h4 style="color: {COLORS['gold']}; margin-bottom: 15px;">📱 Scan QRIS</h4>
-            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">
-                Scan dengan aplikasi e-wallet atau mobile banking
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Display QRIS image
-        try:
-            st.image("assets/qris-labbaik.png", use_container_width=True)
-        except:
-            st.info("📱 QRIS akan ditampilkan di sini")
-        
-        st.caption("Scan dengan GoPay, OVO, DANA, ShopeePay, LinkAja, atau Mobile Banking")
-    
-    with col2:
-        # Bank Transfer
-        st.markdown(f"""
-        <div style="
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px solid {COLORS['gold']}44;
-            text-align: center;
-        ">
-            <h4 style="color: {COLORS['gold']}; margin-bottom: 15px;">🏦 Transfer Bank</h4>
-            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
-                Transfer langsung ke rekening berikut
-            </p>
-            
-            <div style="
-                background: linear-gradient(135deg, #0060AF, #004080);
-                padding: 25px;
-                border-radius: 12px;
-                color: white;
-            ">
-                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">Bank BCA</div>
-                <div style="font-size: 1.8rem; font-weight: 700; letter-spacing: 2px; margin: 10px 0;">
-                    6090221475
-                </div>
-                <div style="font-size: 1rem; font-weight: 600;">
-                    M SOPIAN HADIANTO
-                </div>
-            </div>
-            
-            <p style="color: #888; font-size: 0.8rem; margin-top: 15px;">
-                ✅ Tanpa potongan admin<br>
-                ✅ 100% sampai ke pengembang
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Copy button for account number
-        if st.button("📋 Salin No. Rekening", use_container_width=True):
-            st.code("6090221475")
-            st.success("Salin nomor di atas!")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Why donate
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown(f"""
-        <div style="background: #f9f9f9; padding: 25px; border-radius: 15px; height: 100%;">
-            <h4 style="color: {COLORS['gold']};">💡 Mengapa Berinfak?</h4>
-            <ul style="color: #555; line-height: 2;">
-                <li>Membantu biaya server & hosting</li>
-                <li>Mendukung pengembangan fitur baru</li>
-                <li>Menjaga aplikasi tetap gratis untuk semua</li>
-                <li>Ikut andil dalam memudahkan ibadah umrah umat</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f"""
-        <div style="background: #f9f9f9; padding: 25px; border-radius: 15px; height: 100%;">
-            <h4 style="color: {COLORS['gold']};">🎯 Rencana Pengembangan</h4>
-            <ul style="color: #555; line-height: 2;">
-                <li>Integrasi booking langsung</li>
-                <li>Panduan ibadah interaktif</li>
-                <li>Fitur grup jamaah</li>
-                <li>Notifikasi & reminder perjalanan</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Hadith about sadaqah
-    st.markdown(f"""
-    <div style="
-        background: linear-gradient(135deg, {COLORS['gold']}22, {COLORS['sand']}22);
-        border-left: 4px solid {COLORS['gold']};
-        padding: 25px;
-        border-radius: 0 15px 15px 0;
-        margin: 30px 0;
-    ">
-        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.4rem; color: {COLORS['black']}; text-align: center; margin-bottom: 15px;">
-            مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ
-        </div>
-        <div style="text-align: center; color: #555; font-style: italic;">
-            "Sedekah tidak akan mengurangi harta"
-        </div>
-        <div style="text-align: center; color: {COLORS['gold']}; font-weight: 600; margin-top: 10px;">
-            — HR. Muslim
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Other ways to support
-    st.markdown(f"""
-    <div style="background: #f9f9f9; padding: 25px; border-radius: 15px; margin-top: 20px;">
-        <h4 style="color: {COLORS['black']};">🌟 Cara Lain Mendukung</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 2rem;">📢</div>
-                <div style="font-weight: 600;">Share ke Teman</div>
-                <div style="font-size: 0.85rem; color: #666;">Bantu sebarkan aplikasi ini</div>
-            </div>
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 2rem;">⭐</div>
-                <div style="font-weight: 600;">Beri Rating</div>
-                <div style="font-size: 0.85rem; color: #666;">Review positif sangat membantu</div>
-            </div>
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 2rem;">💬</div>
-                <div style="font-weight: 600;">Feedback</div>
-                <div style="font-size: 0.85rem; color: #666;">Saran untuk perbaikan</div>
-            </div>
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 2rem;">🤲</div>
-                <div style="font-weight: 600;">Doakan</div>
-                <div style="font-size: 0.85rem; color: #666;">Doa terbaik untuk pengembang</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Thank you message
-    st.markdown(f"""
-    <div style="text-align: center; padding: 30px 0; margin-top: 20px;">
-        <div style="font-size: 1.2rem; color: {COLORS['green']}; font-weight: 600;">
-            جَزَاكُمُ اللَّهُ خَيْرًا
-        </div>
-        <div style="color: #666; margin-top: 10px;">
-            Jazakumullahu Khairan - Semoga Allah membalas kebaikan Anda
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 
 def render_user_profile():
@@ -1985,23 +1564,18 @@ def render_user_profile():
     
     role_info = get_user_role_info()
     
-    # Profile card
+    # Profile card - FIXED
     col1, col2 = st.columns([1, 2])
     
     with col1:
-        st.markdown(f"""
-        <div style="
-            background: linear-gradient(135deg, {role_info['color']}88, {role_info['color']}44);
-            padding: 2rem;
-            border-radius: 15px;
-            text-align: center;
-            border: 3px solid {role_info['color']};
-        ">
-            <div style="font-size: 4rem;">{role_info['badge']}</div>
-            <h2>{user['name']}</h2>
-            <p style="color: {role_info['color']}; font-weight: bold;">{role_info['name']}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        profile_card = f"""
+<div style="background: linear-gradient(135deg, {role_info['color']}88, {role_info['color']}44); padding: 2rem; border-radius: 15px; text-align: center; border: 3px solid {role_info['color']};">
+    <div style="font-size: 4rem;">{role_info['badge']}</div>
+    <h2>{user['name']}</h2>
+    <p style="color: {role_info['color']}; font-weight: bold;">{role_info['name']}</p>
+</div>
+"""
+        st.markdown(profile_card, unsafe_allow_html=True)
     
     with col2:
         st.markdown("### 📋 Informasi Akun")
@@ -2094,6 +1668,152 @@ def render_user_profile():
     if st.button("🚪 Logout", type="secondary"):
         logout_user()
         st.rerun()
+
+
+def main():
+    """Main application entry point"""
+    init_session_state()
+    
+    # Initialize show_login_page state
+    if "show_login_page" not in st.session_state:
+        st.session_state.show_login_page = False
+    
+    # Handle login redirect from landing page button
+    if st.session_state.get("nav_to_login"):
+        st.session_state.nav_to_login = False
+        st.session_state.show_login_page = True
+    
+    # If showing login page (before sidebar), render it and return
+    if st.session_state.show_login_page and not is_logged_in():
+        # Mini header - FIXED
+        mini_header = f"""
+<div style="text-align: center; padding: 20px; background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%); border-radius: 10px; margin-bottom: 20px;">
+    <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.5rem; color: {COLORS['gold']};">{BRAND['arabic']}</div>
+    <div style="font-size: 1rem; font-weight: 700; color: white; letter-spacing: 0.2em;">{BRAND['name']}</div>
+</div>
+"""
+        st.markdown(mini_header, unsafe_allow_html=True)
+        
+        render_login_page()
+        
+        # Back button
+        if st.button("← Kembali ke Beranda"):
+            st.session_state.show_login_page = False
+            st.rerun()
+        return
+    
+    # Clear show_login_page if logged in
+    if is_logged_in():
+        st.session_state.show_login_page = False
+    
+    # Sidebar navigation
+    page = render_sidebar()
+    
+    # Initialize system on first load
+    if not st.session_state.initialized:
+        # Check if API key is available
+        if llm_config.groq_api_key or llm_config.openai_api_key:
+            initialize_system()
+    
+    # Route to appropriate page
+    if "Beranda" in page:
+        render_home()
+        render_labbaik_footer()
+    elif "Simulasi Biaya" in page:
+        # Check login for features
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            render_cost_simulation()
+    elif "Perbandingan" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            render_scenario_comparison()
+    elif "Analisis Waktu" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            render_time_analysis()
+    elif "Chat AI" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            render_ai_chat()
+    elif "Buat Rencana" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            render_create_plan()
+    elif "Booking" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            booking_header = f"""
+<div style="text-align: center; margin-bottom: 20px;">
+    <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
+    <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
+</div>
+"""
+            st.markdown(booking_header, unsafe_allow_html=True)
+            st.header("✈️ Booking & Reservasi")
+            st.markdown("Cari penerbangan, hotel, transportasi, dan paket travel terbaik")
+            render_booking_features()
+    elif "Tools" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            tools_header = f"""
+<div style="text-align: center; margin-bottom: 20px;">
+    <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
+    <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
+</div>
+"""
+            st.markdown(tools_header, unsafe_allow_html=True)
+            st.header("🧰 Tools & Fitur Jamaah")
+            render_additional_features()
+    elif "Business" in page:
+        # Admin-only access control
+        user = get_current_user()
+        if not user or user.get("role") not in ["admin", "superadmin"]:
+            st.error("🚫 Akses Ditolak")
+            st.warning("Halaman Business Hub hanya tersedia untuk **Administrator**.")
+            st.info("Silakan login dengan akun admin untuk mengakses halaman ini.")
+            if not is_logged_in():
+                st.markdown("---")
+                if st.button("🔐 Login sebagai Admin", type="primary"):
+                    st.session_state.redirect_to_login = True
+                    st.rerun()
+        else:
+            business_header = f"""
+<div style="text-align: center; margin-bottom: 20px;">
+    <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
+    <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
+</div>
+"""
+            st.markdown(business_header, unsafe_allow_html=True)
+            st.header("💼 Business Hub")
+            st.caption("🔐 Admin Access Only")
+            st.markdown("Monetisasi, partnership, dan fitur premium")
+            render_monetization_page()
+    elif "Login" in page:
+        render_login_page()
+    elif "Admin" in page:
+        render_admin_dashboard()
+    elif "Profil" in page:
+        render_user_profile()
+    elif "Pengaturan" in page:
+        render_settings()
+    elif "Tentang" in page:
+        render_about()
+        render_labbaik_footer()
 
 
 if __name__ == "__main__":
