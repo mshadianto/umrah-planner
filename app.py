@@ -538,28 +538,28 @@ def render_home():
     </div>
     """, unsafe_allow_html=True)
     
-    # Stats Bar
+    # Stats Bar - Realistic for Beta/MVP
     st.markdown(f"""
     <div class="stats-bar">
         <div class="stat-item">
-            <div style="font-size: 1.5rem;">👥</div>
-            <div class="stat-value">15,000+</div>
-            <div class="stat-label">Jamaah Terbantu</div>
+            <div style="font-size: 1.5rem;">🤖</div>
+            <div class="stat-value">24/7</div>
+            <div class="stat-label">AI Assistant</div>
         </div>
         <div class="stat-item">
-            <div style="font-size: 1.5rem;">🤝</div>
-            <div class="stat-value">50+</div>
-            <div class="stat-label">Travel Partner</div>
+            <div style="font-size: 1.5rem;">🏙️</div>
+            <div class="stat-value">10+</div>
+            <div class="stat-label">Kota Keberangkatan</div>
         </div>
         <div class="stat-item">
-            <div style="font-size: 1.5rem;">⭐</div>
-            <div class="stat-value">4.9</div>
-            <div class="stat-label">Rating</div>
+            <div style="font-size: 1.5rem;">📊</div>
+            <div class="stat-value">5+</div>
+            <div class="stat-label">Skenario Paket</div>
         </div>
         <div class="stat-item">
-            <div style="font-size: 1.5rem;">💰</div>
-            <div class="stat-value">30%</div>
-            <div class="stat-label">Hemat</div>
+            <div style="font-size: 1.5rem;">🆓</div>
+            <div class="stat-value">GRATIS</div>
+            <div class="stat-label">Beta Access</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
