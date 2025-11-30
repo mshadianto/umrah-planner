@@ -53,6 +53,10 @@ from auth import (
     render_admin_dashboard, has_permission, check_limit, increment_usage,
     USER_ROLES, logout_user
 )
+from visitor_tracker import (
+    track_page_view, get_visitor_count, get_page_view_count,
+    get_visitor_stats, render_visitor_stats, render_analytics_dashboard
+)
 
 # ============================================
 # LABBAIK BRAND CONSTANTS
@@ -369,44 +373,6 @@ st.markdown(f"""
 
 
 # ============================================
-# VISITOR TRACKING
-# ============================================
-
-def get_visitor_count():
-    """Get total visitor count using CountAPI"""
-    try:
-        import urllib.request
-        import json
-        
-        # Use CountAPI for simple visitor tracking
-        # Namespace: labbaik, Key: visitors
-        url = "https://api.countapi.xyz/hit/labbaik-umrah/visitors"
-        
-        # Only count once per session
-        if "visitor_counted" not in st.session_state:
-            with urllib.request.urlopen(url, timeout=3) as response:
-                data = json.loads(response.read().decode())
-                st.session_state.visitor_counted = True
-                st.session_state.visitor_count = data.get("value", 0)
-        
-        return st.session_state.get("visitor_count", 0)
-    except:
-        # Fallback if API fails
-        return st.session_state.get("visitor_count", 100)
-
-
-def track_page_view(page_name: str):
-    """Track individual page views"""
-    if "page_views" not in st.session_state:
-        st.session_state.page_views = {}
-    
-    if page_name not in st.session_state.page_views:
-        st.session_state.page_views[page_name] = 0
-    
-    st.session_state.page_views[page_name] += 1
-
-
-# ============================================
 # SESSION STATE INITIALIZATION
 # ============================================
 
@@ -491,6 +457,7 @@ def render_sidebar():
             
             # Add admin-only items for admin/superadmin
             if user and user.get("role") in ["admin", "superadmin"]:
+                nav_items.append("📊 Analytics")  # Analytics dashboard
                 nav_items.append("💼 Business Hub")  # Admin only
                 nav_items.append("🛡️ Admin Dashboard")
             
@@ -521,6 +488,24 @@ def render_sidebar():
 </div>
 """
         st.markdown(quick_info, unsafe_allow_html=True)
+        
+        # Show visitor stats for admin users
+        if is_logged_in():
+            user = get_current_user()
+            if user and user.get("role") in ["admin", "superadmin"]:
+                st.markdown("---")
+                stats = get_visitor_stats()
+                visitor_stats_html = f"""
+<div style="background: rgba(0, 107, 60, 0.1); padding: 12px; border-radius: 10px; border: 1px solid {COLORS['green']}40;">
+    <div style="font-size: 0.85rem; font-weight: 600; color: {COLORS['green']}; margin-bottom: 8px;">📊 Visitor Stats (Real-time)</div>
+    <div style="font-size: 0.75rem; color: {COLORS['sand']};">
+        <strong>Total:</strong> {stats['total_visitors']:,} visitors<br>
+        <strong>Views:</strong> {stats['total_views']:,} page views<br>
+        <strong>Today:</strong> {stats['today_visitors']:,} visitors
+    </div>
+</div>
+"""
+                st.markdown(visitor_stats_html, unsafe_allow_html=True)
         
         st.markdown("---")
         
@@ -556,6 +541,9 @@ def render_sidebar():
 
 def render_home():
     """Render home page with LABBAIK branding - different view for guest vs logged-in"""
+    
+    # Track page view
+    track_page_view("Home")
     
     # Hero Section (for everyone) - FIXED
     hero_html = f"""
@@ -1525,27 +1513,47 @@ def render_about():
 
 
 def render_labbaik_footer():
-    """Render LABBAIK branded footer with disclaimer"""
+    """Render LABBAIK branded footer with disclaimer and REAL visitor count"""
     
-    # Get visitor count
-    visitor_count = get_visitor_count()
-    visitor_str = f"{visitor_count:,}" if visitor_count else "0"
+    # Get REAL visitor statistics from database
+    stats = get_visitor_stats()
+    total_visitors = stats['total_visitors']
+    total_views = stats['total_views']
     
-    # Footer container - FIXED
+    # Format numbers with thousand separators
+    visitor_str = f"{total_visitors:,}"
+    views_str = f"{total_views:,}"
+    
+    # Footer container - FIXED with REAL stats
     footer_html = f"""
 <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 40px; border-radius: 20px; text-align: center; margin-top: 50px;">
     <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: #D4AF37;">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
     <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin: 12px 0;">LABBAIK</div>
     <div style="color: #C9A86C; font-size: 0.95rem; margin-bottom: 20px;">Panggilan-Nya, Langkahmu</div>
-    <div style="background: rgba(212, 175, 55, 0.15); display: inline-block; padding: 8px 20px; border-radius: 20px; margin-bottom: 20px;">
-        <span style="color: #D4AF37; font-size: 0.85rem;">👥 Total Pengunjung: <strong>{visitor_str}</strong></span>
+    
+    <div style="display: flex; justify-content: center; gap: 30px; margin: 20px 0;">
+        <div style="background: rgba(212, 175, 55, 0.15); padding: 12px 24px; border-radius: 20px;">
+            <div style="color: #D4AF37; font-size: 0.75rem; opacity: 0.8;">Total Pengunjung</div>
+            <div style="color: #D4AF37; font-size: 1.5rem; font-weight: 700;">{visitor_str}</div>
+        </div>
+        <div style="background: rgba(0, 107, 60, 0.15); padding: 12px 24px; border-radius: 20px;">
+            <div style="color: #C9A86C; font-size: 0.75rem; opacity: 0.8;">Total Page Views</div>
+            <div style="color: #C9A86C; font-size: 1.5rem; font-weight: 700;">{views_str}</div>
+        </div>
     </div>
-    <div style="color: #888; font-size: 0.85rem; margin-bottom: 15px;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div>
+    
+    <div style="color: #888; font-size: 0.85rem; margin: 20px 0 15px;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div>
+    
     <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px 20px; margin: 20px auto; max-width: 600px;">
         <div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">⚠️ Disclaimer</div>
         <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">Aplikasi ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI (Claude, Gemini, dll). Informasi yang disajikan bersifat simulasi dan estimasi. Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.</div>
     </div>
-    <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; color: #666; font-size: 0.8rem;">© 2025 LABBAIK. Hak Cipta Dilindungi.<br><span style="color: #D4AF37;">Made with ❤️ & AI by MS Hadianto</span><br><span style="color: #555; font-size: 0.7rem;">v3.0.0 Beta • Powered by Streamlit & Groq AI</span></div>
+    
+    <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; color: #666; font-size: 0.8rem;">
+        © 2025 LABBAIK. Hak Cipta Dilindungi.<br>
+        <span style="color: #D4AF37;">Made with ❤️ & AI by MS Hadianto</span><br>
+        <span style="color: #555; font-size: 0.7rem;">v3.0.0 Beta • Powered by Streamlit & Groq AI</span>
+    </div>
 </div>
 """
     st.markdown(footer_html, unsafe_allow_html=True)
@@ -1725,36 +1733,42 @@ def main():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
             render_login_page()
         else:
+            track_page_view("Cost Simulation")
             render_cost_simulation()
     elif "Perbandingan" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
             render_login_page()
         else:
+            track_page_view("Scenario Comparison")
             render_scenario_comparison()
     elif "Analisis Waktu" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
             render_login_page()
         else:
+            track_page_view("Time Analysis")
             render_time_analysis()
     elif "Chat AI" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
             render_login_page()
         else:
+            track_page_view("AI Chat")
             render_ai_chat()
     elif "Buat Rencana" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
             render_login_page()
         else:
+            track_page_view("Create Plan")
             render_create_plan()
     elif "Booking" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
             render_login_page()
         else:
+            track_page_view("Booking")
             booking_header = f"""
 <div style="text-align: center; margin-bottom: 20px;">
     <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
@@ -1770,6 +1784,7 @@ def main():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
             render_login_page()
         else:
+            track_page_view("Tools")
             tools_header = f"""
 <div style="text-align: center; margin-bottom: 20px;">
     <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
@@ -1779,6 +1794,25 @@ def main():
             st.markdown(tools_header, unsafe_allow_html=True)
             st.header("🧰 Tools & Fitur Jamaah")
             render_additional_features()
+    elif "Analytics" in page:
+        # Admin-only access control
+        user = get_current_user()
+        if not user or user.get("role") not in ["admin", "superadmin"]:
+            st.error("🚫 Akses Ditolak")
+            st.warning("Halaman Analytics hanya tersedia untuk **Administrator**.")
+            st.info("Silakan login dengan akun admin untuk mengakses halaman ini.")
+        else:
+            track_page_view("Analytics")
+            analytics_header = f"""
+<div style="text-align: center; margin-bottom: 20px;">
+    <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
+    <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
+</div>
+"""
+            st.markdown(analytics_header, unsafe_allow_html=True)
+            st.header("📊 Analytics Dashboard")
+            st.caption("🔐 Admin Access Only")
+            render_analytics_dashboard()
     elif "Business" in page:
         # Admin-only access control
         user = get_current_user()
@@ -1792,6 +1826,7 @@ def main():
                     st.session_state.redirect_to_login = True
                     st.rerun()
         else:
+            track_page_view("Business Hub")
             business_header = f"""
 <div style="text-align: center; margin-bottom: 20px;">
     <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
@@ -1804,14 +1839,19 @@ def main():
             st.markdown("Monetisasi, partnership, dan fitur premium")
             render_monetization_page()
     elif "Login" in page:
+        track_page_view("Login")
         render_login_page()
     elif "Admin" in page:
+        track_page_view("Admin Dashboard")
         render_admin_dashboard()
     elif "Profil" in page:
+        track_page_view("Profile")
         render_user_profile()
     elif "Pengaturan" in page:
+        track_page_view("Settings")
         render_settings()
     elif "Tentang" in page:
+        track_page_view("About")
         render_about()
         render_labbaik_footer()
 
