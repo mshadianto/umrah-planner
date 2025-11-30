@@ -321,8 +321,6 @@ st.markdown(f"""
         background: {COLORS['black']};
         padding: 20px;
         border-radius: 12px;
-        display: flex;
-        justify-content: space-around;
         margin: 20px 0;
     }}
     
@@ -556,29 +554,33 @@ def render_home():
 """
     st.markdown(hero_html, unsafe_allow_html=True)
     
-    # Stats Bar - Realistic for Beta/MVP - FIXED
+    # Stats Bar - Realistic for Beta/MVP - FIXED (using table instead of flex)
     stats_bar_html = f"""
-<div class="stats-bar">
-    <div class="stat-item">
-        <div style="font-size: 1.5rem;">🤖</div>
-        <div class="stat-value">24/7</div>
-        <div class="stat-label">AI Assistant</div>
-    </div>
-    <div class="stat-item">
-        <div style="font-size: 1.5rem;">🏙️</div>
-        <div class="stat-value">10+</div>
-        <div class="stat-label">Kota Keberangkatan</div>
-    </div>
-    <div class="stat-item">
-        <div style="font-size: 1.5rem;">📊</div>
-        <div class="stat-value">5+</div>
-        <div class="stat-label">Skenario Paket</div>
-    </div>
-    <div class="stat-item">
-        <div style="font-size: 1.5rem;">🆓</div>
-        <div class="stat-value">GRATIS</div>
-        <div class="stat-label">Beta Access</div>
-    </div>
+<div style="background: {COLORS['black']}; padding: 20px; border-radius: 12px; margin: 20px 0;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="text-align: center; padding: 10px;">
+                <div style="font-size: 1.5rem;">🤖</div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: {COLORS['gold']};">24/7</div>
+                <div style="font-size: 0.85rem; color: {COLORS['sand']};">AI Assistant</div>
+            </td>
+            <td style="text-align: center; padding: 10px;">
+                <div style="font-size: 1.5rem;">🏙️</div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: {COLORS['gold']};">10+</div>
+                <div style="font-size: 0.85rem; color: {COLORS['sand']};">Kota Keberangkatan</div>
+            </td>
+            <td style="text-align: center; padding: 10px;">
+                <div style="font-size: 1.5rem;">📊</div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: {COLORS['gold']};">5+</div>
+                <div style="font-size: 0.85rem; color: {COLORS['sand']};">Skenario Paket</div>
+            </td>
+            <td style="text-align: center; padding: 10px;">
+                <div style="font-size: 1.5rem;">🆓</div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: {COLORS['gold']};">GRATIS</div>
+                <div style="font-size: 0.85rem; color: {COLORS['sand']};">Beta Access</div>
+            </td>
+        </tr>
+    </table>
 </div>
 """
     st.markdown(stats_bar_html, unsafe_allow_html=True)
@@ -1513,7 +1515,7 @@ def render_about():
 
 
 def render_labbaik_footer():
-    """Render LABBAIK branded footer with disclaimer and REAL visitor count"""
+    """Render LABBAIK branded footer with disclaimer and REAL visitor count - FIXED VERSION"""
     
     # Get REAL visitor statistics from database
     stats = get_visitor_stats()
@@ -1524,39 +1526,67 @@ def render_labbaik_footer():
     visitor_str = f"{total_visitors:,}"
     views_str = f"{total_views:,}"
     
-    # Footer container - FIXED with REAL stats
-    footer_html = f"""
-<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 40px; border-radius: 20px; text-align: center; margin-top: 50px;">
+    # Split into multiple st.markdown calls for better rendering
+    
+    # Part 1: Header section
+    footer_header = """
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 40px 40px 0 40px; border-radius: 20px 20px 0 0; text-align: center; margin-top: 50px;">
     <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: #D4AF37;">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
     <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin: 12px 0;">LABBAIK</div>
     <div style="color: #C9A86C; font-size: 0.95rem; margin-bottom: 20px;">Panggilan-Nya, Langkahmu</div>
+</div>
+"""
+    st.markdown(footer_header, unsafe_allow_html=True)
     
-    <div style="display: flex; justify-content: center; gap: 30px; margin: 20px 0;">
-        <div style="background: rgba(212, 175, 55, 0.15); padding: 12px 24px; border-radius: 20px;">
-            <div style="color: #D4AF37; font-size: 0.75rem; opacity: 0.8;">Total Pengunjung</div>
-            <div style="color: #D4AF37; font-size: 1.5rem; font-weight: 700;">{visitor_str}</div>
-        </div>
-        <div style="background: rgba(0, 107, 60, 0.15); padding: 12px 24px; border-radius: 20px;">
-            <div style="color: #C9A86C; font-size: 0.75rem; opacity: 0.8;">Total Page Views</div>
-            <div style="color: #C9A86C; font-size: 1.5rem; font-weight: 700;">{views_str}</div>
-        </div>
-    </div>
+    # Part 2: Stats section (using table for better compatibility)
+    stats_html = f"""
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;">
+    <table style="margin: 0 auto; border-collapse: separate; border-spacing: 20px 0;">
+        <tr>
+            <td style="background: rgba(212, 175, 55, 0.15); padding: 12px 24px; border-radius: 20px; text-align: center;">
+                <div style="color: #D4AF37; font-size: 0.75rem; opacity: 0.8;">Total Pengunjung</div>
+                <div style="color: #D4AF37; font-size: 1.5rem; font-weight: 700;">{visitor_str}</div>
+            </td>
+            <td style="background: rgba(0, 107, 60, 0.15); padding: 12px 24px; border-radius: 20px; text-align: center;">
+                <div style="color: #C9A86C; font-size: 0.75rem; opacity: 0.8;">Total Page Views</div>
+                <div style="color: #C9A86C; font-size: 1.5rem; font-weight: 700;">{views_str}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+"""
+    st.markdown(stats_html, unsafe_allow_html=True)
     
-    <div style="color: #888; font-size: 0.85rem; margin: 20px 0 15px;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div>
+    # Part 3: Contact
+    footer_contact = """
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px; text-align: center;">
+    <div style="color: #888; font-size: 0.85rem;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div>
+</div>
+"""
+    st.markdown(footer_contact, unsafe_allow_html=True)
     
-    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px 20px; margin: 20px auto; max-width: 600px;">
+    # Part 4: Disclaimer
+    footer_disclaimer = """
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;">
+    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px 20px; margin: 0 auto; max-width: 600px;">
         <div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">⚠️ Disclaimer</div>
-        <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">Aplikasi ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI (Claude, Gemini, dll). Informasi yang disajikan bersifat simulasi dan estimasi. Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.</div>
-    </div>
-    
-    <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; color: #666; font-size: 0.8rem;">
-        © 2025 LABBAIK. Hak Cipta Dilindungi.<br>
-        <span style="color: #D4AF37;">Made with ❤️ & AI by MS Hadianto</span><br>
-        <span style="color: #555; font-size: 0.7rem;">v3.0.0 Beta • Powered by Streamlit & Groq AI</span>
+        <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">Aplikasi ini dikembangkan oleh non-developer dengan memanfaatkan teknologi AI (Claude, Gemini, dll). Informasi yang disajikan bersifat simulasi dan estimasi. Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.</div>
     </div>
 </div>
 """
-    st.markdown(footer_html, unsafe_allow_html=True)
+    st.markdown(footer_disclaimer, unsafe_allow_html=True)
+    
+    # Part 5: Copyright
+    footer_copyright = """
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px 40px 40px; border-radius: 0 0 20px 20px; text-align: center;">
+    <div style="border-top: 1px solid #333; padding-top: 20px; color: #666; font-size: 0.8rem;">
+        © 2025 LABBAIK. Hak Cipta Dilindungi.<br>
+        <span style="color: #D4AF37;">Made with ❤️ &amp; AI by MS Hadianto</span><br>
+        <span style="color: #555; font-size: 0.7rem;">v3.0.0 Beta • Powered by Streamlit &amp; Groq AI</span>
+    </div>
+</div>
+"""
+    st.markdown(footer_copyright, unsafe_allow_html=True)
 
 
 def render_user_profile():
