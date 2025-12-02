@@ -2908,7 +2908,7 @@ def render_about():
                     <li>BUKAN travel agent dan tidak menjual paket umrah</li>
                     <li>BUKAN pengganti konsultasi dengan travel agent resmi</li>
                     <li>BUKAN sumber informasi resmi pemerintah</li>
-                    <li>Dikembangkan oleh non-developer dengan bantuan AI</li>
+                    <li>Dikembangkan oleh MS Hadianto dengan bantuan AI</li>
                 </ul>
             </div>
         </div>
