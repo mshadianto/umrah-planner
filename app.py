@@ -14,13 +14,17 @@ See LICENSE and COPYRIGHT files for full terms.
 
 ================================================================================
 Platform: AI-Powered Umrah Planning Platform
-Version:  3.0.0
+Version:  3.1.0
 Codename: Labbaik
 Author:   MS Hadianto
 Email:    sopian.hadianto@gmail.com
 Website:  labbaik.ai
 GitHub:   https://github.com/mshadianto
 ================================================================================
+
+Version: 3.1.0
+Updated: 2025-12-02
+Changes: Added Makkah/Madinah duration options in Buat Rencana + UAH video tutorial
 """
 
 import streamlit as st
@@ -69,7 +73,7 @@ BRAND = {
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
     "full_tagline": "Labbaik Allahumma Labbaik - Aku Datang Memenuhi Panggilan-Mu",
-    "version": "3.0.0",
+    "version": "3.1.0",
 }
 
 COLORS = {
@@ -87,6 +91,36 @@ CONTACT = {
     "email": "sopian.hadianto@gmail.com",
     "whatsapp": "+62 815 9658 833",
     "website": "labbaik.ai",
+}
+
+# ============================================
+# HOTEL PRICES CONFIGURATION (for Buat Rencana)
+# ============================================
+
+HOTEL_PRICES = {
+    "ekonomis": {
+        "makkah": {"name": "Hotel Bintang 2-3 (1-2 km dari Haram)", "price": 800000},
+        "madinah": {"name": "Hotel Bintang 2-3 (500m-1 km dari Nabawi)", "price": 600000}
+    },
+    "standard": {
+        "makkah": {"name": "Hotel Bintang 3-4 (500m-1 km dari Haram)", "price": 1500000},
+        "madinah": {"name": "Hotel Bintang 3-4 (300-500m dari Nabawi)", "price": 1000000}
+    },
+    "premium": {
+        "makkah": {"name": "Hotel Bintang 4-5 (200-500m dari Haram)", "price": 2500000},
+        "madinah": {"name": "Hotel Bintang 4-5 (100-300m dari Nabawi)", "price": 1800000}
+    },
+    "vip": {
+        "makkah": {"name": "Hotel Bintang 5 (View Ka'bah, <200m)", "price": 5000000},
+        "madinah": {"name": "Hotel Bintang 5 (View Masjid Nabawi, <100m)", "price": 3500000}
+    }
+}
+
+ADDITIONAL_COSTS = {
+    "ekonomis": {"flight": 8000000, "visa": 500000, "transport": 500000, "meals": 300000},
+    "standard": {"flight": 12000000, "visa": 500000, "transport": 800000, "meals": 500000},
+    "premium": {"flight": 18000000, "visa": 500000, "transport": 1200000, "meals": 800000},
+    "vip": {"flight": 30000000, "visa": 500000, "transport": 2000000, "meals": 1500000}
 }
 
 # Page configuration
@@ -374,7 +408,6 @@ st.markdown(f"""
 # SESSION STATE INITIALIZATION
 # ============================================
 
-# Initialize session state
 def init_session_state():
     """Initialize session state variables"""
     if "orchestrator" not in st.session_state:
@@ -407,7 +440,6 @@ def initialize_system():
 def render_sidebar():
     """Render sidebar with LABBAIK branding and navigation"""
     with st.sidebar:
-        # LABBAIK Brand Header - FIXED
         sidebar_header = f"""
 <div style="text-align: center; padding: 25px 15px; border-bottom: 1px solid #333; margin-bottom: 15px;">
     <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2rem; color: {COLORS['gold']}; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);">{BRAND['arabic']}</div>
@@ -420,28 +452,21 @@ def render_sidebar():
 """
         st.markdown(sidebar_header, unsafe_allow_html=True)
         
-        # Initialize systems
         init_user_database()
         init_monetization_state()
-        
-        # User badge (login status)
         render_user_badge()
         
         st.markdown("---")
         
-        # Build navigation based on user role
         user = get_current_user()
         
-        # Different navigation for Guest vs Logged-in users
         if not is_logged_in():
-            # GUEST - Limited access, encourage login
             nav_items = [
                 "🏠 Beranda",
                 "ℹ️ Tentang Aplikasi",
                 "🔐 Login / Register",
             ]
         else:
-            # LOGGED IN USER - Full navigation based on role
             nav_items = [
                 "🏠 Beranda",
                 "💰 Simulasi Biaya",
@@ -453,10 +478,9 @@ def render_sidebar():
                 "🧰 Tools & Fitur",
             ]
             
-            # Add admin-only items for admin/superadmin
             if user and user.get("role") in ["admin", "superadmin"]:
-                nav_items.append("📊 Analytics")  # Analytics dashboard
-                nav_items.append("💼 Business Hub")  # Admin only
+                nav_items.append("📊 Analytics")
+                nav_items.append("💼 Business Hub")
                 nav_items.append("🛡️ Admin Dashboard")
             
             nav_items.append("👤 Profil Saya")
@@ -465,17 +489,12 @@ def render_sidebar():
                 "ℹ️ Tentang Aplikasi"
             ])
         
-        # Navigation
         page = st.radio("📍 Navigasi", nav_items)
         
         st.markdown("---")
-        
-        # Quick quote widget
         render_quick_quote_widget()
-        
         st.markdown("---")
         
-        # Quick info - FIXED
         quick_info = f"""
 <div style="background: rgba(212, 175, 55, 0.1); padding: 12px; border-radius: 10px; border: 1px solid {COLORS['gold']}40;">
     <div style="font-size: 0.85rem; font-weight: 600; color: {COLORS['gold']}; margin-bottom: 8px;">📌 Info Cepat</div>
@@ -487,7 +506,6 @@ def render_sidebar():
 """
         st.markdown(quick_info, unsafe_allow_html=True)
         
-        # Show visitor stats for admin users
         if is_logged_in():
             user = get_current_user()
             if user and user.get("role") in ["admin", "superadmin"]:
@@ -506,8 +524,6 @@ def render_sidebar():
                 st.markdown(visitor_stats_html, unsafe_allow_html=True)
         
         st.markdown("---")
-        
-        # Tips
         st.markdown(f"<div style='font-size: 0.85rem; font-weight: 600; color: {COLORS['gold']};'>💡 Tips</div>", unsafe_allow_html=True)
         tips = [
             "Booking 3-4 bulan sebelumnya untuk harga terbaik",
@@ -519,7 +535,6 @@ def render_sidebar():
         ]
         st.caption(tips[datetime.now().second % len(tips)])
         
-        # Footer - FIXED
         sidebar_footer = f"""
 <div style="text-align: center; padding: 15px 0;">
     <div style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1rem;">{BRAND['arabic']}</div>
@@ -538,12 +553,9 @@ def render_sidebar():
 
 
 def render_home():
-    """Render home page with LABBAIK branding - different view for guest vs logged-in"""
-    
-    # Track page view
+    """Render home page with LABBAIK branding"""
     track_page_view("Home")
     
-    # Hero Section (for everyone) - FIXED
     hero_html = f"""
 <div class="labbaik-hero animate-fadeIn">
     <div class="labbaik-arabic">{BRAND['talbiyah']}</div>
@@ -554,7 +566,6 @@ def render_home():
 """
     st.markdown(hero_html, unsafe_allow_html=True)
     
-    # Stats Bar - Realistic for Beta/MVP - FIXED (using table instead of flex)
     stats_bar_html = f"""
 <div style="background: {COLORS['black']}; padding: 20px; border-radius: 12px; margin: 20px 0;">
     <table style="width: 100%; border-collapse: collapse;">
@@ -585,13 +596,7 @@ def render_home():
 """
     st.markdown(stats_bar_html, unsafe_allow_html=True)
     
-    # Check if user is logged in
     if not is_logged_in():
-        # ============================================
-        # GUEST LANDING PAGE - Encourage Login
-        # ============================================
-        
-        # Login CTA - FIXED
         login_cta = f"""
 <div style="background: linear-gradient(135deg, {COLORS['gold']}22, {COLORS['sand']}22); border: 2px solid {COLORS['gold']}; border-radius: 15px; padding: 30px; text-align: center; margin: 30px 0;">
     <h3 style="color: {COLORS['black']}; margin-bottom: 10px;">🔐 Login untuk Akses Penuh</h3>
@@ -607,127 +612,43 @@ def render_home():
                 st.rerun()
         
         st.markdown("---")
-        
-        # Feature Preview (for guests)
         st.markdown(f"<h3 style='text-align: center; color: {COLORS['black']}; margin: 30px 0 20px;'>✨ Fitur yang Akan Anda Dapatkan</h3>", unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
-        
         with col1:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">🤖</div>
-    <div class="feature-title">AI Assistant 24/7</div>
-    <div class="feature-desc">Tanya apapun tentang umrah, AI siap membantu kapan saja</div>
-</div>
-""", unsafe_allow_html=True)
-        
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Assistant 24/7</div><div class="feature-desc">Tanya apapun tentang umrah, AI siap membantu kapan saja</div></div>""", unsafe_allow_html=True)
         with col2:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">💰</div>
-    <div class="feature-title">Simulasi Biaya</div>
-    <div class="feature-desc">Hitung estimasi biaya dengan berbagai skenario</div>
-</div>
-""", unsafe_allow_html=True)
-        
+            st.markdown("""<div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">Simulasi Biaya</div><div class="feature-desc">Hitung estimasi biaya dengan berbagai skenario</div></div>""", unsafe_allow_html=True)
         with col3:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">📊</div>
-    <div class="feature-title">Bandingkan Paket</div>
-    <div class="feature-desc">Bandingkan opsi Ekonomis, Standard, Premium, VIP</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Bandingkan Paket</div><div class="feature-desc">Bandingkan opsi Ekonomis, Standard, Premium, VIP</div></div>""", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
-        
         with col1:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">✈️</div>
-    <div class="feature-title">Booking Terintegrasi</div>
-    <div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div>
-</div>
-""", unsafe_allow_html=True)
-        
+            st.markdown("""<div class="feature-card"><div class="feature-icon">✈️</div><div class="feature-title">Booking Terintegrasi</div><div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div></div>""", unsafe_allow_html=True)
         with col2:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">🏨</div>
-    <div class="feature-title">Hotel & Akomodasi</div>
-    <div class="feature-desc">Temukan hotel terbaik di Makkah & Madinah</div>
-</div>
-""", unsafe_allow_html=True)
-        
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🏨</div><div class="feature-title">Hotel & Akomodasi</div><div class="feature-desc">Temukan hotel terbaik di Makkah & Madinah</div></div>""", unsafe_allow_html=True)
         with col3:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">📦</div>
-    <div class="feature-title">Paket Travel</div>
-    <div class="feature-desc">Bandingkan paket dari berbagai travel agent terpercaya</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">📦</div><div class="feature-title">Paket Travel</div><div class="feature-desc">Bandingkan paket dari berbagai travel agent terpercaya</div></div>""", unsafe_allow_html=True)
         
-        st.markdown("---")
-        
-        # Why choose us section
         st.markdown("---")
         st.markdown(f"<h3 style='text-align: center; color: {COLORS['black']};'>🌟 Mengapa LABBAIK?</h3>", unsafe_allow_html=True)
         
         col1, col2, col3, col4 = st.columns(4)
-        
         with col1:
-            why_feature_1 = """
-<div style="text-align: center; padding: 15px;">
-    <div style="font-size: 2.5rem;">🤖</div>
-    <div style="font-weight: 700; color: #1A1A1A;">AI-Powered</div>
-    <div style="font-size: 0.85rem; color: #666;">Teknologi AI terdepan</div>
-</div>
-"""
-            st.markdown(why_feature_1, unsafe_allow_html=True)
-        
+            st.markdown("""<div style="text-align: center; padding: 15px;"><div style="font-size: 2.5rem;">🤖</div><div style="font-weight: 700; color: #1A1A1A;">AI-Powered</div><div style="font-size: 0.85rem; color: #666;">Teknologi AI terdepan</div></div>""", unsafe_allow_html=True)
         with col2:
-            why_feature_2 = """
-<div style="text-align: center; padding: 15px;">
-    <div style="font-size: 2.5rem;">📊</div>
-    <div style="font-weight: 700; color: #1A1A1A;">Data Akurat</div>
-    <div style="font-size: 0.85rem; color: #666;">Estimasi biaya real</div>
-</div>
-"""
-            st.markdown(why_feature_2, unsafe_allow_html=True)
-        
+            st.markdown("""<div style="text-align: center; padding: 15px;"><div style="font-size: 2.5rem;">📊</div><div style="font-weight: 700; color: #1A1A1A;">Data Akurat</div><div style="font-size: 0.85rem; color: #666;">Estimasi biaya real</div></div>""", unsafe_allow_html=True)
         with col3:
-            why_feature_3 = """
-<div style="text-align: center; padding: 15px;">
-    <div style="font-size: 2.5rem;">🇮🇩</div>
-    <div style="font-weight: 700; color: #1A1A1A;">Lokal Indonesia</div>
-    <div style="font-size: 0.85rem; color: #666;">Untuk jamaah Indonesia</div>
-</div>
-"""
-            st.markdown(why_feature_3, unsafe_allow_html=True)
-        
+            st.markdown("""<div style="text-align: center; padding: 15px;"><div style="font-size: 2.5rem;">🇮🇩</div><div style="font-weight: 700; color: #1A1A1A;">Lokal Indonesia</div><div style="font-size: 0.85rem; color: #666;">Untuk jamaah Indonesia</div></div>""", unsafe_allow_html=True)
         with col4:
-            why_feature_4 = """
-<div style="text-align: center; padding: 15px;">
-    <div style="font-size: 2.5rem;">💯</div>
-    <div style="font-weight: 700; color: #1A1A1A;">100% Gratis</div>
-    <div style="font-size: 0.85rem; color: #666;">Daftar tanpa biaya</div>
-</div>
-"""
-            st.markdown(why_feature_4, unsafe_allow_html=True)
+            st.markdown("""<div style="text-align: center; padding: 15px;"><div style="font-size: 2.5rem;">💯</div><div style="font-weight: 700; color: #1A1A1A;">100% Gratis</div><div style="font-size: 0.85rem; color: #666;">Daftar tanpa biaya</div></div>""", unsafe_allow_html=True)
         
     else:
-        # ============================================
-        # LOGGED-IN USER DASHBOARD
-        # ============================================
-        
         user = get_current_user()
         role_info = get_user_role_info()
         
-        # Welcome message - FIXED
         welcome_html = f"""
 <div style="background: linear-gradient(135deg, {role_info['color']}22, {role_info['color']}11); border-left: 4px solid {role_info['color']}; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px;">
     <span style="font-size: 1.5rem;">{role_info['badge']}</span>
@@ -737,88 +658,38 @@ def render_home():
 """
         st.markdown(welcome_html, unsafe_allow_html=True)
         
-        # Feature cards
         st.markdown(f"<h3 style='color: {COLORS['black']}; margin: 20px 0;'>✨ Fitur Utama</h3>", unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
-        
         with col1:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">🤖</div>
-    <div class="feature-title">AI Assistant 24/7</div>
-    <div class="feature-desc">Tanya apapun tentang umrah</div>
-</div>
-""", unsafe_allow_html=True)
-        
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Assistant 24/7</div><div class="feature-desc">Tanya apapun tentang umrah</div></div>""", unsafe_allow_html=True)
         with col2:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">💰</div>
-    <div class="feature-title">Simulasi Biaya</div>
-    <div class="feature-desc">Hitung estimasi biaya umrah</div>
-</div>
-""", unsafe_allow_html=True)
-        
+            st.markdown("""<div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">Simulasi Biaya</div><div class="feature-desc">Hitung estimasi biaya umrah</div></div>""", unsafe_allow_html=True)
         with col3:
-            st.markdown("""
-<div class="feature-card">
-    <div class="feature-icon">📊</div>
-    <div class="feature-title">Bandingkan Paket</div>
-    <div class="feature-desc">Ekonomis hingga VIP</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Bandingkan Paket</div><div class="feature-desc">Ekonomis hingga VIP</div></div>""", unsafe_allow_html=True)
         
         st.markdown("---")
-        
-        # Quick start
         st.markdown(f"### 🚀 Mulai Perencanaan Umrah Anda")
         
         col1, col2 = st.columns(2)
-        
         with col1:
-            scenario = st.selectbox(
-                "Pilih Skenario",
-                ["ekonomis", "standard", "premium", "vip"],
-                format_func=lambda x: SCENARIO_TEMPLATES[x]["name"]
-            )
-        
+            scenario = st.selectbox("Pilih Skenario", ["ekonomis", "standard", "premium", "vip"], format_func=lambda x: SCENARIO_TEMPLATES[x]["name"])
         with col2:
-            num_people = st.number_input(
-                "Jumlah Jamaah",
-                min_value=1,
-                max_value=50,
-                value=1
-            )
+            num_people = st.number_input("Jumlah Jamaah", min_value=1, max_value=50, value=1)
         
         if st.button("🔍 Lihat Estimasi Cepat", use_container_width=True):
-            template = SCENARIO_TEMPLATES[scenario]
             planner = st.session_state.scenario_planner
             result = planner.create_scenario(scenario, num_people)
             
             st.markdown("### 📋 Estimasi Cepat")
-            
             col1, col2, col3 = st.columns(3)
-            
             with col1:
-                st.metric(
-                    "Estimasi Minimum",
-                    format_currency(result.estimated_min)
-                )
-            
+                st.metric("Estimasi Minimum", format_currency(result.estimated_min))
             with col2:
-                st.metric(
-                    "Estimasi Maksimum",
-                    format_currency(result.estimated_max)
-                )
-            
+                st.metric("Estimasi Maksimum", format_currency(result.estimated_max))
             with col3:
-                st.metric(
-                    "Per Orang",
-                    format_currency(result.estimated_min / num_people)
-                )
+                st.metric("Per Orang", format_currency(result.estimated_min / num_people))
             
-            # Features
             st.markdown("#### ✨ Fasilitas Termasuk:")
             for feature in result.features:
                 st.markdown(f"• {feature}")
@@ -828,88 +699,41 @@ def render_cost_simulation():
     """Render cost simulation page"""
     st.header("💰 Simulasi Biaya Umrah")
     
-    # Input form
     with st.form("cost_form"):
         col1, col2 = st.columns(2)
         
         with col1:
-            scenario = st.selectbox(
-                "Skenario Paket",
-                ["ekonomis", "standard", "premium", "vip"],
-                format_func=lambda x: SCENARIO_TEMPLATES[x]["name"]
-            )
-            
-            num_people = st.number_input(
-                "Jumlah Jamaah",
-                min_value=1,
-                max_value=50,
-                value=2
-            )
-            
-            duration = st.slider(
-                "Durasi (hari)",
-                min_value=7,
-                max_value=21,
-                value=SCENARIO_TEMPLATES[scenario]["duration_days"]
-            )
+            scenario = st.selectbox("Skenario Paket", ["ekonomis", "standard", "premium", "vip"], format_func=lambda x: SCENARIO_TEMPLATES[x]["name"])
+            num_people = st.number_input("Jumlah Jamaah", min_value=1, max_value=50, value=2)
+            duration = st.slider("Durasi (hari)", min_value=7, max_value=21, value=SCENARIO_TEMPLATES[scenario]["duration_days"])
         
         with col2:
-            departure_city = st.selectbox(
-                "Kota Keberangkatan",
-                DEPARTURE_CITIES
-            )
-            
-            departure_month = st.selectbox(
-                "Bulan Keberangkatan",
-                range(1, 13),
-                format_func=lambda x: [
-                    "Januari", "Februari", "Maret", "April",
-                    "Mei", "Juni", "Juli", "Agustus",
-                    "September", "Oktober", "November", "Desember"
-                ][x-1]
-            )
-            
-            special_requests = st.text_area(
-                "Permintaan Khusus (opsional)",
-                placeholder="Misal: jamaah lansia, butuh kursi roda, dll."
-            )
+            departure_city = st.selectbox("Kota Keberangkatan", DEPARTURE_CITIES)
+            departure_month = st.selectbox("Bulan Keberangkatan", range(1, 13), format_func=lambda x: ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][x-1])
+            special_requests = st.text_area("Permintaan Khusus (opsional)", placeholder="Misal: jamaah lansia, butuh kursi roda, dll.")
         
         submitted = st.form_submit_button("🔍 Hitung Biaya", use_container_width=True)
     
     if submitted:
         with st.spinner("⏳ Menghitung estimasi biaya..."):
-            # Create scenario
             planner = st.session_state.scenario_planner
-            result = planner.create_scenario(
-                scenario_type=scenario,
-                num_people=num_people,
-                duration_days=duration,
-                departure_month=departure_month
-            )
-            
+            result = planner.create_scenario(scenario_type=scenario, num_people=num_people, duration_days=duration, departure_month=departure_month)
             st.session_state.current_scenario = result
         
-        # Display results
         st.markdown("---")
         st.subheader("📊 Hasil Simulasi")
         
-        # Key metrics
         col1, col2, col3, col4 = st.columns(4)
-        
         with col1:
             st.metric("Total Minimum", format_currency(result.estimated_min))
-        
         with col2:
             st.metric("Total Maksimum", format_currency(result.estimated_max))
-        
         with col3:
             st.metric("Per Orang (Min)", format_currency(result.estimated_min / num_people))
-        
         with col4:
             avg = (result.estimated_min + result.estimated_max) / 2
             st.metric("Rata-rata Total", format_currency(avg))
         
-        # Season warning
         season_info = None
         for season in SEASONS.values():
             if departure_month in season["months"]:
@@ -917,18 +741,10 @@ def render_cost_simulation():
                 break
         
         if season_info and season_info["multiplier"] > 1:
-            warning_html = f"""
-<div class="warning-box">
-    ⚠️ <strong>Perhatian:</strong> Bulan {departure_month} termasuk musim {season_info['name']} 
-    dengan kenaikan harga sekitar {int((season_info['multiplier']-1)*100)}%
-</div>
-"""
-            st.markdown(warning_html, unsafe_allow_html=True)
+            st.markdown(f"""<div class="warning-box">⚠️ <strong>Perhatian:</strong> Bulan {departure_month} termasuk musim {season_info['name']} dengan kenaikan harga sekitar {int((season_info['multiplier']-1)*100)}%</div>""", unsafe_allow_html=True)
         
-        # Detailed breakdown visualization
         st.markdown("### 📈 Visualisasi Biaya")
         
-        # Create breakdown chart
         components = [
             {"Komponen": "Tiket Pesawat", "Estimasi": result.estimated_max * 0.25},
             {"Komponen": "Hotel Makkah", "Estimasi": result.estimated_max * 0.30},
@@ -938,96 +754,44 @@ def render_cost_simulation():
             {"Komponen": "Visa & Handling", "Estimasi": result.estimated_max * 0.07},
             {"Komponen": "Lainnya", "Estimasi": result.estimated_max * 0.05},
         ]
-        
         df = pd.DataFrame(components)
         
         col1, col2 = st.columns(2)
-        
         with col1:
-            fig = px.pie(
-                df, 
-                values="Estimasi", 
-                names="Komponen",
-                title="Distribusi Biaya",
-                color_discrete_sequence=px.colors.qualitative.Set3
-            )
+            fig = px.pie(df, values="Estimasi", names="Komponen", title="Distribusi Biaya", color_discrete_sequence=px.colors.qualitative.Set3)
             st.plotly_chart(fig, use_container_width=True)
-        
         with col2:
-            fig = px.bar(
-                df,
-                x="Komponen",
-                y="Estimasi",
-                title="Breakdown per Komponen",
-                color="Komponen",
-                color_discrete_sequence=px.colors.qualitative.Set3
-            )
+            fig = px.bar(df, x="Komponen", y="Estimasi", title="Breakdown per Komponen", color="Komponen", color_discrete_sequence=px.colors.qualitative.Set3)
             fig.update_layout(showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
         
-        # Features included
         st.markdown("### ✨ Fasilitas Termasuk")
         cols = st.columns(2)
         for i, feature in enumerate(result.features):
             cols[i % 2].markdown(f"✅ {feature}")
         
-        # Notes
         if result.notes:
             st.markdown("### 📝 Catatan")
             for note in result.notes:
                 st.markdown(note)
-        
-        # AI Analysis
-        if st.session_state.orchestrator:
-            st.markdown("### 🤖 Analisis AI")
-            
-            if st.button("💡 Dapatkan Saran AI"):
-                with st.spinner("AI sedang menganalisis..."):
-                    response = st.session_state.orchestrator.financial_agent.calculate_cost(
-                        scenario=scenario,
-                        num_people=num_people,
-                        duration_days=duration,
-                        departure_month=departure_month
-                    )
-                    st.markdown(response["response"])
 
 
 def render_scenario_comparison():
     """Render scenario comparison page"""
     st.header("📊 Perbandingan Skenario")
     
-    # Parameters
     col1, col2 = st.columns(2)
-    
     with col1:
-        num_people = st.number_input(
-            "Jumlah Jamaah",
-            min_value=1,
-            max_value=50,
-            value=1,
-            key="compare_people"
-        )
-    
+        num_people = st.number_input("Jumlah Jamaah", min_value=1, max_value=50, value=1, key="compare_people")
     with col2:
-        duration = st.slider(
-            "Durasi (hari)",
-            min_value=7,
-            max_value=21,
-            value=12,
-            key="compare_duration"
-        )
+        duration = st.slider("Durasi (hari)", min_value=7, max_value=21, value=12, key="compare_duration")
     
     if st.button("🔍 Bandingkan Semua Skenario", use_container_width=True):
         planner = st.session_state.scenario_planner
         
-        # Create all scenarios
         scenarios_data = []
         for stype in ["ekonomis", "standard", "premium", "vip"]:
-            scenario = planner.create_scenario(
-                scenario_type=stype,
-                num_people=num_people,
-                duration_days=duration
-            )
+            scenario = planner.create_scenario(scenario_type=stype, num_people=num_people, duration_days=duration)
             scenarios_data.append({
                 "Skenario": SCENARIO_TEMPLATES[stype]["name"],
                 "Hotel Makkah": f"⭐ {scenario.hotel_star_makkah}",
@@ -1040,123 +804,47 @@ def render_scenario_comparison():
         
         df = pd.DataFrame(scenarios_data)
         
-        # Display comparison table
         st.markdown("### 📋 Tabel Perbandingan")
-        st.dataframe(
-            df.style.format({
-                "Min (Rp)": "{:,.0f}",
-                "Max (Rp)": "{:,.0f}"
-            }),
-            use_container_width=True
-        )
+        st.dataframe(df.style.format({"Min (Rp)": "{:,.0f}", "Max (Rp)": "{:,.0f}"}), use_container_width=True)
         
-        # Price comparison chart
         st.markdown("### 💰 Perbandingan Harga")
-        
         fig = go.Figure()
-        
         for scenario in scenarios_data:
-            fig.add_trace(go.Bar(
-                name=scenario["Skenario"],
-                x=[scenario["Skenario"]],
-                y=[(scenario["Min (Rp)"] + scenario["Max (Rp)"]) / 2],
-                error_y=dict(
-                    type='data',
-                    symmetric=False,
-                    array=[scenario["Max (Rp)"] - (scenario["Min (Rp)"] + scenario["Max (Rp)"]) / 2],
-                    arrayminus=[(scenario["Min (Rp)"] + scenario["Max (Rp)"]) / 2 - scenario["Min (Rp)"]]
-                )
-            ))
-        
-        fig.update_layout(
-            title="Range Harga per Skenario",
-            yaxis_title="Estimasi Biaya (Rp)",
-            showlegend=False
-        )
-        
+            fig.add_trace(go.Bar(name=scenario["Skenario"], x=[scenario["Skenario"]], y=[(scenario["Min (Rp)"] + scenario["Max (Rp)"]) / 2], error_y=dict(type='data', symmetric=False, array=[scenario["Max (Rp)"] - (scenario["Min (Rp)"] + scenario["Max (Rp)"]) / 2], arrayminus=[(scenario["Min (Rp)"] + scenario["Max (Rp)"]) / 2 - scenario["Min (Rp)"]])))
+        fig.update_layout(title="Range Harga per Skenario", yaxis_title="Estimasi Biaya (Rp)", showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
         
-        # Recommendation
-        recommendation_html = """
-<div class="highlight-box">
-    <h4>💡 Rekomendasi</h4>
-    <ul>
-        <li><strong>Budget < Rp 35 juta:</strong> Pilih Ekonomis</li>
-        <li><strong>Keseimbangan:</strong> Pilih Standard</li>
-        <li><strong>Prioritas Kenyamanan:</strong> Pilih Premium</li>
-        <li><strong>Pengalaman Terbaik:</strong> Pilih VIP</li>
-    </ul>
-</div>
-"""
-        st.markdown(recommendation_html, unsafe_allow_html=True)
+        st.markdown("""<div class="highlight-box"><h4>💡 Rekomendasi</h4><ul><li><strong>Budget < Rp 35 juta:</strong> Pilih Ekonomis</li><li><strong>Keseimbangan:</strong> Pilih Standard</li><li><strong>Prioritas Kenyamanan:</strong> Pilih Premium</li><li><strong>Pengalaman Terbaik:</strong> Pilih VIP</li></ul></div>""", unsafe_allow_html=True)
 
 
 def render_time_analysis():
     """Render time analysis page"""
     st.header("📅 Analisis Waktu Terbaik Umrah")
     
-    priority = st.selectbox(
-        "Prioritas Anda",
-        ["balanced", "cost", "crowd"],
-        format_func=lambda x: {
-            "balanced": "🎯 Seimbang (Harga & Keramaian)",
-            "cost": "💰 Prioritas Hemat Biaya",
-            "crowd": "👥 Prioritas Hindari Keramaian"
-        }[x]
-    )
+    priority = st.selectbox("Prioritas Anda", ["balanced", "cost", "crowd"], format_func=lambda x: {"balanced": "🎯 Seimbang (Harga & Keramaian)", "cost": "💰 Prioritas Hemat Biaya", "crowd": "👥 Prioritas Hindari Keramaian"}[x])
     
     if st.button("📊 Analisis Waktu Terbaik", use_container_width=True):
         planner = st.session_state.scenario_planner
         analysis = planner.analyze_best_time(priority)
         
-        # Best months
         st.markdown("### ✅ Bulan Terbaik untuk Umrah")
-        
         cols = st.columns(3)
         for i, month_data in enumerate(analysis["best_months"]):
             with cols[i]:
-                best_month_html = f"""
-<div class="success-box">
-    <h4>#{i+1} {month_data['month_name']}</h4>
-    <p>🌡️ Cuaca: {month_data['weather']}</p>
-    <p>💰 Multiplier: {month_data['price_multiplier']}x</p>
-    <p>👥 Keramaian: {month_data['crowd_level']}</p>
-</div>
-"""
-                st.markdown(best_month_html, unsafe_allow_html=True)
+                st.markdown(f"""<div class="success-box"><h4>#{i+1} {month_data['month_name']}</h4><p>🌡️ Cuaca: {month_data['weather']}</p><p>💰 Multiplier: {month_data['price_multiplier']}x</p><p>👥 Keramaian: {month_data['crowd_level']}</p></div>""", unsafe_allow_html=True)
         
-        # Avoid months
         st.markdown("### ⚠️ Bulan yang Perlu Dipertimbangkan")
-        
         cols = st.columns(3)
         for i, month_data in enumerate(analysis["avoid_months"]):
             with cols[i]:
-                avoid_month_html = f"""
-<div class="warning-box">
-    <h4>{month_data['month_name']}</h4>
-    <p>🌡️ Cuaca: {month_data['weather']}</p>
-    <p>💰 Multiplier: {month_data['price_multiplier']}x</p>
-    <p>👥 Keramaian: {month_data['crowd_level']}</p>
-</div>
-"""
-                st.markdown(avoid_month_html, unsafe_allow_html=True)
+                st.markdown(f"""<div class="warning-box"><h4>{month_data['month_name']}</h4><p>🌡️ Cuaca: {month_data['weather']}</p><p>💰 Multiplier: {month_data['price_multiplier']}x</p><p>👥 Keramaian: {month_data['crowd_level']}</p></div>""", unsafe_allow_html=True)
         
-        # Full year chart
         st.markdown("### 📈 Analisis Sepanjang Tahun")
-        
         df = pd.DataFrame(analysis["analysis"])
-        
-        fig = px.line(
-            df,
-            x="month_name",
-            y="recommendation_score",
-            title="Skor Rekomendasi per Bulan",
-            markers=True
-        )
+        fig = px.line(df, x="month_name", y="recommendation_score", title="Skor Rekomendasi per Bulan", markers=True)
         fig.update_layout(xaxis_title="Bulan", yaxis_title="Skor Rekomendasi")
         st.plotly_chart(fig, use_container_width=True)
         
-        # Tips
         st.markdown("### 💡 Tips")
         for note in analysis["notes"]:
             st.markdown(f"• {note}")
@@ -1166,7 +854,6 @@ def render_ai_chat():
     """Render AI chat page"""
     st.header("🤖 Chat dengan AI Assistant")
     
-    # Initialize orchestrator if needed
     if st.session_state.orchestrator is None:
         st.warning("⚠️ Sistem AI belum diinisialisasi.")
         if st.button("🔄 Inisialisasi Sistem"):
@@ -1174,26 +861,18 @@ def render_ai_chat():
             st.rerun()
         return
     
-    # Chat interface
     st.markdown("Tanyakan apa saja tentang umrah kepada AI Assistant!")
     
-    # Display chat history
     for message in st.session_state.chat_history:
         if message["role"] == "user":
             st.chat_message("user").write(message["content"])
         else:
             st.chat_message("assistant").write(message["content"])
     
-    # Chat input
     if prompt := st.chat_input("Ketik pertanyaan Anda..."):
-        # Add user message to history
-        st.session_state.chat_history.append({
-            "role": "user",
-            "content": prompt
-        })
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
         
-        # Get AI response
         with st.spinner("🤔 AI sedang berpikir..."):
             try:
                 response = st.session_state.orchestrator.chat(prompt)
@@ -1201,24 +880,13 @@ def render_ai_chat():
             except Exception as e:
                 ai_response = f"Maaf, terjadi error: {str(e)}"
         
-        # Add AI response to history
-        st.session_state.chat_history.append({
-            "role": "assistant",
-            "content": ai_response
-        })
+        st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
         st.chat_message("assistant").write(ai_response)
     
-    # Quick questions
     st.markdown("---")
     st.markdown("### 💡 Pertanyaan Cepat")
     
-    quick_questions = [
-        "Apa saja rukun umrah?",
-        "Bagaimana tips hemat biaya umrah?",
-        "Kapan waktu terbaik untuk umrah?",
-        "Apa yang harus dipersiapkan sebelum umrah?",
-        "Bagaimana memilih travel umrah yang terpercaya?",
-    ]
+    quick_questions = ["Apa saja rukun umrah?", "Bagaimana tips hemat biaya umrah?", "Kapan waktu terbaik untuk umrah?", "Apa yang harus dipersiapkan sebelum umrah?", "Bagaimana memilih travel umrah yang terpercaya?"]
     
     cols = st.columns(2)
     for i, q in enumerate(quick_questions):
@@ -1226,7 +894,6 @@ def render_ai_chat():
             st.session_state.chat_history.append({"role": "user", "content": q})
             st.rerun()
     
-    # Clear chat
     if st.button("🗑️ Hapus Riwayat Chat"):
         st.session_state.chat_history = []
         if st.session_state.orchestrator:
@@ -1235,7 +902,7 @@ def render_ai_chat():
 
 
 def render_create_plan():
-    """Render create plan page"""
+    """Render create plan page with Makkah/Madinah duration selection - v3.1.0"""
     st.header("📋 Buat Rencana Umrah Lengkap")
     
     if st.session_state.orchestrator is None:
@@ -1245,87 +912,109 @@ def render_create_plan():
             st.rerun()
         return
     
-    with st.form("plan_form"):
-        st.markdown("### 📝 Detail Perjalanan")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            scenario = st.selectbox(
-                "Skenario Paket",
-                ["ekonomis", "standard", "premium", "vip"],
-                format_func=lambda x: SCENARIO_TEMPLATES[x]["name"]
-            )
-            
-            num_people = st.number_input(
-                "Jumlah Jamaah",
-                min_value=1,
-                max_value=50,
-                value=2
-            )
-            
-            duration = st.slider(
-                "Durasi (hari)",
-                min_value=7,
-                max_value=21,
-                value=12
-            )
-        
-        with col2:
-            departure_month = st.selectbox(
-                "Bulan Keberangkatan",
-                range(1, 13),
-                format_func=lambda x: [
-                    "Januari", "Februari", "Maret", "April",
-                    "Mei", "Juni", "Juli", "Agustus",
-                    "September", "Oktober", "November", "Desember"
-                ][x-1]
-            )
-            
-            special_requests = st.text_area(
-                "Permintaan Khusus",
-                placeholder="Misal: jamaah lansia, butuh kursi roda, vegetarian, dll."
-            )
-        
-        submitted = st.form_submit_button("🚀 Buat Rencana Lengkap", use_container_width=True)
+    st.markdown("### 📝 Detail Perjalanan")
     
-    if submitted:
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        scenario = st.selectbox("Skenario Paket", ["ekonomis", "standard", "premium", "vip"], format_func=lambda x: SCENARIO_TEMPLATES[x]["name"], key="plan_scenario")
+        num_people = st.number_input("Jumlah Jamaah", min_value=1, max_value=50, value=2, key="plan_num_people")
+        departure_month = st.selectbox("Bulan Keberangkatan", range(1, 13), format_func=lambda x: ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][x-1], key="plan_departure_month")
+    
+    with col2:
+        st.markdown("#### 🕋 Durasi Menginap")
+        nights_makkah = st.slider("🕋 Lama di Mekkah (malam)", min_value=2, max_value=10, value=4, key="nights_makkah", help="Pilih jumlah malam menginap di Mekkah")
+        nights_madinah = st.slider("🕌 Lama di Madinah (malam)", min_value=2, max_value=10, value=3, key="nights_madinah", help="Pilih jumlah malam menginap di Madinah")
+        total_duration = nights_makkah + nights_madinah + 2
+        st.info(f"📅 **Total Durasi:** {total_duration} hari ({nights_makkah} malam Mekkah + {nights_madinah} malam Madinah + 2 hari transit)")
+    
+    st.markdown("---")
+    st.markdown("### 💰 Preview Biaya Akomodasi")
+    
+    hotel_makkah = HOTEL_PRICES[scenario]["makkah"]
+    hotel_madinah = HOTEL_PRICES[scenario]["madinah"]
+    additional = ADDITIONAL_COSTS[scenario]
+    
+    cost_makkah = hotel_makkah["price"] * nights_makkah
+    cost_madinah = hotel_madinah["price"] * nights_madinah
+    cost_accommodation = cost_makkah + cost_madinah
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown(f"""<div style="background: #fff3e0; padding: 15px; border-radius: 10px; border-left: 4px solid #e65100;"><div style="font-weight: 700; color: #e65100; margin-bottom: 8px;">🕋 Hotel Mekkah</div><div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">{hotel_makkah['name']}</div><div style="font-size: 0.8rem; color: #888;">Rp {hotel_makkah['price']:,}/malam × {nights_makkah} malam</div><div style="font-size: 1.2rem; font-weight: 700; color: #e65100; margin-top: 8px;">Rp {cost_makkah:,}</div></div>""", unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""<div style="background: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #2e7d32;"><div style="font-weight: 700; color: #2e7d32; margin-bottom: 8px;">🕌 Hotel Madinah</div><div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">{hotel_madinah['name']}</div><div style="font-size: 0.8rem; color: #888;">Rp {hotel_madinah['price']:,}/malam × {nights_madinah} malam</div><div style="font-size: 1.2rem; font-weight: 700; color: #2e7d32; margin-top: 8px;">Rp {cost_madinah:,}</div></div>""", unsafe_allow_html=True)
+    
+    with col3:
+        total_accommodation = cost_accommodation * num_people
+        st.markdown(f"""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 15px; border-radius: 10px;"><div style="font-weight: 700; color: #D4AF37; margin-bottom: 8px;">💰 Total Akomodasi</div><div style="font-size: 0.85rem; color: #C9A86C; margin-bottom: 5px;">Per orang: Rp {cost_accommodation:,}</div><div style="font-size: 0.8rem; color: #888;">× {num_people} jamaah</div><div style="font-size: 1.2rem; font-weight: 700; color: #D4AF37; margin-top: 8px;">Rp {total_accommodation:,}</div></div>""", unsafe_allow_html=True)
+    
+    st.markdown("---")
+    special_requests = st.text_area("Permintaan Khusus", placeholder="Misal: jamaah lansia, butuh kursi roda, vegetarian, dll.", key="plan_special_requests")
+    
+    if st.button("🚀 Buat Rencana Lengkap", use_container_width=True, type="primary"):
         with st.spinner("⏳ AI sedang menyusun rencana lengkap..."):
             try:
-                result = st.session_state.orchestrator.create_complete_plan(
-                    scenario=scenario,
-                    num_people=num_people,
-                    duration_days=duration,
-                    departure_month=departure_month,
-                    special_requests=special_requests if special_requests else None
-                )
+                duration_info = f"\n\nDurasi menginap:\n- Mekkah: {nights_makkah} malam\n- Madinah: {nights_madinah} malam\n- Total: {total_duration} hari"
+                enhanced_requests = (special_requests or "") + duration_info
                 
-                # Display results
+                result = st.session_state.orchestrator.create_complete_plan(scenario=scenario, num_people=num_people, duration_days=total_duration, departure_month=departure_month, special_requests=enhanced_requests if enhanced_requests.strip() else None)
+                
                 st.markdown("---")
                 st.success("✅ Rencana berhasil dibuat!")
                 
-                # Financial summary
-                st.markdown("### 💰 Ringkasan Biaya")
+                st.markdown("### 📊 Ringkasan Perjalanan")
+                sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
+                with sum_col1:
+                    st.metric("👥 Jamaah", f"{num_people} orang")
+                with sum_col2:
+                    st.metric("🕋 Mekkah", f"{nights_makkah} malam")
+                with sum_col3:
+                    st.metric("🕌 Madinah", f"{nights_madinah} malam")
+                with sum_col4:
+                    st.metric("📅 Total", f"{total_duration} hari")
+                
+                st.markdown("### 💰 Rincian Biaya Per Orang")
+                
+                flight_cost = additional["flight"]
+                visa_cost = additional["visa"]
+                transport_cost = additional["transport"]
+                meals_cost = additional["meals"] * total_duration
+                
+                total_per_person = cost_accommodation + flight_cost + visa_cost + transport_cost + meals_cost
+                grand_total = total_per_person * num_people
+                
+                cost_items = [("✈️ Tiket Pesawat PP", flight_cost), ("🕋 Hotel Mekkah", cost_makkah), ("🕌 Hotel Madinah", cost_madinah), ("📄 Visa & Handling", visa_cost), ("🚐 Transportasi Lokal", transport_cost), (f"🍽️ Makan ({total_duration} hari)", meals_cost)]
+                
+                for item_name, item_cost in cost_items:
+                    st.markdown(f"""<div style="display: flex; justify-content: space-between; padding: 8px 12px; background: #f9f9f9; border-radius: 5px; margin: 4px 0;"><span>{item_name}</span><span style="font-weight: 600;">Rp {item_cost:,}</span></div>""", unsafe_allow_html=True)
+                
+                st.markdown("---")
+                total_col1, total_col2 = st.columns(2)
+                with total_col1:
+                    st.markdown(f"""<div style="background: #e3f2fd; padding: 20px; border-radius: 10px; text-align: center;"><div style="font-size: 0.9rem; color: #1565c0;">Per Orang</div><div style="font-size: 1.8rem; font-weight: 700; color: #1565c0;">Rp {total_per_person:,}</div></div>""", unsafe_allow_html=True)
+                with total_col2:
+                    st.markdown(f"""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 10px; text-align: center;"><div style="font-size: 0.9rem; color: #D4AF37;">GRAND TOTAL ({num_people} orang)</div><div style="font-size: 1.8rem; font-weight: 700; color: #D4AF37;">Rp {grand_total:,}</div></div>""", unsafe_allow_html=True)
+                
+                st.markdown("---")
+                st.markdown("### 💡 Analisis AI - Keuangan")
                 if "calculation" in result["results"]["financial"]:
                     calc = result["results"]["financial"]["calculation"]
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.metric("Total Minimum", format_currency(calc["total_min"]))
-                    with col2:
-                        st.metric("Total Maksimum", format_currency(calc["total_max"]))
-                
+                    ai_col1, ai_col2 = st.columns(2)
+                    with ai_col1:
+                        st.metric("Estimasi AI Min", format_currency(calc["total_min"]))
+                    with ai_col2:
+                        st.metric("Estimasi AI Max", format_currency(calc["total_max"]))
                 st.markdown(result["results"]["financial"]["response"])
                 
-                # Itinerary
                 st.markdown("### 📅 Itinerary")
                 st.markdown(result["results"]["itinerary"]["response"])
                 
-                # Requirements
                 st.markdown("### 📋 Persyaratan")
                 st.markdown(result["results"]["requirements"]["response"])
                 
-                # Tips
                 st.markdown("### 💡 Tips")
                 st.markdown(result["results"]["tips"]["response"])
                 
@@ -1339,44 +1028,24 @@ def render_settings():
     
     st.markdown("### 🔑 Konfigurasi API")
     
-    provider = st.selectbox(
-        "LLM Provider",
-        ["groq", "openai"],
-        index=0 if llm_config.provider == "groq" else 1
-    )
+    provider = st.selectbox("LLM Provider", ["groq", "openai"], index=0 if llm_config.provider == "groq" else 1)
     
     if provider == "groq":
-        api_key = st.text_input(
-            "Groq API Key",
-            type="password",
-            value=llm_config.groq_api_key[:10] + "..." if llm_config.groq_api_key else ""
-        )
+        api_key = st.text_input("Groq API Key", type="password", value=llm_config.groq_api_key[:10] + "..." if llm_config.groq_api_key else "")
         st.info("💡 Dapatkan API key gratis di https://console.groq.com")
     else:
-        api_key = st.text_input(
-            "OpenAI API Key",
-            type="password",
-            value=llm_config.openai_api_key[:10] + "..." if llm_config.openai_api_key else ""
-        )
+        api_key = st.text_input("OpenAI API Key", type="password", value=llm_config.openai_api_key[:10] + "..." if llm_config.openai_api_key else "")
         st.info("💡 Dapatkan API key di https://platform.openai.com")
     
     st.markdown("### 📊 Status Sistem")
     
     col1, col2 = st.columns(2)
-    
     with col1:
-        st.metric(
-            "Status Inisialisasi",
-            "✅ Aktif" if st.session_state.initialized else "❌ Belum Aktif"
-        )
-    
+        st.metric("Status Inisialisasi", "✅ Aktif" if st.session_state.initialized else "❌ Belum Aktif")
     with col2:
         if st.session_state.orchestrator:
             stats = st.session_state.orchestrator.get_agent_status()
-            st.metric(
-                "Dokumen Knowledge Base",
-                stats["rag_retriever"]["total_documents"]
-            )
+            st.metric("Dokumen Knowledge Base", stats["rag_retriever"]["total_documents"])
     
     if st.button("🔄 Reinisialisasi Sistem"):
         st.session_state.orchestrator = None
@@ -1387,206 +1056,77 @@ def render_settings():
     st.markdown("### ℹ️ Informasi Aplikasi")
     
     col1, col2 = st.columns(2)
-    
     with col1:
-        st.info(f"""
-        **{APP_INFO['name']}** v{__version__}
-        
-        {APP_INFO['tagline']}
-        
-        **Developer:** {DEVELOPER['name']}
-        **Email:** {DEVELOPER['email']}
-        """)
-    
+        st.info(f"""**{APP_INFO['name']}** v{__version__}\n\n{APP_INFO['tagline']}\n\n**Developer:** {DEVELOPER['name']}\n**Email:** {DEVELOPER['email']}""")
     with col2:
-        st.info(f"""
-        **Repository:**
-        {APP_INFO['repository']}
-        
-        **Demo:**
-        {APP_INFO['demo_url']}
-        
-        **License:** {APP_INFO['license']}
-        """)
+        st.info(f"""**Repository:**\n{APP_INFO['repository']}\n\n**Demo:**\n{APP_INFO['demo_url']}\n\n**License:** {APP_INFO['license']}""")
 
 
 def render_about():
-    """Render about page with LABBAIK branding and developer info"""
+    """Render about page with LABBAIK branding"""
     
-    # LABBAIK Brand Header - FIXED
     about_header = f"""
 <div style="background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 50%, {COLORS['black']} 100%); color: white; padding: 40px; border-radius: 20px; text-align: center; margin-bottom: 30px;">
     <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 2.5rem; color: {COLORS['gold']}; text-shadow: 0 2px 15px rgba(212, 175, 55, 0.4);">{BRAND['talbiyah']}</div>
     <div style="font-size: 2rem; font-weight: 700; letter-spacing: 0.3em; margin: 15px 0;">{BRAND['name']}</div>
     <div style="color: {COLORS['sand']}; font-size: 1.1rem; margin-bottom: 15px;">{BRAND['tagline']}</div>
     <div style="color: {COLORS['sand']}; font-size: 0.95rem;">{BRAND['description']}</div>
-    <div style="margin-top: 20px;">
-        <span style="background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%); color: {COLORS['black']}; padding: 8px 20px; border-radius: 20px; font-weight: 700;">Version {BRAND['version']}</span>
-    </div>
+    <div style="margin-top: 20px;"><span style="background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%); color: {COLORS['black']}; padding: 8px 20px; border-radius: 20px; font-weight: 700;">Version {BRAND['version']}</span></div>
 </div>
 """
     st.markdown(about_header, unsafe_allow_html=True)
     
-    # Tabs
     tab1, tab2, tab3, tab4 = st.tabs(["👨‍💻 Developer", "📋 Changelog", "🔧 Tech Stack", "📊 Stats"])
     
     with tab1:
         st.markdown(get_developer_card(), unsafe_allow_html=True)
-        
         st.markdown("### 📧 Kontak")
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.markdown(f"📧 **Email**\n\n{DEVELOPER['email']}")
         with col2:
-            wa_link = f"https://wa.me/{DEVELOPER['whatsapp']}"
-            st.markdown(f"💬 **WhatsApp**\n\n[Chat]({wa_link})")
+            st.markdown(f"💬 **WhatsApp**\n\n[Chat](https://wa.me/{DEVELOPER['whatsapp']})")
         with col3:
             st.markdown(f"🔗 **GitHub**\n\n[mshadianto]({DEVELOPER['github']})")
         with col4:
             st.markdown(f"💼 **LinkedIn**\n\n[Profile]({DEVELOPER['linkedin']})")
-        
-        st.markdown("---")
-        st.markdown("### 🎯 Keahlian Developer")
-        st.markdown("""
-        - 📊 Governance, Risk & Compliance (GRC)
-        - 🔍 Internal Audit & Quality Assurance
-        - 🤖 AI-Powered Solutions
-        - 📋 Corporate Governance Advisory
-        - 💻 Full-Stack Development
-        """)
     
     with tab2:
         st.markdown(get_changelog_markdown())
     
     with tab3:
         st.markdown("### 🔧 Technology Stack")
-        
         for category, techs in TECH_STACK.items():
             st.markdown(f"#### {category.replace('_', ' ').title()}")
             for name, version, desc in techs:
                 st.markdown(f"- **{name}** `{version}` - {desc}")
-        
-        st.markdown("---")
-        st.markdown("### 📦 Source Code")
-        st.code(f"git clone {APP_INFO['repository']}.git", language="bash")
-        st.markdown(f"[📂 View on GitHub]({APP_INFO['repository']})")
     
     with tab4:
         st.markdown("### 📊 Application Statistics")
-        
         col1, col2, col3 = st.columns(3)
-        
         with col1:
             st.metric("📅 Released", get_app_age())
         with col2:
             st.metric("🔄 Version", __version__)
         with col3:
             st.metric("📦 Modules", "8+")
-        
-        st.markdown("---")
-        st.markdown("### 🌟 Features")
-        
-        features = [
-            ("💰 Cost Simulation", "Simulate umrah costs with multiple scenarios"),
-            ("📊 Scenario Comparison", "Compare economic, standard, premium, VIP packages"),
-            ("🤖 AI Chat", "RAG-powered chatbot for umrah guidance"),
-            ("✈️ Flight Search", "Search and compare flight prices"),
-            ("🏨 Hotel Booking", "Find hotels in Makkah & Madinah"),
-            ("📦 Package Comparison", "Compare travel agent packages"),
-            ("🛂 Visa Tracker", "Track visa processing status"),
-            ("💳 Payment Calculator", "Calculate installment plans"),
-            ("✅ Preparation Checklist", "Interactive preparation checklist"),
-            ("📿 Doa & Manasik", "Complete prayer and ritual guide"),
-        ]
-        
-        col1, col2 = st.columns(2)
-        for i, (name, desc) in enumerate(features):
-            with col1 if i % 2 == 0 else col2:
-                st.markdown(f"**{name}**\n\n{desc}")
-    
-    st.markdown("---")
-    footer_license = f"""
-<div style="text-align: center; padding: 1rem; background: #f5f5f5; border-radius: 10px;">
-    <p>📜 Licensed under {APP_INFO['license']}</p>
-    <p>Made with ❤️ in Indonesia 🇮🇩</p>
-</div>
-"""
-    st.markdown(footer_license, unsafe_allow_html=True)
 
 
 def render_labbaik_footer():
-    """Render LABBAIK branded footer with disclaimer and REAL visitor count - FIXED VERSION"""
-    
-    # Get REAL visitor statistics from database
+    """Render LABBAIK branded footer"""
     stats = get_visitor_stats()
-    total_visitors = stats['total_visitors']
-    total_views = stats['total_views']
+    visitor_str = f"{stats['total_visitors']:,}"
+    views_str = f"{stats['total_views']:,}"
     
-    # Format numbers with thousand separators
-    visitor_str = f"{total_visitors:,}"
-    views_str = f"{total_views:,}"
+    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 40px 40px 0 40px; border-radius: 20px 20px 0 0; text-align: center; margin-top: 50px;"><div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: #D4AF37;">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div><div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin: 12px 0;">LABBAIK</div><div style="color: #C9A86C; font-size: 0.95rem; margin-bottom: 20px;">Panggilan-Nya, Langkahmu</div></div>""", unsafe_allow_html=True)
     
-    # Split into multiple st.markdown calls for better rendering
+    st.markdown(f"""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;"><table style="margin: 0 auto; border-collapse: separate; border-spacing: 20px 0;"><tr><td style="background: rgba(212, 175, 55, 0.15); padding: 12px 24px; border-radius: 20px; text-align: center;"><div style="color: #D4AF37; font-size: 0.75rem; opacity: 0.8;">Total Pengunjung</div><div style="color: #D4AF37; font-size: 1.5rem; font-weight: 700;">{visitor_str}</div></td><td style="background: rgba(0, 107, 60, 0.15); padding: 12px 24px; border-radius: 20px; text-align: center;"><div style="color: #C9A86C; font-size: 0.75rem; opacity: 0.8;">Total Page Views</div><div style="color: #C9A86C; font-size: 1.5rem; font-weight: 700;">{views_str}</div></td></tr></table></div>""", unsafe_allow_html=True)
     
-    # Part 1: Header section
-    footer_header = """
-<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 40px 40px 0 40px; border-radius: 20px 20px 0 0; text-align: center; margin-top: 50px;">
-    <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: #D4AF37;">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
-    <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin: 12px 0;">LABBAIK</div>
-    <div style="color: #C9A86C; font-size: 0.95rem; margin-bottom: 20px;">Panggilan-Nya, Langkahmu</div>
-</div>
-"""
-    st.markdown(footer_header, unsafe_allow_html=True)
+    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px; text-align: center;"><div style="color: #888; font-size: 0.85rem;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div></div>""", unsafe_allow_html=True)
     
-    # Part 2: Stats section (using table for better compatibility)
-    stats_html = f"""
-<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;">
-    <table style="margin: 0 auto; border-collapse: separate; border-spacing: 20px 0;">
-        <tr>
-            <td style="background: rgba(212, 175, 55, 0.15); padding: 12px 24px; border-radius: 20px; text-align: center;">
-                <div style="color: #D4AF37; font-size: 0.75rem; opacity: 0.8;">Total Pengunjung</div>
-                <div style="color: #D4AF37; font-size: 1.5rem; font-weight: 700;">{visitor_str}</div>
-            </td>
-            <td style="background: rgba(0, 107, 60, 0.15); padding: 12px 24px; border-radius: 20px; text-align: center;">
-                <div style="color: #C9A86C; font-size: 0.75rem; opacity: 0.8;">Total Page Views</div>
-                <div style="color: #C9A86C; font-size: 1.5rem; font-weight: 700;">{views_str}</div>
-            </td>
-        </tr>
-    </table>
-</div>
-"""
-    st.markdown(stats_html, unsafe_allow_html=True)
+    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;"><div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px 20px; margin: 0 auto; max-width: 600px;"><div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">⚠️ Disclaimer</div><div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">Aplikasi ini dikembangkan oleh non-developer dengan memanfaatkan teknologi AI (Claude, Gemini, dll). Informasi yang disajikan bersifat simulasi dan estimasi. Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.</div></div></div>""", unsafe_allow_html=True)
     
-    # Part 3: Contact
-    footer_contact = """
-<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px; text-align: center;">
-    <div style="color: #888; font-size: 0.85rem;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div>
-</div>
-"""
-    st.markdown(footer_contact, unsafe_allow_html=True)
-    
-    # Part 4: Disclaimer
-    footer_disclaimer = """
-<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;">
-    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px 20px; margin: 0 auto; max-width: 600px;">
-        <div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">⚠️ Disclaimer</div>
-        <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">Aplikasi ini dikembangkan oleh non-developer dengan memanfaatkan teknologi AI (Claude, Gemini, dll). Informasi yang disajikan bersifat simulasi dan estimasi. Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.</div>
-    </div>
-</div>
-"""
-    st.markdown(footer_disclaimer, unsafe_allow_html=True)
-    
-    # Part 5: Copyright
-    footer_copyright = """
-<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px 40px 40px; border-radius: 0 0 20px 20px; text-align: center;">
-    <div style="border-top: 1px solid #333; padding-top: 20px; color: #666; font-size: 0.8rem;">
-        © 2025 LABBAIK. Hak Cipta Dilindungi.<br>
-        <span style="color: #D4AF37;">Made with ❤️ &amp; AI by MS Hadianto</span><br>
-        <span style="color: #555; font-size: 0.7rem;">v3.0.0 Beta • Powered by Streamlit &amp; Groq AI</span>
-    </div>
-</div>
-"""
-    st.markdown(footer_copyright, unsafe_allow_html=True)
+    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px 40px 40px; border-radius: 0 0 20px 20px; text-align: center;"><div style="border-top: 1px solid #333; padding-top: 20px; color: #666; font-size: 0.8rem;">© 2025 LABBAIK. Hak Cipta Dilindungi.<br><span style="color: #D4AF37;">Made with ❤️ &amp; AI by MS Hadianto</span><br><span style="color: #555; font-size: 0.7rem;">v3.1.0 Beta • Powered by Streamlit &amp; Groq AI</span></div></div>""", unsafe_allow_html=True)
 
 
 def render_user_profile():
@@ -1599,109 +1139,15 @@ def render_user_profile():
         return
     
     st.header("👤 Profil Saya")
-    
     role_info = get_user_role_info()
     
-    # Profile card - FIXED
     col1, col2 = st.columns([1, 2])
-    
     with col1:
-        profile_card = f"""
-<div style="background: linear-gradient(135deg, {role_info['color']}88, {role_info['color']}44); padding: 2rem; border-radius: 15px; text-align: center; border: 3px solid {role_info['color']};">
-    <div style="font-size: 4rem;">{role_info['badge']}</div>
-    <h2>{user['name']}</h2>
-    <p style="color: {role_info['color']}; font-weight: bold;">{role_info['name']}</p>
-</div>
-"""
-        st.markdown(profile_card, unsafe_allow_html=True)
-    
+        st.markdown(f"""<div style="background: linear-gradient(135deg, {role_info['color']}88, {role_info['color']}44); padding: 2rem; border-radius: 15px; text-align: center; border: 3px solid {role_info['color']};"><div style="font-size: 4rem;">{role_info['badge']}</div><h2>{user['name']}</h2><p style="color: {role_info['color']}; font-weight: bold;">{role_info['name']}</p></div>""", unsafe_allow_html=True)
     with col2:
         st.markdown("### 📋 Informasi Akun")
-        
-        st.markdown(f"""
-        | Field | Value |
-        |-------|-------|
-        | **Username** | @{user['username']} |
-        | **Email** | {user['email']} |
-        | **Phone** | {user.get('phone', '-')} |
-        | **Member Since** | {user.get('created_at', '-')[:10]} |
-        | **Last Login** | {user.get('last_login', '-')[:16] if user.get('last_login') else '-'} |
-        | **Status** | {'✅ Active' if user.get('status') == 'active' else '❌ Inactive'} |
-        """)
+        st.markdown(f"""| Field | Value |\n|-------|-------|\n| **Username** | @{user['username']} |\n| **Email** | {user['email']} |\n| **Phone** | {user.get('phone', '-')} |\n| **Member Since** | {user.get('created_at', '-')[:10]} |\n| **Last Login** | {user.get('last_login', '-')[:16] if user.get('last_login') else '-'} |\n| **Status** | {'✅ Active' if user.get('status') == 'active' else '❌ Inactive'} |""")
     
-    st.markdown("---")
-    
-    # Subscription info
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### 💎 Subscription")
-        
-        subscription = user.get("subscription", {})
-        
-        if user["role"] == "free":
-            st.info("Anda menggunakan paket **Gratis**")
-            st.markdown("Upgrade untuk membuka fitur premium!")
-            
-            if st.button("🚀 Upgrade Sekarang", type="primary"):
-                st.session_state.show_upgrade = True
-        else:
-            st.success(f"Paket: **{role_info['name']}**")
-            if subscription.get("end_date"):
-                st.markdown(f"Berlaku hingga: **{subscription['end_date'][:10]}**")
-    
-    with col2:
-        st.markdown("### 📊 Usage Statistics")
-        
-        stats = user.get("stats", {})
-        limits = role_info.get("limits", {})
-        
-        # AI Chat usage
-        chat_today = stats.get("ai_chat_today", 0)
-        chat_limit = limits.get("ai_chat_daily", 5)
-        
-        if chat_limit == -1:
-            st.markdown(f"🤖 Chat AI hari ini: **{chat_today}** (Unlimited)")
-        else:
-            st.markdown(f"🤖 Chat AI hari ini: **{chat_today}/{chat_limit}**")
-            st.progress(min(chat_today / chat_limit, 1.0))
-        
-        st.markdown(f"📋 Saved Plans: **{stats.get('total_saved_plans', 0)}**")
-    
-    st.markdown("---")
-    
-    # Edit profile
-    with st.expander("✏️ Edit Profil"):
-        with st.form("edit_profile"):
-            new_name = st.text_input("Nama", value=user.get("name", ""))
-            new_phone = st.text_input("Phone", value=user.get("phone", ""))
-            
-            if st.form_submit_button("💾 Simpan"):
-                user["name"] = new_name
-                user["phone"] = new_phone
-                st.success("Profil berhasil diupdate!")
-                st.rerun()
-    
-    # Change password
-    with st.expander("🔐 Ganti Password"):
-        with st.form("change_password"):
-            current_pw = st.text_input("Password Saat Ini", type="password")
-            new_pw = st.text_input("Password Baru", type="password")
-            confirm_pw = st.text_input("Konfirmasi Password", type="password")
-            
-            if st.form_submit_button("🔐 Ganti Password"):
-                from auth import hash_password
-                if hash_password(current_pw) != user["password_hash"]:
-                    st.error("Password saat ini salah")
-                elif new_pw != confirm_pw:
-                    st.error("Password baru tidak cocok")
-                elif len(new_pw) < 6:
-                    st.error("Password minimal 6 karakter")
-                else:
-                    user["password_hash"] = hash_password(new_pw)
-                    st.success("Password berhasil diganti!")
-    
-    # Logout button
     st.markdown("---")
     if st.button("🚪 Logout", type="secondary"):
         logout_user()
@@ -1712,53 +1158,34 @@ def main():
     """Main application entry point"""
     init_session_state()
     
-    # Initialize show_login_page state
     if "show_login_page" not in st.session_state:
         st.session_state.show_login_page = False
     
-    # Handle login redirect from landing page button
     if st.session_state.get("nav_to_login"):
         st.session_state.nav_to_login = False
         st.session_state.show_login_page = True
     
-    # If showing login page (before sidebar), render it and return
     if st.session_state.show_login_page and not is_logged_in():
-        # Mini header - FIXED
-        mini_header = f"""
-<div style="text-align: center; padding: 20px; background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%); border-radius: 10px; margin-bottom: 20px;">
-    <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.5rem; color: {COLORS['gold']};">{BRAND['arabic']}</div>
-    <div style="font-size: 1rem; font-weight: 700; color: white; letter-spacing: 0.2em;">{BRAND['name']}</div>
-</div>
-"""
-        st.markdown(mini_header, unsafe_allow_html=True)
-        
+        st.markdown(f"""<div style="text-align: center; padding: 20px; background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%); border-radius: 10px; margin-bottom: 20px;"><div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.5rem; color: {COLORS['gold']};">{BRAND['arabic']}</div><div style="font-size: 1rem; font-weight: 700; color: white; letter-spacing: 0.2em;">{BRAND['name']}</div></div>""", unsafe_allow_html=True)
         render_login_page()
-        
-        # Back button
         if st.button("← Kembali ke Beranda"):
             st.session_state.show_login_page = False
             st.rerun()
         return
     
-    # Clear show_login_page if logged in
     if is_logged_in():
         st.session_state.show_login_page = False
     
-    # Sidebar navigation
     page = render_sidebar()
     
-    # Initialize system on first load
     if not st.session_state.initialized:
-        # Check if API key is available
         if llm_config.groq_api_key or llm_config.openai_api_key:
             initialize_system()
     
-    # Route to appropriate page
     if "Beranda" in page:
         render_home()
         render_labbaik_footer()
     elif "Simulasi Biaya" in page:
-        # Check login for features
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
             render_login_page()
@@ -1799,15 +1226,8 @@ def main():
             render_login_page()
         else:
             track_page_view("Booking")
-            booking_header = f"""
-<div style="text-align: center; margin-bottom: 20px;">
-    <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
-    <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
-</div>
-"""
-            st.markdown(booking_header, unsafe_allow_html=True)
+            st.markdown(f"""<div style="text-align: center; margin-bottom: 20px;"><span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span><span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span></div>""", unsafe_allow_html=True)
             st.header("✈️ Booking & Reservasi")
-            st.markdown("Cari penerbangan, hotel, transportasi, dan paket travel terbaik")
             render_booking_features()
     elif "Tools" in page:
         if not is_logged_in():
@@ -1815,58 +1235,24 @@ def main():
             render_login_page()
         else:
             track_page_view("Tools")
-            tools_header = f"""
-<div style="text-align: center; margin-bottom: 20px;">
-    <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
-    <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
-</div>
-"""
-            st.markdown(tools_header, unsafe_allow_html=True)
+            st.markdown(f"""<div style="text-align: center; margin-bottom: 20px;"><span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span><span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span></div>""", unsafe_allow_html=True)
             st.header("🧰 Tools & Fitur Jamaah")
             render_additional_features()
     elif "Analytics" in page:
-        # Admin-only access control
         user = get_current_user()
         if not user or user.get("role") not in ["admin", "superadmin"]:
             st.error("🚫 Akses Ditolak")
-            st.warning("Halaman Analytics hanya tersedia untuk **Administrator**.")
-            st.info("Silakan login dengan akun admin untuk mengakses halaman ini.")
         else:
             track_page_view("Analytics")
-            analytics_header = f"""
-<div style="text-align: center; margin-bottom: 20px;">
-    <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
-    <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
-</div>
-"""
-            st.markdown(analytics_header, unsafe_allow_html=True)
             st.header("📊 Analytics Dashboard")
-            st.caption("🔐 Admin Access Only")
             render_analytics_dashboard()
     elif "Business" in page:
-        # Admin-only access control
         user = get_current_user()
         if not user or user.get("role") not in ["admin", "superadmin"]:
             st.error("🚫 Akses Ditolak")
-            st.warning("Halaman Business Hub hanya tersedia untuk **Administrator**.")
-            st.info("Silakan login dengan akun admin untuk mengakses halaman ini.")
-            if not is_logged_in():
-                st.markdown("---")
-                if st.button("🔐 Login sebagai Admin", type="primary"):
-                    st.session_state.redirect_to_login = True
-                    st.rerun()
         else:
             track_page_view("Business Hub")
-            business_header = f"""
-<div style="text-align: center; margin-bottom: 20px;">
-    <span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span>
-    <span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span>
-</div>
-"""
-            st.markdown(business_header, unsafe_allow_html=True)
             st.header("💼 Business Hub")
-            st.caption("🔐 Admin Access Only")
-            st.markdown("Monetisasi, partnership, dan fitur premium")
             render_monetization_page()
     elif "Login" in page:
         track_page_view("Login")
