@@ -228,7 +228,7 @@ LABBAIK membantu Anda merencanakan perjalanan umrah dengan:
 LABBAIK adalah platform simulasi & perencanaan. Selalu verifikasi dengan 
 travel agent berizin Kemenag RI dan sumber resmi.
 
-Dikembangkan oleh KIM Consulting dengan teknologi AI.
+Dikembangkan oleh MS Hadianto dengan teknologi AI.
 
 لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ
 "Aku datang memenuhi panggilan-Mu, ya Allah"
