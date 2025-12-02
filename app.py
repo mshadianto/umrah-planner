@@ -1099,11 +1099,20 @@ def render_budget_finder():
     available_packages = []
     partial_packages = []
     
+    # Hotel star mapping for each scenario
+    HOTEL_STARS = {
+        "ekonomis": "2-3",
+        "standard": "3-4", 
+        "premium": "4-5",
+        "vip": "5"
+    }
+    
     for scenario_key, threshold in PACKAGE_THRESHOLDS.items():
         template = SCENARIO_TEMPLATES[scenario_key]
         hotel_makkah = HOTEL_PRICES[scenario_key]["makkah"]
         hotel_madinah = HOTEL_PRICES[scenario_key]["madinah"]
         additional = ADDITIONAL_COSTS[scenario_key]
+        hotel_star = HOTEL_STARS.get(scenario_key, "3")
         
         # Calculate minimum cost for this package (base duration)
         base_nights_makkah = 4
@@ -1136,7 +1145,7 @@ def render_budget_finder():
             available_packages.append({
                 "scenario": scenario_key,
                 "name": template["name"],
-                "hotel_star": template["hotel_star"],
+                "hotel_star": hotel_star,
                 "nights_makkah": final_makkah,
                 "nights_madinah": final_madinah,
                 "duration": final_duration,
@@ -1144,7 +1153,7 @@ def render_budget_finder():
                 "remaining": budget_per_person - actual_total,
                 "hotel_makkah": hotel_makkah["name"],
                 "hotel_madinah": hotel_madinah["name"],
-                "features": template.get("features", []),
+                "features": ["Visa Umrah", "Transportasi", "Muthawwif", "Air Zamzam 5L"],
                 "flight_class": "Economy" if scenario_key in ["ekonomis", "standard"] else "Business" if scenario_key == "vip" else "Economy Plus",
                 "meals": "Prasmanan" if scenario_key in ["ekonomis"] else "Buffet Hotel" if scenario_key == "standard" else "Full Board Premium",
             })
