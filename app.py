@@ -63,6 +63,18 @@ from visitor_tracker import (
 )
 
 # ============================================
+# PWA (Progressive Web App) SUPPORT
+# ============================================
+try:
+    from pwa_component import init_pwa, render_install_card, render_pwa_status
+    PWA_AVAILABLE = True
+except ImportError:
+    PWA_AVAILABLE = False
+    def init_pwa(): pass
+    def render_install_card(): pass
+    def render_pwa_status(): pass
+
+# ============================================
 # DATABASE INTEGRATION (Neon PostgreSQL)
 # ============================================
 try:
@@ -2895,7 +2907,7 @@ def render_about():
 """
     st.markdown(about_header, unsafe_allow_html=True)
     
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["👨‍💻 Developer", "📋 Changelog", "🗺️ Roadmap", "🔧 Tech Stack", "📊 Stats", "⚖️ Legal & Disclaimer"])
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["👨‍💻 Developer", "📋 Changelog", "🗺️ Roadmap", "🔧 Tech Stack", "📊 Stats", "⚖️ Legal & Disclaimer", "📱 Install App"])
     
     with tab1:
         st.markdown(get_developer_card(), unsafe_allow_html=True)
@@ -2918,7 +2930,7 @@ def render_about():
         
         st.markdown(f"""
         <div style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #2E7D32; margin-top: 0;">📱 Q1 2026 - Mobile App</h4>
+            <h4 style="color: #2E7D32; margin-top: 0;">📱 Q1 2025 - Mobile App</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🤖 <strong>Android App</strong> - Play Store release</li>
                 <li>🍎 <strong>iOS App</strong> - App Store release</li>
@@ -2928,7 +2940,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #1565C0; margin-top: 0;">💳 Q2 2026 - Payment & Partnership</h4>
+            <h4 style="color: #1565C0; margin-top: 0;">💳 Q2 2025 - Payment & Partnership</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>💰 <strong>Payment Gateway</strong> - Bayar langsung via app</li>
                 <li>🤝 <strong>Travel Agent Portal</strong> - Partnership dashboard</li>
@@ -2938,7 +2950,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #E65100; margin-top: 0;">🌐 Q3 2026 - Global Expansion</h4>
+            <h4 style="color: #E65100; margin-top: 0;">🌐 Q3 2025 - Global Expansion</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🗣️ <strong>Multi-language</strong> - Arabic, English, Malay</li>
                 <li>🎤 <strong>Voice Assistant</strong> - Tanya dengan suara</li>
@@ -2948,7 +2960,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); border-radius: 15px; padding: 20px;">
-            <h4 style="color: #7B1FA2; margin-top: 0;">🚀 Q4 2026 - Advanced Features</h4>
+            <h4 style="color: #7B1FA2; margin-top: 0;">🚀 Q4 2025 - Advanced Features</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🧠 <strong>AI Travel Planner</strong> - Personalized itinerary</li>
                 <li>👥 <strong>Group Management</strong> - Kelola rombongan</li>
@@ -3064,6 +3076,82 @@ def render_about():
             </p>
         </div>
         """, unsafe_allow_html=True)
+    
+    with tab7:
+        st.markdown("### 📱 Install LABBAIK sebagai Aplikasi")
+        
+        # PWA Status
+        if PWA_AVAILABLE:
+            render_pwa_status()
+        
+        # Install instructions card
+        if PWA_AVAILABLE:
+            render_install_card()
+        else:
+            # Fallback manual instructions
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); 
+                        border: 2px solid {COLORS['gold']}40; border-radius: 20px; padding: 25px; margin: 20px 0;">
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <span style="font-size: 3rem;">📱</span>
+                    <h3 style="color: {COLORS['gold']}; margin: 10px 0 5px 0;">Install LABBAIK di HP Anda</h3>
+                    <p style="color: #888; font-size: 0.9rem; margin: 0;">
+                        Akses LABBAIK langsung dari home screen - seperti aplikasi native!
+                    </p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: #1E1E1E; border-radius: 15px; padding: 20px; border: 1px solid #333;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <span style="font-size: 1.5rem;">🤖</span>
+                            <span style="color: #4CAF50; font-weight: 700;">Android</span>
+                        </div>
+                        <ol style="color: #aaa; font-size: 0.85rem; line-height: 1.8; padding-left: 20px; margin: 0;">
+                            <li>Buka di <strong>Chrome</strong></li>
+                            <li>Tap menu <strong>⋮</strong> (kanan atas)</li>
+                            <li>Pilih "<strong>Add to Home screen</strong>"</li>
+                            <li>Tap "<strong>Add</strong>"</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="background: #1E1E1E; border-radius: 15px; padding: 20px; border: 1px solid #333;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <span style="font-size: 1.5rem;">🍎</span>
+                            <span style="color: #007AFF; font-weight: 700;">iPhone / iPad</span>
+                        </div>
+                        <ol style="color: #aaa; font-size: 0.85rem; line-height: 1.8; padding-left: 20px; margin: 0;">
+                            <li>Buka di <strong>Safari</strong></li>
+                            <li>Tap tombol <strong>Share</strong> 📤</li>
+                            <li>Scroll, pilih "<strong>Add to Home Screen</strong>"</li>
+                            <li>Tap "<strong>Add</strong>"</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: {COLORS['gold']}15; border-radius: 10px; text-align: center;">
+                    <div style="color: {COLORS['gold']}; font-weight: 600; margin-bottom: 5px;">💡 Keuntungan Install:</div>
+                    <div style="color: #888; font-size: 0.85rem;">
+                        Akses cepat • Layar penuh • Hemat data • Seperti app native
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Coming soon features
+        st.markdown("---")
+        st.markdown("### 🚀 Coming Soon")
+        st.info("""
+        **Play Store & App Store (Q1 2025)**
+        
+        Kami sedang mengembangkan aplikasi native untuk pengalaman yang lebih optimal:
+        - 🤖 Android App di Google Play Store
+        - 🍎 iOS App di Apple App Store
+        - 🔔 Push Notifications
+        - 📴 Full Offline Mode
+        
+        Stay tuned! 🎉
+        """)
 
 
 def render_labbaik_footer():
@@ -3111,6 +3199,10 @@ def render_user_profile():
 def main():
     """Main application entry point"""
     init_session_state()
+    
+    # Initialize PWA support
+    if PWA_AVAILABLE:
+        init_pwa()
     
     if "show_login_page" not in st.session_state:
         st.session_state.show_login_page = False
