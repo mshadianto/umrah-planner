@@ -14,7 +14,7 @@ See LICENSE and COPYRIGHT files for full terms.
 
 ================================================================================
 Platform: AI-Powered Umrah Planning Platform
-Version:  3.1.0
+Version:  3.4.0
 Codename: Labbaik
 Author:   MS Hadianto
 Email:    sopian.hadianto@gmail.com
@@ -22,9 +22,9 @@ Website:  labbaik.ai
 GitHub:   https://github.com/mshadianto
 ================================================================================
 
-Version: 3.1.0
+Version: 3.4.0
 Updated: 2025-12-02
-Changes: Added Makkah/Madinah duration options in Buat Rencana + UAH video tutorial + Budget Finder feature
+Changes: Database integration with Neon PostgreSQL for persistent data storage
 """
 
 import streamlit as st
@@ -63,6 +63,22 @@ from visitor_tracker import (
 )
 
 # ============================================
+# DATABASE INTEGRATION (Neon PostgreSQL)
+# ============================================
+try:
+    from db_integration import (
+        is_db_available, hybrid_login, hybrid_register,
+        db_get_open_trips, db_create_trip, db_get_user_trips,
+        db_update_trip_status, db_delete_trip,
+        db_get_forum_posts, db_create_post, db_get_post_comments,
+        db_add_comment, db_like_post, db_increment_views,
+        db_log_visit, db_get_stats
+    )
+    DB_AVAILABLE = True
+except ImportError:
+    DB_AVAILABLE = False
+
+# ============================================
 # LABBAIK BRAND CONSTANTS
 # ============================================
 
@@ -73,7 +89,7 @@ BRAND = {
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
     "full_tagline": "Labbaik Allahumma Labbaik - Aku Datang Memenuhi Panggilan-Mu",
-    "version": "3.3.0",
+    "version": "3.4.0",
 }
 
 COLORS = {
@@ -1410,9 +1426,20 @@ def render_budget_finder():
 # ============================================
 
 def init_umrah_bareng_state():
-    """Initialize Umrah Bareng session state"""
+    """Initialize Umrah Bareng session state - load from database if available"""
     if "open_trips" not in st.session_state:
-        # Sample data for demonstration
+        # Try to load from database first
+        if DB_AVAILABLE and is_db_available():
+            try:
+                db_trips = db_get_open_trips()
+                if db_trips:
+                    st.session_state.open_trips = db_trips
+                    st.session_state.trips_from_db = True
+                    return
+            except:
+                pass
+        
+        # Fallback to sample data for demonstration
         st.session_state.open_trips = [
             {
                 "id": "OT001",
@@ -1484,6 +1511,7 @@ def init_umrah_bareng_state():
                 "whatsapp_group": "https://chat.whatsapp.com/zzz",
             },
         ]
+        st.session_state.trips_from_db = False
 
 
 def render_umrah_bareng():
@@ -1812,12 +1840,8 @@ def render_umrah_bareng():
             
             if submitted:
                 if trip_title and creator_name and creator_phone:
-                    # Create new trip
-                    new_trip = {
-                        "id": f"OT{len(st.session_state.open_trips) + 1:03d}",
-                        "creator_name": creator_name,
-                        "creator_phone": creator_phone,
-                        "creator_city": creator_city,
+                    # Prepare trip data
+                    trip_data = {
                         "title": trip_title,
                         "departure_date": str(departure_date),
                         "departure_city": departure_city,
@@ -1826,26 +1850,55 @@ def render_umrah_bareng():
                         "duration_days": duration_days,
                         "nights_makkah": nights_makkah,
                         "nights_madinah": nights_madinah,
-                        "current_members": 1,  # Creator is first member
                         "max_members": max_members,
                         "gender_preference": gender_preference,
                         "age_preference": age_preference,
                         "special_notes": special_notes,
                         "amenities": amenities,
-                        "status": "open",
-                        "created_at": str(datetime.now().date()),
                         "whatsapp_group": whatsapp_group,
                     }
                     
-                    st.session_state.open_trips.append(new_trip)
-                    st.success("✅ Open Trip berhasil dibuat!")
-                    st.balloons()
+                    user = get_current_user()
+                    user_id = user.get("id") if user else None
+                    trip_code = None
+                    
+                    # Try database first
+                    if DB_AVAILABLE and is_db_available() and user_id:
+                        try:
+                            result = db_create_trip(user_id, trip_data)
+                            if result.get("success"):
+                                trip_code = result.get("trip_code")
+                                st.success(f"✅ Open Trip berhasil dibuat! Kode: {trip_code}")
+                                st.balloons()
+                                # Refresh trips from database
+                                st.session_state.open_trips = db_get_open_trips()
+                            else:
+                                st.error(f"❌ Gagal menyimpan ke database: {result.get('error')}")
+                        except Exception as e:
+                            st.warning(f"Database error, menyimpan secara lokal: {e}")
+                    
+                    # Fallback to session state if database fails or not available
+                    if not trip_code:
+                        new_trip = {
+                            "id": f"OT{len(st.session_state.open_trips) + 1:03d}",
+                            "creator_name": creator_name,
+                            "creator_phone": creator_phone,
+                            "creator_city": creator_city,
+                            "current_members": 1,
+                            "status": "open",
+                            "created_at": str(datetime.now().date()),
+                            **trip_data
+                        }
+                        st.session_state.open_trips.append(new_trip)
+                        trip_code = new_trip['id']
+                        st.success("✅ Open Trip berhasil dibuat!")
+                        st.balloons()
                     
                     st.markdown(f"""
                     <div style="background: #e8f5e9; border: 2px solid #4CAF50; border-radius: 10px; padding: 20px; margin-top: 20px;">
                         <h4 style="color: #2e7d32; margin-top: 0;">🎉 Open Trip Anda Sudah Live!</h4>
-                        <p><strong>ID:</strong> {new_trip['id']}</p>
-                        <p><strong>Judul:</strong> {new_trip['title']}</p>
+                        <p><strong>ID:</strong> {trip_code}</p>
+                        <p><strong>Judul:</strong> {trip_title}</p>
                         <p>Jamaah lain sekarang bisa melihat dan bergabung dengan open trip Anda.</p>
                     </div>
                     """, unsafe_allow_html=True)
@@ -1888,12 +1941,19 @@ def render_umrah_bareng():
                             st.info("Fitur edit akan segera hadir!")
                     with col2:
                         if st.button("🔴 Tutup", key=f"close_{trip['id']}"):
+                            # Try database first
+                            if DB_AVAILABLE and is_db_available() and isinstance(trip.get('id'), int):
+                                db_update_trip_status(trip['id'], 'closed')
                             trip["status"] = "closed"
                             st.success("Trip ditutup")
                             st.rerun()
                     with col3:
                         if st.button("🗑️ Hapus", key=f"delete_{trip['id']}"):
-                            st.session_state.open_trips.remove(trip)
+                            # Try database first
+                            if DB_AVAILABLE and is_db_available() and isinstance(trip.get('id'), int):
+                                db_delete_trip(trip['id'])
+                            if trip in st.session_state.open_trips:
+                                st.session_state.open_trips.remove(trip)
                             st.success("Trip dihapus")
                             st.rerun()
             else:
@@ -1940,8 +2000,20 @@ def render_umrah_bareng():
 # ============================================
 
 def init_forum_state():
-    """Initialize Forum Umrah Mandiri session state"""
+    """Initialize Forum Umrah Mandiri session state - load from database if available"""
     if "forum_posts" not in st.session_state:
+        # Try to load from database first
+        if DB_AVAILABLE and is_db_available():
+            try:
+                db_posts = db_get_forum_posts()
+                if db_posts:
+                    st.session_state.forum_posts = db_posts
+                    st.session_state.posts_from_db = True
+                    return
+            except:
+                pass
+        
+        # Fallback to sample data
         st.session_state.forum_posts = [
             {
                 "id": "F001",
@@ -2133,6 +2205,7 @@ Recommended banget buat yang mau umrah mandiri tapi bingung mulai dari mana! �
                 "views": 445,
             },
         ]
+        st.session_state.posts_from_db = False
 
 
 def render_umrah_mandiri():
@@ -2607,23 +2680,42 @@ def render_umrah_mandiri():
                 
                 if submitted:
                     if post_title and post_content:
-                        new_post = {
-                            "id": f"F{len(st.session_state.forum_posts) + 1:03d}",
-                            "author": user.get("name", "Anonymous"),
-                            "author_city": author_city,
-                            "avatar": "👤",
-                            "title": post_title,
-                            "category": post_category,
-                            "content": post_content,
-                            "likes": 0,
-                            "comments": [],
-                            "created_at": str(datetime.now().date()),
-                            "views": 0,
-                        }
+                        user_id = user.get("id") if user else None
+                        post_saved = False
                         
-                        st.session_state.forum_posts.insert(0, new_post)
-                        st.success("✅ Postingan berhasil dipublikasikan!")
-                        st.balloons()
+                        # Try database first
+                        if DB_AVAILABLE and is_db_available() and user_id:
+                            try:
+                                result = db_create_post(user_id, post_title, post_category, post_content)
+                                if result.get("success"):
+                                    st.success("✅ Postingan berhasil dipublikasikan!")
+                                    st.balloons()
+                                    post_saved = True
+                                    # Refresh posts from database
+                                    st.session_state.forum_posts = db_get_forum_posts()
+                                else:
+                                    st.warning(f"Database error: {result.get('error')}")
+                            except Exception as e:
+                                st.warning(f"Database error, menyimpan secara lokal: {e}")
+                        
+                        # Fallback to session state if database fails
+                        if not post_saved:
+                            new_post = {
+                                "id": f"F{len(st.session_state.forum_posts) + 1:03d}",
+                                "author": user.get("name", "Anonymous"),
+                                "author_city": author_city,
+                                "avatar": "👤",
+                                "title": post_title,
+                                "category": post_category,
+                                "content": post_content,
+                                "likes": 0,
+                                "comments": [],
+                                "created_at": str(datetime.now().date()),
+                                "views": 0,
+                            }
+                            st.session_state.forum_posts.insert(0, new_post)
+                            st.success("✅ Postingan berhasil dipublikasikan!")
+                            st.balloons()
                     else:
                         st.error("❌ Mohon isi judul dan konten postingan.")
         
