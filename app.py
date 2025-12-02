@@ -1988,11 +1988,21 @@ def render_umrah_bareng():
         - 📱 Koordinasi mudah via WhatsApp
         """)
     
-    st.warning("""
-    **⚠️ Disclaimer:** LABBAIK hanya memfasilitasi pertemuan antar calon jamaah. 
-    Segala transaksi dan koordinasi dilakukan langsung antar peserta dan travel agent terpilih. 
-    Pastikan memilih travel agent resmi berizin.
-    """)
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-left: 4px solid #FF9800; border-radius: 10px; padding: 20px; margin-top: 20px;">
+        <div style="color: #E65100; font-weight: 700; font-size: 1rem; margin-bottom: 10px;">⚠️ Disclaimer - Umrah Bareng</div>
+        <div style="color: #5D4037; font-size: 0.9rem; line-height: 1.7;">
+            <p style="margin-bottom: 10px;"><strong>LABBAIK hanya memfasilitasi pertemuan antar calon jamaah.</strong></p>
+            <ul style="margin: 0; padding-left: 20px;">
+                <li>Segala transaksi dilakukan langsung antar peserta</li>
+                <li>Verifikasi identitas peserta secara mandiri</li>
+                <li>Pilih travel agent resmi berizin Kemenag RI</li>
+                <li>Cek legalitas di: <strong>siskopatuh.kemenag.go.id</strong></li>
+            </ul>
+            <p style="margin-top: 10px; font-style: italic; color: #795548;">"Bertawakkal setelah berikhtiar dengan maksimal"</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ============================================
@@ -2753,6 +2763,47 @@ def render_umrah_mandiri():
         <div style="color: {COLORS['sand']}; font-size: 0.9rem;">💰 Simulasi Biaya • 🤖 AI Assistant • 📊 Perbandingan Paket</div>
     </div>
     """, unsafe_allow_html=True)
+    
+    # DYOR Disclaimer for Umrah Mandiri
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border: 2px solid #1976D2; border-radius: 15px; padding: 25px; margin-top: 25px;">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <span style="background: #1976D2; color: white; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
+                📋 DYOR - Do Your Own Research
+            </span>
+        </div>
+        
+        <div style="color: #0D47A1; font-size: 0.95rem; line-height: 1.8;">
+            <p style="text-align: center; font-weight: 600; margin-bottom: 15px;">
+                Informasi di halaman ini bersifat <strong>panduan umum</strong> dan <strong>estimasi</strong>.<br>
+                BUKAN pengganti riset pribadi Anda.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #4CAF50;">
+                    <div style="font-weight: 700; color: #2E7D32; margin-bottom: 8px;">✅ Verifikasi Sumber Resmi:</div>
+                    <ul style="margin: 0; padding-left: 18px; color: #333;">
+                        <li><strong>Arab Saudi:</strong> nusuk.sa</li>
+                        <li><strong>Indonesia:</strong> kemenag.go.id</li>
+                        <li><strong>KBRI Riyadh:</strong> +966-11-488-2800</li>
+                    </ul>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #FF9800;">
+                    <div style="font-weight: 700; color: #E65100; margin-bottom: 8px;">⚠️ Perlu Diingat:</div>
+                    <ul style="margin: 0; padding-left: 18px; color: #333;">
+                        <li>Harga dapat berubah sewaktu-waktu</li>
+                        <li>Regulasi visa dapat berubah</li>
+                        <li>Anda bertanggung jawab penuh</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <p style="text-align: center; color: #5D4037; font-style: italic; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #90CAF9;">
+                "Sebaik-baik persiapan adalah ilmu, sebaik-baik bekal adalah taqwa" 🤲
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def render_settings():
@@ -2809,7 +2860,7 @@ def render_about():
 """
     st.markdown(about_header, unsafe_allow_html=True)
     
-    tab1, tab2, tab3, tab4 = st.tabs(["👨‍💻 Developer", "📋 Changelog", "🔧 Tech Stack", "📊 Stats"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["👨‍💻 Developer", "📋 Changelog", "🔧 Tech Stack", "📊 Stats", "⚖️ Legal & Disclaimer"])
     
     with tab1:
         st.markdown(get_developer_card(), unsafe_allow_html=True)
@@ -2843,6 +2894,94 @@ def render_about():
             st.metric("🔄 Version", __version__)
         with col3:
             st.metric("📦 Modules", "8+")
+    
+    with tab5:
+        st.markdown("### ⚖️ Legal & Disclaimer")
+        
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%); border: 2px solid #D32F2F; border-radius: 15px; padding: 25px; margin-bottom: 20px;">
+            <h4 style="color: #B71C1C; margin-top: 0;">⚠️ DISCLAIMER - HARAP DIBACA</h4>
+            <div style="color: #5D4037; line-height: 1.8;">
+                <p><strong>LABBAIK</strong> adalah platform berbasis AI untuk <strong>simulasi dan perencanaan</strong> umrah. 
+                Platform ini:</p>
+                <ul>
+                    <li>BUKAN travel agent dan tidak menjual paket umrah</li>
+                    <li>BUKAN pengganti konsultasi dengan travel agent resmi</li>
+                    <li>BUKAN sumber informasi resmi pemerintah</li>
+                    <li>Dikembangkan oleh non-developer dengan bantuan AI</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(f"""
+            <div style="background: #E8F5E9; border-radius: 15px; padding: 20px; height: 100%;">
+                <h4 style="color: #2E7D32; margin-top: 0;">📌 Untuk Umrah via Travel Agent</h4>
+                <ul style="color: #333; line-height: 1.8;">
+                    <li>Pilih travel agent berizin <strong>Kemenag RI</strong></li>
+                    <li>Verifikasi di: <strong>siskopatuh.kemenag.go.id</strong></li>
+                    <li>Minta kontrak tertulis sebelum bayar</li>
+                    <li>Simpan bukti pembayaran</li>
+                    <li>Pahami hak & kewajiban Anda</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div style="background: #E3F2FD; border-radius: 15px; padding: 20px; height: 100%;">
+                <h4 style="color: #1565C0; margin-top: 0;">🕋 Untuk Umrah Mandiri (DYOR)</h4>
+                <ul style="color: #333; line-height: 1.8;">
+                    <li><strong>Do Your Own Research</strong> - riset mandiri</li>
+                    <li>Verifikasi regulasi di <strong>nusuk.sa</strong></li>
+                    <li>Cek update di <strong>kemenag.go.id</strong></li>
+                    <li>Simpan kontak KBRI Riyadh</li>
+                    <li>Anda bertanggung jawab penuh atas keputusan</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        st.markdown(f"""
+        <div style="background: #FFF8E1; border-radius: 15px; padding: 20px; margin-top: 10px;">
+            <h4 style="color: #F57F17; margin-top: 0;">📋 Sumber Informasi Resmi</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 10px;"><strong>🇸🇦 Arab Saudi</strong></td>
+                    <td style="padding: 10px;">nusuk.sa - Portal resmi visa & umrah</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 10px;"><strong>🇮🇩 Indonesia</strong></td>
+                    <td style="padding: 10px;">kemenag.go.id - Kementerian Agama RI</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 10px;"><strong>✅ Verifikasi Travel</strong></td>
+                    <td style="padding: 10px;">siskopatuh.kemenag.go.id</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><strong>🏛️ KBRI Riyadh</strong></td>
+                    <td style="padding: 10px;">+966-11-488-2800</td>
+                </tr>
+            </table>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div style="background: #F3E5F5; border-radius: 15px; padding: 20px; margin-top: 20px; text-align: center;">
+            <h4 style="color: #7B1FA2; margin-top: 0;">🤖 Tentang Pengembangan</h4>
+            <p style="color: #4A148C; line-height: 1.8;">
+                Platform ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI 
+                (<strong>Claude by Anthropic</strong> & <strong>Gemini by Google</strong>).<br><br>
+                Tujuannya adalah membantu calon jamaah dalam <strong>simulasi biaya</strong> dan 
+                <strong>perencanaan perjalanan umrah</strong>.<br><br>
+                <em>"Sebaik-baik persiapan adalah ilmu, sebaik-baik bekal adalah taqwa"</em> 🤲
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def render_labbaik_footer():
@@ -2857,9 +2996,9 @@ def render_labbaik_footer():
     
     st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px; text-align: center;"><div style="color: #888; font-size: 0.85rem;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div></div>""", unsafe_allow_html=True)
     
-    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;"><div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px 20px; margin: 0 auto; max-width: 600px;"><div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">⚠️ Disclaimer</div><div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">Aplikasi ini dikembangkan oleh non-developer dengan memanfaatkan teknologi AI (Claude, Gemini, dll). Informasi yang disajikan bersifat simulasi dan estimasi. Untuk keputusan perjalanan umrah, selalu konsultasikan dengan travel agent resmi berizin.</div></div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;"><div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 20px 25px; margin: 0 auto; max-width: 700px;"><div style="color: #D4AF37; font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;">⚠️ Disclaimer & DYOR</div><div style="color: #bbb; font-size: 0.78rem; line-height: 1.7; text-align: left;"><p style="margin-bottom: 8px;">Platform ini menyediakan <strong>simulasi & estimasi</strong> untuk perencanaan umrah. Informasi bukan pengganti riset pribadi.</p><p style="margin-bottom: 8px;">📌 <strong>Travel Agent:</strong> Pastikan berizin resmi Kemenag RI (cek: siskopatuh.kemenag.go.id)</p><p style="margin-bottom: 8px;">📌 <strong>Umrah Mandiri:</strong> Verifikasi regulasi terbaru di nusuk.sa & kemenag.go.id</p><p style="margin: 0; color: #888; font-style: italic;">🤖 Dikembangkan dengan bantuan AI (Claude & Gemini) oleh non-developer.</p></div></div></div>""", unsafe_allow_html=True)
     
-    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px 40px 40px; border-radius: 0 0 20px 20px; text-align: center;"><div style="border-top: 1px solid #333; padding-top: 20px; color: #666; font-size: 0.8rem;">© 2025 LABBAIK. Hak Cipta Dilindungi.<br><span style="color: #D4AF37;">Made with ❤️ &amp; AI by MS Hadianto</span><br><span style="color: #555; font-size: 0.7rem;">v3.1.0 Beta • Powered by Streamlit &amp; Groq AI</span></div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px 40px 40px; border-radius: 0 0 20px 20px; text-align: center;"><div style="border-top: 1px solid #333; padding-top: 20px; color: #666; font-size: 0.8rem;">© 2025 LABBAIK. Hak Cipta Dilindungi.<br><span style="color: #D4AF37;">Made with ❤️ &amp; AI by MS Hadianto</span><br><span style="color: #555; font-size: 0.7rem;">v3.4.0 Beta • Powered by Streamlit &amp; Groq AI</span></div></div>""", unsafe_allow_html=True)
 
 
 def render_user_profile():
