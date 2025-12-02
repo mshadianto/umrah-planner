@@ -394,20 +394,20 @@ VIDEO_TUTORIALS = [
     {
         "id": "uah_manasik",
         "title": "Panduan Lengkap Manasik Umrah - Ustadz Adi Hidayat",
-        "url": "https://www.youtube.com/live/sS7T6YqIJHI?si=oWshzMle8D034mC8",
+        "url": "https://youtu.be/e1XsLF6aUaA?si=Bxpy9w5r7fkc2Yw1",
         "description": "Kajian lengkap tata cara manasik umrah dari Ustadz Adi Hidayat, Lc., MA. Penjelasan detail mulai dari ihram hingga tahallul dengan dalil-dalil shahih.",
         "speaker": "Ustadz Adi Hidayat, Lc., MA",
-        "duration": "Live Stream",
+        "duration": "2+ jam",
         "featured": True,
         "tags": ["manasik", "umrah", "lengkap", "ustadz adi hidayat"]
     },
     {
         "id": "generic_manasik",
-        "title": "Video Panduan Manasik Umrah",
+        "title": "Video Panduan Manasik Umrah Singkat",
         "url": "https://www.youtube.com/watch?v=TRYDkDwqJv0",
-        "description": "Video panduan manasik umrah untuk referensi tambahan.",
+        "description": "Video panduan manasik umrah singkat untuk referensi tambahan.",
         "speaker": "Various",
-        "duration": "Video",
+        "duration": "~15 menit",
         "featured": False,
         "tags": ["manasik", "umrah", "panduan"]
     }
