@@ -6,6 +6,7 @@ __version__ = "3.4.0"
 DEVELOPER = {
     "name": "MS Hadianto",
     "role": "Founder & Lead Developer",
+    "company": "MSH Consulting",
     "email": "sopian.hadianto@gmail.com",
     "whatsapp": "6281596588833",
     "github": "https://github.com/mshadianto",
@@ -231,15 +232,16 @@ def get_version_badge():
 
 def get_developer_card():
     """Return styled developer info card HTML"""
+    company = DEVELOPER.get('company', 'Independent Developer')
     return f"""
 <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); 
             border-radius: 15px; padding: 25px; border: 1px solid #D4AF3740;">
     <div style="display: flex; align-items: center; gap: 20px;">
         <div style="font-size: 4rem;">👨‍💻</div>
         <div>
-            <h3 style="color: #D4AF37; margin: 0;">{DEVELOPER['name']}</h3>
-            <p style="color: #C9A86C; margin: 5px 0;">{DEVELOPER['role']}</p>
-            <p style="color: #888; margin: 0; font-size: 0.9rem;">{DEVELOPER['company']}</p>
+            <h3 style="color: #D4AF37; margin: 0;">{DEVELOPER.get('name', 'Developer')}</h3>
+            <p style="color: #C9A86C; margin: 5px 0;">{DEVELOPER.get('role', 'Developer')}</p>
+            <p style="color: #888; margin: 0; font-size: 0.9rem;">{company}</p>
         </div>
     </div>
     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;">
