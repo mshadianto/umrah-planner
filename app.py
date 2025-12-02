@@ -24,7 +24,7 @@ GitHub:   https://github.com/mshadianto
 
 Version: 3.1.0
 Updated: 2025-12-02
-Changes: Added Makkah/Madinah duration options in Buat Rencana + UAH video tutorial
+Changes: Added Makkah/Madinah duration options in Buat Rencana + UAH video tutorial + Budget Finder feature
 """
 
 import streamlit as st
@@ -470,6 +470,7 @@ def render_sidebar():
             nav_items = [
                 "🏠 Beranda",
                 "💰 Simulasi Biaya",
+                "💵 Cari Paket by Budget",
                 "📊 Perbandingan Skenario",
                 "📅 Analisis Waktu",
                 "🤖 Chat AI",
@@ -660,12 +661,14 @@ def render_home():
         
         st.markdown(f"<h3 style='color: {COLORS['black']}; margin: 20px 0;'>✨ Fitur Utama</h3>", unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.markdown("""<div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Assistant 24/7</div><div class="feature-desc">Tanya apapun tentang umrah</div></div>""", unsafe_allow_html=True)
         with col2:
             st.markdown("""<div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">Simulasi Biaya</div><div class="feature-desc">Hitung estimasi biaya umrah</div></div>""", unsafe_allow_html=True)
         with col3:
+            st.markdown("""<div class="feature-card"><div class="feature-icon">💵</div><div class="feature-title">Cari by Budget</div><div class="feature-desc">Temukan paket sesuai dana</div></div>""", unsafe_allow_html=True)
+        with col4:
             st.markdown("""<div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Bandingkan Paket</div><div class="feature-desc">Ekonomis hingga VIP</div></div>""", unsafe_allow_html=True)
         
         st.markdown("---")
@@ -1022,6 +1025,367 @@ def render_create_plan():
                 st.error(f"Error: {str(e)}")
 
 
+def render_budget_finder():
+    """Render budget finder page - Find packages based on available budget v3.1.0"""
+    st.header("💵 Cari Paket Sesuai Budget")
+    st.markdown("Masukkan dana yang Anda miliki, kami akan carikan paket terbaik untuk Anda!")
+    
+    # Budget input
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        budget = st.number_input(
+            "💰 Budget Anda (Rp)",
+            min_value=10_000_000,
+            max_value=500_000_000,
+            value=35_000_000,
+            step=1_000_000,
+            format="%d",
+            help="Masukkan total dana yang Anda siapkan untuk umrah"
+        )
+    
+    with col2:
+        num_people = st.number_input(
+            "👥 Jumlah Jamaah",
+            min_value=1,
+            max_value=50,
+            value=1,
+            help="Berapa orang yang akan berangkat?"
+        )
+    
+    budget_per_person = budget / num_people
+    
+    st.markdown("---")
+    
+    # Display budget per person
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+        <div style="color: #C9A86C; font-size: 0.9rem;">Budget Per Orang</div>
+        <div style="color: #D4AF37; font-size: 2rem; font-weight: 700;">Rp {budget_per_person:,.0f}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Analyze what packages are available
+    st.markdown("### 📊 Analisis Paket yang Tersedia")
+    
+    # Package thresholds (minimum budget per person for each scenario)
+    PACKAGE_THRESHOLDS = {
+        "ekonomis": {
+            "min_budget": 20_000_000,
+            "max_budget": 35_000_000,
+            "base_duration": 9,  # minimum days
+            "max_duration": 12,
+        },
+        "standard": {
+            "min_budget": 35_000_000,
+            "max_budget": 50_000_000,
+            "base_duration": 9,
+            "max_duration": 14,
+        },
+        "premium": {
+            "min_budget": 50_000_000,
+            "max_budget": 80_000_000,
+            "base_duration": 10,
+            "max_duration": 14,
+        },
+        "vip": {
+            "min_budget": 80_000_000,
+            "max_budget": 200_000_000,
+            "base_duration": 12,
+            "max_duration": 21,
+        }
+    }
+    
+    available_packages = []
+    partial_packages = []
+    
+    for scenario_key, threshold in PACKAGE_THRESHOLDS.items():
+        template = SCENARIO_TEMPLATES[scenario_key]
+        hotel_makkah = HOTEL_PRICES[scenario_key]["makkah"]
+        hotel_madinah = HOTEL_PRICES[scenario_key]["madinah"]
+        additional = ADDITIONAL_COSTS[scenario_key]
+        
+        # Calculate minimum cost for this package (base duration)
+        base_nights_makkah = 4
+        base_nights_madinah = 3
+        base_total_days = base_nights_makkah + base_nights_madinah + 2
+        
+        min_accommodation = (hotel_makkah["price"] * base_nights_makkah) + (hotel_madinah["price"] * base_nights_madinah)
+        min_total = min_accommodation + additional["flight"] + additional["visa"] + additional["transport"] + (additional["meals"] * base_total_days)
+        
+        # Calculate maximum possible duration with this budget
+        if budget_per_person >= min_total:
+            # Calculate how many extra nights can be afforded
+            remaining_budget = budget_per_person - min_total
+            extra_night_cost = hotel_makkah["price"] + additional["meals"]  # Cost per extra night
+            extra_nights = int(remaining_budget / extra_night_cost)
+            max_possible_nights = min(base_nights_makkah + base_nights_madinah + extra_nights, threshold["max_duration"] - 2)
+            
+            # Distribute extra nights
+            extra_makkah = min(extra_nights // 2, 6)  # Max 10 nights in Makkah
+            extra_madinah = min(extra_nights - extra_makkah, 7)  # Max 10 nights in Madinah
+            
+            final_makkah = base_nights_makkah + extra_makkah
+            final_madinah = base_nights_madinah + extra_madinah
+            final_duration = final_makkah + final_madinah + 2
+            
+            # Recalculate actual cost
+            actual_accommodation = (hotel_makkah["price"] * final_makkah) + (hotel_madinah["price"] * final_madinah)
+            actual_total = actual_accommodation + additional["flight"] + additional["visa"] + additional["transport"] + (additional["meals"] * final_duration)
+            
+            available_packages.append({
+                "scenario": scenario_key,
+                "name": template["name"],
+                "hotel_star": template["hotel_star"],
+                "nights_makkah": final_makkah,
+                "nights_madinah": final_madinah,
+                "duration": final_duration,
+                "total_cost": actual_total,
+                "remaining": budget_per_person - actual_total,
+                "hotel_makkah": hotel_makkah["name"],
+                "hotel_madinah": hotel_madinah["name"],
+                "features": template.get("features", []),
+                "flight_class": "Economy" if scenario_key in ["ekonomis", "standard"] else "Business" if scenario_key == "vip" else "Economy Plus",
+                "meals": "Prasmanan" if scenario_key in ["ekonomis"] else "Buffet Hotel" if scenario_key == "standard" else "Full Board Premium",
+            })
+        elif budget_per_person >= threshold["min_budget"] * 0.7:
+            # Partial - almost enough
+            shortage = min_total - budget_per_person
+            partial_packages.append({
+                "scenario": scenario_key,
+                "name": template["name"],
+                "shortage": shortage,
+                "min_required": min_total,
+            })
+    
+    # Display available packages
+    if available_packages:
+        st.success(f"✅ **{len(available_packages)} Paket Tersedia** untuk budget Anda!")
+        
+        for i, pkg in enumerate(available_packages):
+            # Determine card color based on scenario
+            colors = {
+                "ekonomis": ("#4CAF50", "#E8F5E9"),
+                "standard": ("#2196F3", "#E3F2FD"),
+                "premium": ("#FF9800", "#FFF3E0"),
+                "vip": ("#D4AF37", "#FFF8E1"),
+            }
+            accent_color, bg_color = colors.get(pkg["scenario"], ("#666", "#f5f5f5"))
+            
+            st.markdown(f"""
+            <div style="background: {bg_color}; border: 2px solid {accent_color}; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div>
+                        <span style="background: {accent_color}; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">
+                            {'🌟' if pkg['scenario'] == 'vip' else '⭐' if pkg['scenario'] == 'premium' else '✨'} {pkg['name']}
+                        </span>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.8rem; color: #666;">Estimasi Biaya/Orang</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: {accent_color};">Rp {pkg['total_cost']:,.0f}</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Package details in columns
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.markdown(f"""
+                **🕋 Mekkah**  
+                {pkg['nights_makkah']} malam  
+                _{pkg['hotel_makkah'][:30]}..._
+                """)
+            
+            with col2:
+                st.markdown(f"""
+                **🕌 Madinah**  
+                {pkg['nights_madinah']} malam  
+                _{pkg['hotel_madinah'][:30]}..._
+                """)
+            
+            with col3:
+                st.markdown(f"""
+                **📅 Durasi**  
+                {pkg['duration']} hari  
+                _Termasuk transit_
+                """)
+            
+            with col4:
+                if pkg['remaining'] > 0:
+                    st.markdown(f"""
+                    **💰 Sisa Budget**  
+                    Rp {pkg['remaining']:,.0f}  
+                    _Untuk oleh-oleh_
+                    """)
+                else:
+                    st.markdown(f"""
+                    **💰 Status**  
+                    Pas Budget  
+                    _Sesuai dana_
+                    """)
+            
+            # Expandable details
+            with st.expander(f"📋 Lihat Detail Paket {pkg['name']}"):
+                detail_col1, detail_col2 = st.columns(2)
+                
+                with detail_col1:
+                    st.markdown("**✈️ Penerbangan**")
+                    st.markdown(f"- Kelas: {pkg['flight_class']}")
+                    st.markdown(f"- Rute: PP Indonesia - Jeddah/Madinah")
+                    
+                    st.markdown("**🏨 Akomodasi**")
+                    st.markdown(f"- Hotel Bintang: ⭐ {pkg['hotel_star']}")
+                    st.markdown(f"- Mekkah: {pkg['hotel_makkah']}")
+                    st.markdown(f"- Madinah: {pkg['hotel_madinah']}")
+                
+                with detail_col2:
+                    st.markdown("**🍽️ Konsumsi**")
+                    st.markdown(f"- Tipe: {pkg['meals']}")
+                    st.markdown(f"- {pkg['duration']} hari full board")
+                    
+                    st.markdown("**📦 Termasuk**")
+                    st.markdown("- ✅ Visa Umrah")
+                    st.markdown("- ✅ Transportasi lokal")
+                    st.markdown("- ✅ Muthawwif/Guide")
+                    st.markdown("- ✅ Air Zamzam 5L")
+                
+                # Cost breakdown
+                st.markdown("---")
+                st.markdown("**💰 Rincian Biaya Per Orang:**")
+                
+                additional = ADDITIONAL_COSTS[pkg["scenario"]]
+                hotel_m = HOTEL_PRICES[pkg["scenario"]]["makkah"]["price"] * pkg["nights_makkah"]
+                hotel_d = HOTEL_PRICES[pkg["scenario"]]["madinah"]["price"] * pkg["nights_madinah"]
+                
+                breakdown_data = [
+                    ("✈️ Tiket Pesawat PP", additional["flight"]),
+                    ("🕋 Hotel Mekkah", hotel_m),
+                    ("🕌 Hotel Madinah", hotel_d),
+                    ("📄 Visa & Handling", additional["visa"]),
+                    ("🚐 Transportasi", additional["transport"]),
+                    (f"🍽️ Makan ({pkg['duration']} hari)", additional["meals"] * pkg["duration"]),
+                ]
+                
+                for item, cost in breakdown_data:
+                    st.markdown(f"- {item}: **Rp {cost:,.0f}**")
+                
+                st.markdown(f"**TOTAL: Rp {pkg['total_cost']:,.0f}**")
+            
+            st.markdown("---")
+        
+        # Summary for multiple people
+        if num_people > 1:
+            best_pkg = available_packages[0]  # Recommend the first available (usually ekonomis)
+            total_for_group = best_pkg["total_cost"] * num_people
+            
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 25px; border-radius: 15px; margin-top: 20px;">
+                <div style="text-align: center;">
+                    <div style="color: #C9A86C; font-size: 1rem; margin-bottom: 10px;">💡 Rekomendasi untuk {num_people} Jamaah</div>
+                    <div style="color: white; font-size: 1.2rem; margin-bottom: 15px;">Paket <strong style="color: #D4AF37;">{best_pkg['name']}</strong></div>
+                    <table style="margin: 0 auto; color: white;">
+                        <tr>
+                            <td style="padding: 10px 30px; text-align: center;">
+                                <div style="font-size: 0.8rem; color: #888;">Per Orang</div>
+                                <div style="font-size: 1.3rem; font-weight: 700; color: #D4AF37;">Rp {best_pkg['total_cost']:,.0f}</div>
+                            </td>
+                            <td style="padding: 10px 30px; text-align: center;">
+                                <div style="font-size: 0.8rem; color: #888;">Total {num_people} Orang</div>
+                                <div style="font-size: 1.3rem; font-weight: 700; color: #D4AF37;">Rp {total_for_group:,.0f}</div>
+                            </td>
+                            <td style="padding: 10px 30px; text-align: center;">
+                                <div style="font-size: 0.8rem; color: #888;">Sisa Budget</div>
+                                <div style="font-size: 1.3rem; font-weight: 700; color: #4CAF50;">Rp {budget - total_for_group:,.0f}</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    else:
+        # No packages available
+        st.warning("⚠️ Budget belum mencukupi untuk paket umrah reguler.")
+        
+        # Show what's needed
+        min_ekonomis = 20_000_000
+        shortage = min_ekonomis - budget_per_person
+        
+        st.markdown(f"""
+        <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; border-radius: 0 10px 10px 0;">
+            <h4 style="color: #e65100; margin-top: 0;">💡 Saran untuk Anda</h4>
+            <p>Budget per orang: <strong>Rp {budget_per_person:,.0f}</strong></p>
+            <p>Minimum untuk Paket Ekonomis: <strong>Rp {min_ekonomis:,.0f}</strong></p>
+            <p>Kekurangan: <strong style="color: #e65100;">Rp {shortage:,.0f}</strong></p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("### 📈 Opsi yang Bisa Anda Lakukan:")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            **💰 Tambah Tabungan**
+            - Target tambahan: Rp {:,.0f}
+            - Jika menabung Rp 1 juta/bulan: {} bulan lagi
+            - Jika menabung Rp 2 juta/bulan: {} bulan lagi
+            """.format(
+                shortage,
+                int(shortage / 1_000_000) + 1,
+                int(shortage / 2_000_000) + 1
+            ))
+        
+        with col2:
+            st.markdown("""
+            **🤝 Opsi Lain**
+            - Cari promo early bird
+            - Berangkat di low season (Januari-Februari)
+            - Gabung dengan grup besar untuk diskon
+            - Cicilan dari travel agent
+            """)
+        
+        # Show partial packages (almost affordable)
+        if partial_packages:
+            st.markdown("### 📦 Paket yang Hampir Terjangkau")
+            for pkg in partial_packages:
+                st.info(f"**{pkg['name']}** - Kurang Rp {pkg['shortage']:,.0f} (Minimum: Rp {pkg['min_required']:,.0f})")
+    
+    # Tips section
+    st.markdown("---")
+    st.markdown("### 💡 Tips Mendapatkan Harga Terbaik")
+    
+    tips_col1, tips_col2 = st.columns(2)
+    
+    with tips_col1:
+        st.markdown("""
+        **🗓️ Waktu Booking**
+        - Book 3-4 bulan sebelumnya
+        - Hindari musim haji & Ramadhan
+        - Cari promo akhir tahun
+        
+        **✈️ Penerbangan**
+        - Flexible date = harga lebih murah
+        - Transit 1x bisa hemat 20-30%
+        - Cek berbagai maskapai
+        """)
+    
+    with tips_col2:
+        st.markdown("""
+        **🏨 Akomodasi**
+        - Hotel agak jauh = lebih murah
+        - Sharing room untuk hemat
+        - Weekday lebih murah dari weekend
+        
+        **👥 Grup**
+        - Grup 10+ orang dapat diskon
+        - Gabung open trip
+        - Tanya promo travel agent
+        """)
+
+
 def render_settings():
     """Render settings page"""
     st.header("⚙️ Pengaturan")
@@ -1192,6 +1556,13 @@ def main():
         else:
             track_page_view("Cost Simulation")
             render_cost_simulation()
+    elif "Cari Paket by Budget" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            track_page_view("Budget Finder")
+            render_budget_finder()
     elif "Perbandingan" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
