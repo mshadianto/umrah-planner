@@ -246,7 +246,7 @@ def get_developer_card():
     </div>
     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;">
         <p style="color: #aaa; font-size: 0.85rem; line-height: 1.6;">
-            Platform ini dikembangkan oleh MS Hadianto, profesional di bidang GRC & Internal Audit, 
+            Platform ini dikembangkan oleh MS Hadianto - profesional di bidang GRC & Internal Audit, 
             dengan memanfaatkan teknologi AI (Claude by Anthropic & Gemini by Google) untuk membantu 
             calon jamaah merencanakan perjalanan umrah yang terencana dan sesuai budget.
         </p>
