@@ -5,7 +5,7 @@ Checklist, Kalkulator Tabungan, Doa & Manasik, dll
 
 Version: 3.1.0
 Updated: 2025-12-02
-Changes: Added Ustadz Adi Hidayat video tutorial in Video Tutorial tab
+Changes: Added Ustadz Adi Hidayat video tutorial as featured recommendation
 """
 
 import streamlit as st
@@ -386,31 +386,36 @@ DOA_MANASIK = {
     }
 }
 
-
 # ============================================
-# VIDEO TUTORIALS DATA - UPDATED
+# VIDEO TUTORIALS DATA - v3.1.0 NEW!
 # ============================================
 
 VIDEO_TUTORIALS = [
     {
-        "title": "🕋 Panduan Lengkap Tata Cara Umrah - Ustadz Adi Hidayat",
-        "url": "https://www.youtube.com/watch?v=sS7T6YqIJHI",
-        "description": "Video lengkap tata cara umrah dari niat hingga tahallul oleh Ustadz Adi Hidayat. Penjelasan detail dan mudah dipahami.",
-        "duration": "Live Streaming",
-        "featured": True
+        "id": "uah_manasik",
+        "title": "Panduan Lengkap Manasik Umrah - Ustadz Adi Hidayat",
+        "url": "https://www.youtube.com/live/sS7T6YqIJHI?si=oWshzMle8D034mC8",
+        "description": "Kajian lengkap tata cara manasik umrah dari Ustadz Adi Hidayat, Lc., MA. Penjelasan detail mulai dari ihram hingga tahallul dengan dalil-dalil shahih.",
+        "speaker": "Ustadz Adi Hidayat, Lc., MA",
+        "duration": "Live Stream",
+        "featured": True,
+        "tags": ["manasik", "umrah", "lengkap", "ustadz adi hidayat"]
     },
     {
-        "title": "📖 Manasik Umrah Lengkap",
+        "id": "generic_manasik",
+        "title": "Video Panduan Manasik Umrah",
         "url": "https://www.youtube.com/watch?v=TRYDkDwqJv0",
-        "description": "Tutorial manasik umrah step by step",
-        "duration": "~45 menit",
-        "featured": False
-    },
+        "description": "Video panduan manasik umrah untuk referensi tambahan.",
+        "speaker": "Various",
+        "duration": "Video",
+        "featured": False,
+        "tags": ["manasik", "umrah", "panduan"]
+    }
 ]
 
 
 def render_doa_manasik():
-    """Render doa and manasik guide with video tutorials"""
+    """Render doa and manasik guide with video tutorials - v3.1.0"""
     st.markdown("### 📿 Panduan Doa & Manasik Umrah")
     
     # Tabs for different sections
@@ -495,38 +500,54 @@ def render_doa_manasik():
     
     with tab3:
         st.markdown("#### 🎥 Video Panduan Manasik Umrah")
-        st.markdown("Tonton video tutorial berikut untuk memahami tata cara umrah dengan lebih baik:")
+        st.markdown("Pelajari tata cara manasik umrah dari ulama terpercaya:")
         
-        st.markdown("---")
+        # Display featured videos first
+        featured_videos = [v for v in VIDEO_TUTORIALS if v.get("featured", False)]
+        other_videos = [v for v in VIDEO_TUTORIALS if not v.get("featured", False)]
         
-        # Featured video - Ustadz Adi Hidayat
-        for video in VIDEO_TUTORIALS:
-            if video.get("featured"):
+        # Featured Video Section
+        if featured_videos:
+            for video in featured_videos:
+                # Featured video with gold border styling
                 st.markdown(f"""
-                <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #d4af37;">
-                    <span style="background: #d4af37; color: #1a1a1a; padding: 3px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold;">⭐ REKOMENDASI</span>
-                    <h4 style="color: #d4af37; margin: 10px 0 5px 0;">{video['title']}</h4>
-                    <p style="color: #c9a86c; margin: 0; font-size: 0.9rem;">{video['description']}</p>
+                <div style="background: linear-gradient(135deg, #d4af37 0%, #f5e6c8 50%, #d4af37 100%); padding: 3px; border-radius: 15px; margin-bottom: 20px;">
+                    <div style="background: white; padding: 20px; border-radius: 12px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <span style="background: linear-gradient(135deg, #d4af37 0%, #c9a86c 100%); color: #1A1A1A; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">⭐ REKOMENDASI</span>
+                        </div>
+                        <h4 style="margin: 0 0 8px 0; color: #1A1A1A;">{video['title']}</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 8px;">{video['description']}</p>
+                        <p style="color: #d4af37; font-size: 0.85rem; font-weight: 600;">🎤 {video['speaker']}</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Embed YouTube video
-                st.video(video["url"])
+                # Embed the featured video
+                st.video(video['url'])
                 st.caption(f"⏱️ Durasi: {video['duration']}")
+                st.markdown("---")
         
-        st.markdown("---")
-        st.markdown("##### 📚 Video Tutorial Lainnya")
-        
-        # Other videos
-        for video in VIDEO_TUTORIALS:
-            if not video.get("featured"):
-                with st.expander(f"▶️ {video['title']}"):
-                    st.markdown(f"*{video['description']}*")
-                    st.video(video["url"])
+        # Other Videos Section
+        if other_videos:
+            st.markdown("#### 📺 Video Lainnya")
+            for video in other_videos:
+                with st.expander(f"🎬 {video['title']}", expanded=False):
+                    st.markdown(f"**{video['description']}**")
+                    st.markdown(f"🎤 *{video['speaker']}*")
+                    st.video(video['url'])
                     st.caption(f"⏱️ Durasi: {video['duration']}")
         
+        # Tips section
         st.markdown("---")
-        st.info("💡 **Tips:** Tonton video-video ini sebelum berangkat agar lebih memahami tata cara umrah yang benar.")
+        st.info("""
+        💡 **Tips Belajar Manasik:**
+        - Tonton video beberapa kali sebelum berangkat
+        - Catat poin-poin penting
+        - Praktikkan gerakan thawaf dan sa'i
+        - Hafalkan doa-doa utama
+        - Ikuti manasik dari travel agent jika tersedia
+        """)
 
 
 # ============================================
