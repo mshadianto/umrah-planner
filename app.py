@@ -470,7 +470,42 @@ def render_sidebar():
         
         init_user_database()
         init_monetization_state()
-        render_user_badge()
+        
+        # Custom user badge with dark background for sidebar visibility
+        user = get_current_user()
+        if user:
+            role_info = get_user_role_info()
+            badge_html = f"""
+<div style="background: linear-gradient(135deg, {role_info['color']}40, {role_info['color']}20); 
+            border: 2px solid {role_info['color']}; border-radius: 15px; padding: 20px; 
+            text-align: center; margin: 10px 0;">
+    <div style="font-size: 2.5rem; margin-bottom: 5px;">{role_info['badge']}</div>
+    <div style="color: white; font-weight: 700; font-size: 1rem;">{user['name']}</div>
+    <div style="color: {role_info['color']}; font-size: 0.8rem; font-weight: 600;">{role_info['name']}</div>
+</div>
+"""
+            st.markdown(badge_html, unsafe_allow_html=True)
+            
+            # Logout button for logged-in users
+            if st.button("🚪 Logout", use_container_width=True, key="sidebar_logout_btn"):
+                logout_user()
+                st.rerun()
+        else:
+            guest_badge_html = f"""
+<div style="background: linear-gradient(135deg, #333 0%, #222 100%); 
+            border: 2px solid {COLORS['gold']}; border-radius: 15px; padding: 20px; 
+            text-align: center; margin: 10px 0;">
+    <div style="font-size: 2.5rem; margin-bottom: 5px;">👤</div>
+    <div style="color: white; font-weight: 700; font-size: 1rem;">Guest User</div>
+    <div style="color: {COLORS['sand']}; font-size: 0.8rem;">Belum Login</div>
+</div>
+"""
+            st.markdown(guest_badge_html, unsafe_allow_html=True)
+            
+            # Login button for guests
+            if st.button("🔑 Login / Register", type="primary", use_container_width=True, key="sidebar_login_btn"):
+                st.session_state.show_login_page = True
+                st.rerun()
         
         st.markdown("---")
         
@@ -479,8 +514,8 @@ def render_sidebar():
         if not is_logged_in():
             nav_items = [
                 "🏠 Beranda",
+                "🕋 Umrah Mandiri",
                 "ℹ️ Tentang Aplikasi",
-                "🔐 Login / Register",
             ]
         else:
             nav_items = [
@@ -2908,7 +2943,7 @@ def render_about():
                     <li>BUKAN travel agent dan tidak menjual paket umrah</li>
                     <li>BUKAN pengganti konsultasi dengan travel agent resmi</li>
                     <li>BUKAN sumber informasi resmi pemerintah</li>
-                    <li>Dikembangkan oleh MS Hadianto dengan bantuan AI</li>
+                    <li>Dikembangkan oleh non-developer dengan bantuan AI</li>
                 </ul>
             </div>
         </div>
@@ -2974,7 +3009,7 @@ def render_about():
         <div style="background: #F3E5F5; border-radius: 15px; padding: 20px; margin-top: 20px; text-align: center;">
             <h4 style="color: #7B1FA2; margin-top: 0;">🤖 Tentang Pengembangan</h4>
             <p style="color: #4A148C; line-height: 1.8;">
-                Platform ini dikembangkan oleh <strong>MS Hadianto</strong> dengan memanfaatkan teknologi AI 
+                Platform ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI 
                 (<strong>Claude by Anthropic</strong> & <strong>Gemini by Google</strong>).<br><br>
                 Tujuannya adalah membantu calon jamaah dalam <strong>simulasi biaya</strong> dan 
                 <strong>perencanaan perjalanan umrah</strong>.<br><br>
@@ -2996,7 +3031,7 @@ def render_labbaik_footer():
     
     st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px; text-align: center;"><div style="color: #888; font-size: 0.85rem;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div></div>""", unsafe_allow_html=True)
     
-    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;"><div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 20px 25px; margin: 0 auto; max-width: 700px;"><div style="color: #D4AF37; font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;">⚠️ Disclaimer & DYOR</div><div style="color: #bbb; font-size: 0.78rem; line-height: 1.7; text-align: left;"><p style="margin-bottom: 8px;">Platform ini menyediakan <strong>simulasi & estimasi</strong> untuk perencanaan umrah. Informasi bukan pengganti riset pribadi.</p><p style="margin-bottom: 8px;">📌 <strong>Travel Agent:</strong> Pastikan berizin resmi Kemenag RI (cek: siskopatuh.kemenag.go.id)</p><p style="margin-bottom: 8px;">📌 <strong>Umrah Mandiri:</strong> Verifikasi regulasi terbaru di nusuk.sa & kemenag.go.id</p><p style="margin: 0; color: #888; font-style: italic;">🤖 Dikembangkan dengan bantuan AI (Claude & Gemini) oleh MS Hadianto.</p></div></div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;"><div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 20px 25px; margin: 0 auto; max-width: 700px;"><div style="color: #D4AF37; font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;">⚠️ Disclaimer & DYOR</div><div style="color: #bbb; font-size: 0.78rem; line-height: 1.7; text-align: left;"><p style="margin-bottom: 8px;">Platform ini menyediakan <strong>simulasi & estimasi</strong> untuk perencanaan umrah. Informasi bukan pengganti riset pribadi.</p><p style="margin-bottom: 8px;">📌 <strong>Travel Agent:</strong> Pastikan berizin resmi Kemenag RI (cek: siskopatuh.kemenag.go.id)</p><p style="margin-bottom: 8px;">📌 <strong>Umrah Mandiri:</strong> Verifikasi regulasi terbaru di nusuk.sa & kemenag.go.id</p><p style="margin: 0; color: #888; font-style: italic;">🤖 Dikembangkan dengan bantuan AI (Claude & Gemini) oleh non-developer.</p></div></div></div>""", unsafe_allow_html=True)
     
     st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px 40px 40px; border-radius: 0 0 20px 20px; text-align: center;"><div style="border-top: 1px solid #333; padding-top: 20px; color: #666; font-size: 0.8rem;">© 2025 LABBAIK. Hak Cipta Dilindungi.<br><span style="color: #D4AF37;">Made with ❤️ &amp; AI by MS Hadianto</span><br><span style="color: #555; font-size: 0.7rem;">v3.4.0 Beta • Powered by Streamlit &amp; Groq AI</span></div></div>""", unsafe_allow_html=True)
 
