@@ -2,6 +2,10 @@
 Fitur Tambahan untuk Jamaah Umrah
 =================================
 Checklist, Kalkulator Tabungan, Doa & Manasik, dll
+
+Version: 3.1.0
+Updated: 2025-12-02
+Changes: Added Ustadz Adi Hidayat video tutorial in Video Tutorial tab
 """
 
 import streamlit as st
@@ -383,14 +387,39 @@ DOA_MANASIK = {
 }
 
 
+# ============================================
+# VIDEO TUTORIALS DATA - UPDATED
+# ============================================
+
+VIDEO_TUTORIALS = [
+    {
+        "title": "🕋 Panduan Lengkap Tata Cara Umrah - Ustadz Adi Hidayat",
+        "url": "https://www.youtube.com/watch?v=sS7T6YqIJHI",
+        "description": "Video lengkap tata cara umrah dari niat hingga tahallul oleh Ustadz Adi Hidayat. Penjelasan detail dan mudah dipahami.",
+        "duration": "Live Streaming",
+        "featured": True
+    },
+    {
+        "title": "📖 Manasik Umrah Lengkap",
+        "url": "https://www.youtube.com/watch?v=TRYDkDwqJv0",
+        "description": "Tutorial manasik umrah step by step",
+        "duration": "~45 menit",
+        "featured": False
+    },
+]
+
+
 def render_doa_manasik():
-    """Render doa and manasik guide"""
+    """Render doa and manasik guide with video tutorials"""
     st.markdown("### 📿 Panduan Doa & Manasik Umrah")
     
     # Tabs for different sections
     tab1, tab2, tab3 = st.tabs(["📖 Doa-Doa Umrah", "🚶 Tata Cara Manasik", "🎥 Video Tutorial"])
     
     with tab1:
+        st.markdown("Kumpulan doa-doa penting yang dibaca selama ibadah umrah:")
+        st.markdown("---")
+        
         for key, doa in DOA_MANASIK.items():
             with st.expander(doa["title"], expanded=False):
                 st.markdown(f"""
@@ -407,42 +436,97 @@ def render_doa_manasik():
         st.markdown("""
         #### 🕋 Urutan Manasik Umrah
         
-        1. **Ihram dari Miqat**
-           - Mandi sunnah
-           - Pakai pakaian ihram
-           - Niat umrah
-           - Mulai membaca talbiyah
+        Berikut adalah urutan lengkap tata cara pelaksanaan umrah:
         
-        2. **Thawaf (7 putaran)**
-           - Mulai dari Hajar Aswad
-           - Putaran 1-3: Ramal (jalan cepat) untuk pria
-           - Putaran 4-7: Jalan biasa
-           - Selesai dengan istilam Hajar Aswad
+        ---
         
-        3. **Shalat 2 Rakaat di Maqam Ibrahim**
-           - Rakaat 1: Al-Kafirun
-           - Rakaat 2: Al-Ikhlas
+        **1. Ihram dari Miqat**
+        - Mandi sunnah (disunnahkan)
+        - Pakai pakaian ihram (pria: 2 kain putih tanpa jahitan, wanita: pakaian biasa menutup aurat)
+        - Niat umrah dengan membaca: *Labbaika Allahumma 'umratan*
+        - Mulai membaca talbiyah terus-menerus
         
-        4. **Minum Air Zamzam**
-           - Berdoa sesuai hajat
+        ---
         
-        5. **Sa'i (7 kali)**
-           - Mulai dari Shafa ke Marwah (1)
-           - Marwah ke Shafa (2)
-           - Berakhir di Marwah (7)
-           - Pria: berlari kecil di area lampu hijau
+        **2. Thawaf (7 putaran)**
+        - Mulai dari Hajar Aswad (batu hitam)
+        - Putaran 1-3: Ramal (jalan cepat) untuk pria
+        - Putaran 4-7: Jalan biasa
+        - Berdoa dengan khusyuk selama thawaf
+        - Selesai dengan istilam (menghadap) Hajar Aswad
         
-        6. **Tahallul**
-           - Pria: cukur/potong rambut
-           - Wanita: potong ujung rambut ±3cm
+        ---
         
-        7. **Selesai - Keluar dari Ihram** ✅
+        **3. Shalat 2 Rakaat di Maqam Ibrahim**
+        - Setelah thawaf, shalat 2 rakaat
+        - Rakaat 1: Surah Al-Kafirun
+        - Rakaat 2: Surah Al-Ikhlas
+        
+        ---
+        
+        **4. Minum Air Zamzam**
+        - Pergi ke tempat air zamzam
+        - Minum dengan menghadap kiblat
+        - Berdoa sesuai hajat
+        
+        ---
+        
+        **5. Sa'i (7 kali)**
+        - Mulai dari Shafa ke Marwah (hitungan 1)
+        - Marwah ke Shafa (hitungan 2)
+        - Berakhir di Marwah (hitungan 7)
+        - Pria: berlari kecil di area lampu hijau
+        - Berdoa di setiap Shafa dan Marwah
+        
+        ---
+        
+        **6. Tahallul**
+        - Pria: cukur/potong rambut (dicukur habis lebih utama)
+        - Wanita: potong ujung rambut ±3cm
+        
+        ---
+        
+        **7. Selesai - Keluar dari Ihram** ✅
+        
+        Alhamdulillah, umrah selesai! Semua larangan ihram sudah halal kembali.
         """)
+        
+        st.success("💡 **Tips:** Lakukan semua rukun dengan tenang dan khusyuk. Jangan terburu-buru.")
     
     with tab3:
-        st.markdown("#### 🎥 Video Panduan Manasik")
-        st.video("https://www.youtube.com/watch?v=TRYDkDwqJv0")
-        st.caption("Video panduan manasik umrah lengkap")
+        st.markdown("#### 🎥 Video Panduan Manasik Umrah")
+        st.markdown("Tonton video tutorial berikut untuk memahami tata cara umrah dengan lebih baik:")
+        
+        st.markdown("---")
+        
+        # Featured video - Ustadz Adi Hidayat
+        for video in VIDEO_TUTORIALS:
+            if video.get("featured"):
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #d4af37;">
+                    <span style="background: #d4af37; color: #1a1a1a; padding: 3px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold;">⭐ REKOMENDASI</span>
+                    <h4 style="color: #d4af37; margin: 10px 0 5px 0;">{video['title']}</h4>
+                    <p style="color: #c9a86c; margin: 0; font-size: 0.9rem;">{video['description']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Embed YouTube video
+                st.video(video["url"])
+                st.caption(f"⏱️ Durasi: {video['duration']}")
+        
+        st.markdown("---")
+        st.markdown("##### 📚 Video Tutorial Lainnya")
+        
+        # Other videos
+        for video in VIDEO_TUTORIALS:
+            if not video.get("featured"):
+                with st.expander(f"▶️ {video['title']}"):
+                    st.markdown(f"*{video['description']}*")
+                    st.video(video["url"])
+                    st.caption(f"⏱️ Durasi: {video['duration']}")
+        
+        st.markdown("---")
+        st.info("💡 **Tips:** Tonton video-video ini sebelum berangkat agar lebih memahami tata cara umrah yang benar.")
 
 
 # ============================================
