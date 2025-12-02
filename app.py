@@ -2918,7 +2918,7 @@ def render_about():
         
         st.markdown(f"""
         <div style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #2E7D32; margin-top: 0;">📱 Q1 2025 - Mobile App</h4>
+            <h4 style="color: #2E7D32; margin-top: 0;">📱 Q1 2026 - Mobile App</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🤖 <strong>Android App</strong> - Play Store release</li>
                 <li>🍎 <strong>iOS App</strong> - App Store release</li>
@@ -2928,7 +2928,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #1565C0; margin-top: 0;">💳 Q2 2025 - Payment & Partnership</h4>
+            <h4 style="color: #1565C0; margin-top: 0;">💳 Q2 2026 - Payment & Partnership</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>💰 <strong>Payment Gateway</strong> - Bayar langsung via app</li>
                 <li>🤝 <strong>Travel Agent Portal</strong> - Partnership dashboard</li>
@@ -2938,7 +2938,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #E65100; margin-top: 0;">🌐 Q3 2025 - Global Expansion</h4>
+            <h4 style="color: #E65100; margin-top: 0;">🌐 Q3 2026 - Global Expansion</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🗣️ <strong>Multi-language</strong> - Arabic, English, Malay</li>
                 <li>🎤 <strong>Voice Assistant</strong> - Tanya dengan suara</li>
@@ -2948,7 +2948,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); border-radius: 15px; padding: 20px;">
-            <h4 style="color: #7B1FA2; margin-top: 0;">🚀 Q4 2025 - Advanced Features</h4>
+            <h4 style="color: #7B1FA2; margin-top: 0;">🚀 Q4 2026 - Advanced Features</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🧠 <strong>AI Travel Planner</strong> - Personalized itinerary</li>
                 <li>👥 <strong>Group Management</strong> - Kelola rombongan</li>
@@ -2990,7 +2990,7 @@ def render_about():
                     <li>BUKAN travel agent dan tidak menjual paket umrah</li>
                     <li>BUKAN pengganti konsultasi dengan travel agent resmi</li>
                     <li>BUKAN sumber informasi resmi pemerintah</li>
-                    <li>Dikembangkan oleh non-developer dengan bantuan AI</li>
+                    <li>Dikembangkan oleh MS Hadianto dengan bantuan AI</li>
                 </ul>
             </div>
         </div>
@@ -3056,7 +3056,7 @@ def render_about():
         <div style="background: #F3E5F5; border-radius: 15px; padding: 20px; margin-top: 20px; text-align: center;">
             <h4 style="color: #7B1FA2; margin-top: 0;">🤖 Tentang Pengembangan</h4>
             <p style="color: #4A148C; line-height: 1.8;">
-                Platform ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI 
+                Platform ini dikembangkan oleh <strong>MS Hadianto</strong> dengan memanfaatkan teknologi AI 
                 (<strong>Claude by Anthropic</strong> & <strong>Gemini by Google</strong>).<br><br>
                 Tujuannya adalah membantu calon jamaah dalam <strong>simulasi biaya</strong> dan 
                 <strong>perencanaan perjalanan umrah</strong>.<br><br>
@@ -3078,7 +3078,7 @@ def render_labbaik_footer():
     
     st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px; text-align: center;"><div style="color: #888; font-size: 0.85rem;">📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai</div></div>""", unsafe_allow_html=True)
     
-    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;"><div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 20px 25px; margin: 0 auto; max-width: 700px;"><div style="color: #D4AF37; font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;">⚠️ Disclaimer & DYOR</div><div style="color: #bbb; font-size: 0.78rem; line-height: 1.7; text-align: left;"><p style="margin-bottom: 8px;">Platform ini menyediakan <strong>simulasi & estimasi</strong> untuk perencanaan umrah. Informasi bukan pengganti riset pribadi.</p><p style="margin-bottom: 8px;">📌 <strong>Travel Agent:</strong> Pastikan berizin resmi Kemenag RI (cek: siskopatuh.kemenag.go.id)</p><p style="margin-bottom: 8px;">📌 <strong>Umrah Mandiri:</strong> Verifikasi regulasi terbaru di nusuk.sa & kemenag.go.id</p><p style="margin: 0; color: #888; font-style: italic;">🤖 Dikembangkan dengan bantuan AI (Claude & Gemini) oleh non-developer.</p></div></div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 0 40px; text-align: center;"><div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 20px 25px; margin: 0 auto; max-width: 700px;"><div style="color: #D4AF37; font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;">⚠️ Disclaimer & DYOR</div><div style="color: #bbb; font-size: 0.78rem; line-height: 1.7; text-align: left;"><p style="margin-bottom: 8px;">Platform ini menyediakan <strong>simulasi & estimasi</strong> untuk perencanaan umrah. Informasi bukan pengganti riset pribadi.</p><p style="margin-bottom: 8px;">📌 <strong>Travel Agent:</strong> Pastikan berizin resmi Kemenag RI (cek: siskopatuh.kemenag.go.id)</p><p style="margin-bottom: 8px;">📌 <strong>Umrah Mandiri:</strong> Verifikasi regulasi terbaru di nusuk.sa & kemenag.go.id</p><p style="margin: 0; color: #888; font-style: italic;">🤖 Dikembangkan dengan bantuan AI (Claude & Gemini) oleh MS Hadianto.</p></div></div></div>""", unsafe_allow_html=True)
     
     st.markdown("""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); padding: 20px 40px 40px 40px; border-radius: 0 0 20px 20px; text-align: center;"><div style="border-top: 1px solid #333; padding-top: 20px; color: #666; font-size: 0.8rem;">© 2025 LABBAIK. Hak Cipta Dilindungi.<br><span style="color: #D4AF37;">Made with ❤️ &amp; AI by MS Hadianto</span><br><span style="color: #555; font-size: 0.7rem;">v3.4.0 Beta • Powered by Streamlit &amp; Groq AI</span></div></div>""", unsafe_allow_html=True)
 
