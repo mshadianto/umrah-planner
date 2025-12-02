@@ -73,7 +73,7 @@ BRAND = {
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
     "full_tagline": "Labbaik Allahumma Labbaik - Aku Datang Memenuhi Panggilan-Mu",
-    "version": "3.1.0",
+    "version": "3.2.0",
 }
 
 COLORS = {
@@ -471,6 +471,7 @@ def render_sidebar():
                 "🏠 Beranda",
                 "💰 Simulasi Biaya",
                 "💵 Cari Paket by Budget",
+                "🤝 Umrah Bareng",
                 "📊 Perbandingan Skenario",
                 "📅 Analisis Waktu",
                 "🤖 Chat AI",
@@ -627,11 +628,11 @@ def render_home():
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">✈️</div><div class="feature-title">Booking Terintegrasi</div><div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🤝</div><div class="feature-title">Umrah Bareng</div><div class="feature-desc">Cari teman umrah dengan kriteria yang cocok</div></div>""", unsafe_allow_html=True)
         with col2:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">🏨</div><div class="feature-title">Hotel & Akomodasi</div><div class="feature-desc">Temukan hotel terbaik di Makkah & Madinah</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">✈️</div><div class="feature-title">Booking Terintegrasi</div><div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div></div>""", unsafe_allow_html=True)
         with col3:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">📦</div><div class="feature-title">Paket Travel</div><div class="feature-desc">Bandingkan paket dari berbagai travel agent terpercaya</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🏨</div><div class="feature-title">Hotel & Akomodasi</div><div class="feature-desc">Temukan hotel terbaik di Makkah & Madinah</div></div>""", unsafe_allow_html=True)
         
         st.markdown("---")
         st.markdown(f"<h3 style='text-align: center; color: {COLORS['black']};'>🌟 Mengapa LABBAIK?</h3>", unsafe_allow_html=True)
@@ -661,15 +662,17 @@ def render_home():
         
         st.markdown(f"<h3 style='color: {COLORS['black']}; margin: 20px 0;'>✨ Fitur Utama</h3>", unsafe_allow_html=True)
         
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Assistant 24/7</div><div class="feature-desc">Tanya apapun tentang umrah</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Assistant</div><div class="feature-desc">Tanya apapun tentang umrah</div></div>""", unsafe_allow_html=True)
         with col2:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">Simulasi Biaya</div><div class="feature-desc">Hitung estimasi biaya umrah</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">Simulasi Biaya</div><div class="feature-desc">Hitung estimasi biaya</div></div>""", unsafe_allow_html=True)
         with col3:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">💵</div><div class="feature-title">Cari by Budget</div><div class="feature-desc">Temukan paket sesuai dana</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">💵</div><div class="feature-title">Cari by Budget</div><div class="feature-desc">Paket sesuai dana</div></div>""", unsafe_allow_html=True)
         with col4:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Bandingkan Paket</div><div class="feature-desc">Ekonomis hingga VIP</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🤝</div><div class="feature-title">Umrah Bareng</div><div class="feature-desc">Cari teman umrah</div></div>""", unsafe_allow_html=True)
+        with col5:
+            st.markdown("""<div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Bandingkan</div><div class="feature-desc">Ekonomis - VIP</div></div>""", unsafe_allow_html=True)
         
         st.markdown("---")
         st.markdown(f"### 🚀 Mulai Perencanaan Umrah Anda")
@@ -1395,6 +1398,536 @@ def render_budget_finder():
         """)
 
 
+# ============================================
+# UMRAH BARENG - OPEN TRIP FEATURE
+# ============================================
+
+def init_umrah_bareng_state():
+    """Initialize Umrah Bareng session state"""
+    if "open_trips" not in st.session_state:
+        # Sample data for demonstration
+        st.session_state.open_trips = [
+            {
+                "id": "OT001",
+                "creator_name": "Ahmad Fauzi",
+                "creator_phone": "+62812xxxx1234",
+                "creator_city": "Jakarta",
+                "title": "Umrah Bareng Keluarga Muda",
+                "departure_date": "2025-03-15",
+                "departure_city": "Jakarta (CGK)",
+                "package_type": "standard",
+                "budget_per_person": 38000000,
+                "duration_days": 12,
+                "nights_makkah": 5,
+                "nights_madinah": 4,
+                "current_members": 4,
+                "max_members": 10,
+                "gender_preference": "Campuran (Keluarga)",
+                "age_preference": "25-40 tahun",
+                "special_notes": "Fokus ibadah, tidak banyak shopping. Ada anak kecil.",
+                "amenities": ["Muthawwif Indonesia", "Kursi Roda Tersedia", "Menu Indonesia"],
+                "status": "open",
+                "created_at": "2025-01-15",
+                "whatsapp_group": "https://chat.whatsapp.com/xxx",
+            },
+            {
+                "id": "OT002",
+                "creator_name": "Hj. Siti Aminah",
+                "creator_phone": "+62813xxxx5678",
+                "creator_city": "Surabaya",
+                "title": "Umrah Khusus Ibu-Ibu",
+                "departure_date": "2025-04-10",
+                "departure_city": "Surabaya (SUB)",
+                "package_type": "premium",
+                "budget_per_person": 55000000,
+                "duration_days": 14,
+                "nights_makkah": 6,
+                "nights_madinah": 5,
+                "current_members": 8,
+                "max_members": 15,
+                "gender_preference": "Wanita Only",
+                "age_preference": "40+ tahun",
+                "special_notes": "Tempo santai, banyak ziarah. Cocok untuk lansia.",
+                "amenities": ["Ustadzah Pendamping", "Hotel Dekat Haram", "Wheelchair Friendly"],
+                "status": "open",
+                "created_at": "2025-01-10",
+                "whatsapp_group": "https://chat.whatsapp.com/yyy",
+            },
+            {
+                "id": "OT003",
+                "creator_name": "Rizky Pratama",
+                "creator_phone": "+62857xxxx9012",
+                "creator_city": "Bandung",
+                "title": "Umrah Backpacker Style",
+                "departure_date": "2025-02-20",
+                "departure_city": "Jakarta (CGK)",
+                "package_type": "ekonomis",
+                "budget_per_person": 25000000,
+                "duration_days": 9,
+                "nights_makkah": 4,
+                "nights_madinah": 3,
+                "current_members": 3,
+                "max_members": 8,
+                "gender_preference": "Pria Only",
+                "age_preference": "20-35 tahun",
+                "special_notes": "Budget terbatas tapi semangat tinggi! Siap jalan kaki.",
+                "amenities": ["Guide Lokal", "Sharing Room"],
+                "status": "open",
+                "created_at": "2025-01-20",
+                "whatsapp_group": "https://chat.whatsapp.com/zzz",
+            },
+        ]
+
+
+def render_umrah_bareng():
+    """Render Umrah Bareng (Open Trip) feature"""
+    init_umrah_bareng_state()
+    
+    st.header("🤝 Umrah Bareng - Open Trip")
+    st.markdown("Cari teman perjalanan umrah atau buat open trip sendiri!")
+    
+    # Stats bar
+    total_trips = len(st.session_state.open_trips)
+    open_trips = len([t for t in st.session_state.open_trips if t["status"] == "open"])
+    total_slots = sum([t["max_members"] - t["current_members"] for t in st.session_state.open_trips if t["status"] == "open"])
+    
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+        <table style="width: 100%; color: white;">
+            <tr>
+                <td style="text-align: center; padding: 10px;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #D4AF37;">{total_trips}</div>
+                    <div style="font-size: 0.85rem; color: #C9A86C;">Total Open Trip</div>
+                </td>
+                <td style="text-align: center; padding: 10px;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #4CAF50;">{open_trips}</div>
+                    <div style="font-size: 0.85rem; color: #C9A86C;">Masih Tersedia</div>
+                </td>
+                <td style="text-align: center; padding: 10px;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #2196F3;">{total_slots}</div>
+                    <div style="font-size: 0.85rem; color: #C9A86C;">Slot Kosong</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Tabs
+    tab1, tab2, tab3 = st.tabs(["🔍 Cari Open Trip", "➕ Buat Open Trip", "📋 Trip Saya"])
+    
+    # ===== TAB 1: CARI OPEN TRIP =====
+    with tab1:
+        st.markdown("### 🔍 Cari Open Trip yang Cocok")
+        
+        # Filters
+        with st.expander("🎯 Filter Pencarian", expanded=True):
+            filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
+            
+            with filter_col1:
+                filter_budget = st.select_slider(
+                    "💰 Budget Maksimal",
+                    options=[20, 30, 40, 50, 60, 80, 100],
+                    value=50,
+                    format_func=lambda x: f"Rp {x} juta"
+                )
+            
+            with filter_col2:
+                filter_package = st.selectbox(
+                    "📦 Tipe Paket",
+                    options=["Semua", "ekonomis", "standard", "premium", "vip"],
+                    format_func=lambda x: "Semua Paket" if x == "Semua" else SCENARIO_TEMPLATES.get(x, {}).get("name", x.title())
+                )
+            
+            with filter_col3:
+                filter_gender = st.selectbox(
+                    "👥 Preferensi Gender",
+                    options=["Semua", "Campuran (Keluarga)", "Pria Only", "Wanita Only"]
+                )
+            
+            with filter_col4:
+                filter_city = st.selectbox(
+                    "🏙️ Kota Keberangkatan",
+                    options=["Semua"] + DEPARTURE_CITIES
+                )
+        
+        # Filter results
+        filtered_trips = st.session_state.open_trips.copy()
+        
+        if filter_budget:
+            filtered_trips = [t for t in filtered_trips if t["budget_per_person"] <= filter_budget * 1_000_000]
+        
+        if filter_package != "Semua":
+            filtered_trips = [t for t in filtered_trips if t["package_type"] == filter_package]
+        
+        if filter_gender != "Semua":
+            filtered_trips = [t for t in filtered_trips if t["gender_preference"] == filter_gender]
+        
+        if filter_city != "Semua":
+            filtered_trips = [t for t in filtered_trips if filter_city in t["departure_city"]]
+        
+        # Only show open trips
+        filtered_trips = [t for t in filtered_trips if t["status"] == "open"]
+        
+        st.markdown(f"**Ditemukan {len(filtered_trips)} open trip**")
+        st.markdown("---")
+        
+        # Display trips
+        if filtered_trips:
+            for trip in filtered_trips:
+                slots_left = trip["max_members"] - trip["current_members"]
+                progress = trip["current_members"] / trip["max_members"]
+                
+                # Package colors
+                pkg_colors = {
+                    "ekonomis": ("#4CAF50", "🟢"),
+                    "standard": ("#2196F3", "🔵"),
+                    "premium": ("#FF9800", "🟠"),
+                    "vip": ("#D4AF37", "🟡"),
+                }
+                pkg_color, pkg_emoji = pkg_colors.get(trip["package_type"], ("#666", "⚪"))
+                
+                st.markdown(f"""
+                <div style="background: white; border: 2px solid {pkg_color}; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <div>
+                            <span style="background: {pkg_color}; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">
+                                {pkg_emoji} {SCENARIO_TEMPLATES.get(trip['package_type'], {}).get('name', trip['package_type'].title())}
+                            </span>
+                            <h3 style="margin: 10px 0 5px 0; color: #1A1A1A;">{trip['title']}</h3>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">oleh {trip['creator_name']} • {trip['creator_city']}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.8rem; color: #888;">Budget/Orang</div>
+                            <div style="font-size: 1.4rem; font-weight: 700; color: {pkg_color};">Rp {trip['budget_per_person']:,}</div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Trip details
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.markdown(f"📅 **Berangkat**\n\n{trip['departure_date']}")
+                
+                with col2:
+                    st.markdown(f"✈️ **Dari**\n\n{trip['departure_city']}")
+                
+                with col3:
+                    st.markdown(f"⏱️ **Durasi**\n\n{trip['duration_days']} hari")
+                
+                with col4:
+                    st.markdown(f"👥 **Slot**\n\n{trip['current_members']}/{trip['max_members']} ({slots_left} sisa)")
+                
+                # Progress bar
+                st.progress(progress)
+                
+                # Expandable details
+                with st.expander("📋 Lihat Detail & Gabung"):
+                    detail_col1, detail_col2 = st.columns(2)
+                    
+                    with detail_col1:
+                        st.markdown("**🕋 Itinerary:**")
+                        st.markdown(f"- Mekkah: {trip['nights_makkah']} malam")
+                        st.markdown(f"- Madinah: {trip['nights_madinah']} malam")
+                        
+                        st.markdown("**👥 Preferensi:**")
+                        st.markdown(f"- Gender: {trip['gender_preference']}")
+                        st.markdown(f"- Usia: {trip['age_preference']}")
+                    
+                    with detail_col2:
+                        st.markdown("**✨ Fasilitas Khusus:**")
+                        for amenity in trip["amenities"]:
+                            st.markdown(f"- ✅ {amenity}")
+                        
+                        st.markdown("**📝 Catatan:**")
+                        st.markdown(f"_{trip['special_notes']}_")
+                    
+                    st.markdown("---")
+                    
+                    # Contact buttons
+                    btn_col1, btn_col2, btn_col3 = st.columns(3)
+                    
+                    with btn_col1:
+                        st.markdown(f"[💬 Hubungi via WhatsApp](https://wa.me/{trip['creator_phone'].replace('+', '')}?text=Halo%20kak,%20saya%20tertarik%20dengan%20open%20trip%20{trip['title']})")
+                    
+                    with btn_col2:
+                        if trip.get("whatsapp_group"):
+                            st.markdown(f"[👥 Join Grup WA]({trip['whatsapp_group']})")
+                    
+                    with btn_col3:
+                        if st.button(f"❤️ Simpan Trip", key=f"save_{trip['id']}"):
+                            st.success("Trip disimpan!")
+                
+                st.markdown("---")
+        else:
+            st.info("🔍 Tidak ada open trip yang sesuai filter. Coba ubah kriteria pencarian atau buat open trip sendiri!")
+    
+    # ===== TAB 2: BUAT OPEN TRIP =====
+    with tab2:
+        st.markdown("### ➕ Buat Open Trip Baru")
+        st.markdown("Ajak jamaah lain untuk umrah bareng dengan kriteria yang Anda tentukan!")
+        
+        with st.form("create_open_trip"):
+            st.markdown("#### 📝 Informasi Dasar")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                trip_title = st.text_input(
+                    "Judul Open Trip *",
+                    placeholder="Contoh: Umrah Bareng Keluarga Muda"
+                )
+                
+                creator_name = st.text_input(
+                    "Nama Anda *",
+                    placeholder="Nama yang akan ditampilkan"
+                )
+                
+                creator_phone = st.text_input(
+                    "No. WhatsApp *",
+                    placeholder="+62812xxxxxxxx"
+                )
+            
+            with col2:
+                creator_city = st.selectbox(
+                    "Kota Anda *",
+                    options=["Jakarta", "Surabaya", "Bandung", "Medan", "Makassar", "Semarang", "Yogyakarta", "Lainnya"]
+                )
+                
+                departure_city = st.selectbox(
+                    "Kota Keberangkatan *",
+                    options=DEPARTURE_CITIES
+                )
+                
+                departure_date = st.date_input(
+                    "Tanggal Keberangkatan *",
+                    min_value=datetime.now()
+                )
+            
+            st.markdown("---")
+            st.markdown("#### 📦 Detail Paket")
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                package_type = st.selectbox(
+                    "Tipe Paket *",
+                    options=["ekonomis", "standard", "premium", "vip"],
+                    format_func=lambda x: SCENARIO_TEMPLATES[x]["name"]
+                )
+                
+                budget_per_person = st.number_input(
+                    "Budget per Orang (Rp) *",
+                    min_value=20_000_000,
+                    max_value=200_000_000,
+                    value=35_000_000,
+                    step=1_000_000
+                )
+            
+            with col2:
+                duration_days = st.number_input(
+                    "Durasi (hari) *",
+                    min_value=7,
+                    max_value=21,
+                    value=12
+                )
+                
+                nights_makkah = st.number_input(
+                    "Malam di Mekkah *",
+                    min_value=2,
+                    max_value=10,
+                    value=5
+                )
+            
+            with col3:
+                nights_madinah = st.number_input(
+                    "Malam di Madinah *",
+                    min_value=2,
+                    max_value=10,
+                    value=4
+                )
+                
+                max_members = st.number_input(
+                    "Maksimal Peserta *",
+                    min_value=2,
+                    max_value=50,
+                    value=10
+                )
+            
+            st.markdown("---")
+            st.markdown("#### 👥 Preferensi Peserta")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                gender_preference = st.selectbox(
+                    "Preferensi Gender",
+                    options=["Campuran (Keluarga)", "Pria Only", "Wanita Only"]
+                )
+                
+                age_preference = st.selectbox(
+                    "Rentang Usia",
+                    options=["Semua Usia", "20-35 tahun", "25-40 tahun", "35-50 tahun", "40+ tahun", "50+ tahun"]
+                )
+            
+            with col2:
+                amenities = st.multiselect(
+                    "Fasilitas Khusus",
+                    options=[
+                        "Muthawwif Indonesia",
+                        "Ustadz/Ustadzah Pendamping",
+                        "Hotel Dekat Haram",
+                        "Kursi Roda Tersedia",
+                        "Wheelchair Friendly",
+                        "Menu Indonesia",
+                        "Sharing Room",
+                        "Private Room",
+                        "City Tour",
+                        "Oleh-oleh Tour"
+                    ]
+                )
+            
+            special_notes = st.text_area(
+                "Catatan Khusus",
+                placeholder="Jelaskan lebih detail tentang trip Anda...",
+                max_chars=500
+            )
+            
+            whatsapp_group = st.text_input(
+                "Link Grup WhatsApp (opsional)",
+                placeholder="https://chat.whatsapp.com/..."
+            )
+            
+            st.markdown("---")
+            
+            submitted = st.form_submit_button("🚀 Buat Open Trip", use_container_width=True)
+            
+            if submitted:
+                if trip_title and creator_name and creator_phone:
+                    # Create new trip
+                    new_trip = {
+                        "id": f"OT{len(st.session_state.open_trips) + 1:03d}",
+                        "creator_name": creator_name,
+                        "creator_phone": creator_phone,
+                        "creator_city": creator_city,
+                        "title": trip_title,
+                        "departure_date": str(departure_date),
+                        "departure_city": departure_city,
+                        "package_type": package_type,
+                        "budget_per_person": budget_per_person,
+                        "duration_days": duration_days,
+                        "nights_makkah": nights_makkah,
+                        "nights_madinah": nights_madinah,
+                        "current_members": 1,  # Creator is first member
+                        "max_members": max_members,
+                        "gender_preference": gender_preference,
+                        "age_preference": age_preference,
+                        "special_notes": special_notes,
+                        "amenities": amenities,
+                        "status": "open",
+                        "created_at": str(datetime.now().date()),
+                        "whatsapp_group": whatsapp_group,
+                    }
+                    
+                    st.session_state.open_trips.append(new_trip)
+                    st.success("✅ Open Trip berhasil dibuat!")
+                    st.balloons()
+                    
+                    st.markdown(f"""
+                    <div style="background: #e8f5e9; border: 2px solid #4CAF50; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                        <h4 style="color: #2e7d32; margin-top: 0;">🎉 Open Trip Anda Sudah Live!</h4>
+                        <p><strong>ID:</strong> {new_trip['id']}</p>
+                        <p><strong>Judul:</strong> {new_trip['title']}</p>
+                        <p>Jamaah lain sekarang bisa melihat dan bergabung dengan open trip Anda.</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.error("❌ Mohon lengkapi semua field yang wajib (*)")
+    
+    # ===== TAB 3: TRIP SAYA =====
+    with tab3:
+        st.markdown("### 📋 Open Trip yang Saya Buat")
+        
+        user = get_current_user()
+        
+        if user:
+            # Filter trips created by current user (by name for demo)
+            my_trips = [t for t in st.session_state.open_trips if t["creator_name"] == user.get("name", "")]
+            
+            if my_trips:
+                for trip in my_trips:
+                    slots_left = trip["max_members"] - trip["current_members"]
+                    
+                    st.markdown(f"""
+                    <div style="background: #f5f5f5; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <strong>{trip['title']}</strong><br>
+                                <small>📅 {trip['departure_date']} • 👥 {trip['current_members']}/{trip['max_members']} peserta</small>
+                            </div>
+                            <div>
+                                <span style="background: {'#4CAF50' if trip['status'] == 'open' else '#666'}; color: white; padding: 3px 10px; border-radius: 10px; font-size: 0.8rem;">
+                                    {'🟢 Open' if trip['status'] == 'open' else '⚫ Closed'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        if st.button("✏️ Edit", key=f"edit_{trip['id']}"):
+                            st.info("Fitur edit akan segera hadir!")
+                    with col2:
+                        if st.button("🔴 Tutup", key=f"close_{trip['id']}"):
+                            trip["status"] = "closed"
+                            st.success("Trip ditutup")
+                            st.rerun()
+                    with col3:
+                        if st.button("🗑️ Hapus", key=f"delete_{trip['id']}"):
+                            st.session_state.open_trips.remove(trip)
+                            st.success("Trip dihapus")
+                            st.rerun()
+            else:
+                st.info("Anda belum membuat open trip. Buat sekarang di tab 'Buat Open Trip'!")
+        else:
+            st.warning("🔐 Login untuk melihat open trip yang Anda buat.")
+    
+    # Info section
+    st.markdown("---")
+    st.markdown("### 💡 Tentang Umrah Bareng")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        **🤝 Apa itu Umrah Bareng?**
+        
+        Platform untuk mencari teman perjalanan umrah dengan kriteria yang cocok:
+        - Budget yang sama
+        - Jadwal yang sesuai
+        - Preferensi yang mirip
+        - Dapat diskon grup
+        """)
+    
+    with col2:
+        st.markdown("""
+        **✨ Keuntungan:**
+        
+        - 💰 Lebih hemat dengan grup
+        - 👥 Dapat teman perjalanan
+        - 🕋 Ibadah lebih nyaman
+        - 📱 Koordinasi mudah via WhatsApp
+        """)
+    
+    st.warning("""
+    **⚠️ Disclaimer:** LABBAIK hanya memfasilitasi pertemuan antar calon jamaah. 
+    Segala transaksi dan koordinasi dilakukan langsung antar peserta dan travel agent terpilih. 
+    Pastikan memilih travel agent resmi berizin.
+    """)
+
+
 def render_settings():
     """Render settings page"""
     st.header("⚙️ Pengaturan")
@@ -1572,6 +2105,13 @@ def main():
         else:
             track_page_view("Budget Finder")
             render_budget_finder()
+    elif "Umrah Bareng" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            track_page_view("Umrah Bareng")
+            render_umrah_bareng()
     elif "Perbandingan" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
