@@ -1,19 +1,28 @@
+# .streamlit/config.toml
+# LABBAIK - Streamlit Configuration
+
 [server]
+# Enable serving static files from /static folder
+enableStaticServing = true
+
+# Server settings
 headless = true
-address = "0.0.0.0"
-enableCORS = false
-enableXsrfProtection = false
+runOnSave = true
+fileWatcherType = "auto"
 
 [browser]
+# Don't auto-open browser
 gatherUsageStats = false
 
 [theme]
-primaryColor = "#1e5128"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f0f2f6"
-textColor = "#262730"
+# LABBAIK Dark Theme with Gold Accents
+primaryColor = "#D4AF37"
+backgroundColor = "#1A1A1A"
+secondaryBackgroundColor = "#2D2D2D"
+textColor = "#FFFFFF"
 font = "sans serif"
 
 [client]
-showErrorDetails = false
+# Toolbar mode
 toolbarMode = "minimal"
+showErrorDetails = false
