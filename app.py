@@ -73,7 +73,7 @@ BRAND = {
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
     "full_tagline": "Labbaik Allahumma Labbaik - Aku Datang Memenuhi Panggilan-Mu",
-    "version": "3.2.0",
+    "version": "3.3.0",
 }
 
 COLORS = {
@@ -472,6 +472,7 @@ def render_sidebar():
                 "💰 Simulasi Biaya",
                 "💵 Cari Paket by Budget",
                 "🤝 Umrah Bareng",
+                "🕋 Umrah Mandiri",
                 "📊 Perbandingan Skenario",
                 "📅 Analisis Waktu",
                 "🤖 Chat AI",
@@ -630,9 +631,9 @@ def render_home():
         with col1:
             st.markdown("""<div class="feature-card"><div class="feature-icon">🤝</div><div class="feature-title">Umrah Bareng</div><div class="feature-desc">Cari teman umrah dengan kriteria yang cocok</div></div>""", unsafe_allow_html=True)
         with col2:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">✈️</div><div class="feature-title">Booking Terintegrasi</div><div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🕋</div><div class="feature-title">Umrah Mandiri</div><div class="feature-desc">Panduan lengkap & forum sharing pengalaman</div></div>""", unsafe_allow_html=True)
         with col3:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">🏨</div><div class="feature-title">Hotel & Akomodasi</div><div class="feature-desc">Temukan hotel terbaik di Makkah & Madinah</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="feature-card"><div class="feature-icon">✈️</div><div class="feature-title">Booking Terintegrasi</div><div class="feature-desc">Pesan tiket pesawat dan hotel dalam satu platform</div></div>""", unsafe_allow_html=True)
         
         st.markdown("---")
         st.markdown(f"<h3 style='text-align: center; color: {COLORS['black']};'>🌟 Mengapa LABBAIK?</h3>", unsafe_allow_html=True)
@@ -662,16 +663,22 @@ def render_home():
         
         st.markdown(f"<h3 style='color: {COLORS['black']}; margin: 20px 0;'>✨ Fitur Utama</h3>", unsafe_allow_html=True)
         
-        col1, col2, col3, col4, col5 = st.columns(5)
+        col1, col2, col3 = st.columns(3)
         with col1:
             st.markdown("""<div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Assistant</div><div class="feature-desc">Tanya apapun tentang umrah</div></div>""", unsafe_allow_html=True)
         with col2:
             st.markdown("""<div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">Simulasi Biaya</div><div class="feature-desc">Hitung estimasi biaya</div></div>""", unsafe_allow_html=True)
         with col3:
             st.markdown("""<div class="feature-card"><div class="feature-icon">💵</div><div class="feature-title">Cari by Budget</div><div class="feature-desc">Paket sesuai dana</div></div>""", unsafe_allow_html=True)
-        with col4:
-            st.markdown("""<div class="feature-card"><div class="feature-icon">🤝</div><div class="feature-title">Umrah Bareng</div><div class="feature-desc">Cari teman umrah</div></div>""", unsafe_allow_html=True)
-        with col5:
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🤝</div><div class="feature-title">Umrah Bareng</div><div class="feature-desc">Cari teman perjalanan</div></div>""", unsafe_allow_html=True)
+        with col2:
+            st.markdown("""<div class="feature-card"><div class="feature-icon">🕋</div><div class="feature-title">Umrah Mandiri</div><div class="feature-desc">Panduan & Forum</div></div>""", unsafe_allow_html=True)
+        with col3:
             st.markdown("""<div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Bandingkan</div><div class="feature-desc">Ekonomis - VIP</div></div>""", unsafe_allow_html=True)
         
         st.markdown("---")
@@ -1928,6 +1935,734 @@ def render_umrah_bareng():
     """)
 
 
+# ============================================
+# UMRAH MANDIRI - INDEPENDENT UMRAH GUIDE
+# ============================================
+
+def init_forum_state():
+    """Initialize Forum Umrah Mandiri session state"""
+    if "forum_posts" not in st.session_state:
+        st.session_state.forum_posts = [
+            {
+                "id": "F001",
+                "author": "Pak Hendra",
+                "author_city": "Jakarta",
+                "avatar": "👨‍💼",
+                "title": "Pengalaman Umrah Mandiri Pertama Kali - Total Rp 18 Juta!",
+                "category": "Pengalaman",
+                "content": """Alhamdulillah baru pulang dari umrah mandiri perdana. Sharing pengalaman ya:
+
+**Budget Total (1 orang, 9 hari):**
+- Tiket PP Jakarta-Jeddah (Saudi Airlines): Rp 8.5 juta
+- Visa Umrah (via agen visa): Rp 600rb
+- Hotel Makkah (4 malam, 800m dari Haram): Rp 3.2 juta
+- Hotel Madinah (3 malam, 500m dari Nabawi): Rp 2.4 juta
+- Transport Jeddah-Makkah-Madinah-Jeddah: Rp 1.5 juta
+- Makan & lain-lain: Rp 1.8 juta
+**TOTAL: Rp 18 juta**
+
+**Tips dari saya:**
+1. Book tiket 3 bulan sebelumnya, dapat harga murah
+2. Hotel pilih yang ada dapur, bisa masak sendiri
+3. Download app Careem/Uber Saudi untuk transport
+4. Bawa bekal mie instan & bumbu dari Indonesia 😄
+
+Kalau ada yang mau tanya-tanya, silakan!""",
+                "likes": 47,
+                "comments": [
+                    {"author": "Bu Ani", "text": "MasyaAllah, sangat membantu! Gimana caranya dapat visa pak?", "time": "2 jam lalu"},
+                    {"author": "Rizki", "text": "Wah murah banget! Saya kemarin via travel agent Rp 28 juta", "time": "5 jam lalu"},
+                    {"author": "Pak Hendra", "text": "@Bu Ani: Visa bisa via agen visa online, processing 3-5 hari kerja", "time": "1 jam lalu"},
+                ],
+                "created_at": "2025-01-20",
+                "views": 324,
+            },
+            {
+                "id": "F002",
+                "author": "Mbak Fatimah",
+                "author_city": "Surabaya",
+                "avatar": "👩‍🦱",
+                "title": "Tips Umrah Mandiri untuk Wanita Solo - Aman & Nyaman!",
+                "category": "Tips & Trik",
+                "content": """Salam ukhti semua! Saya baru saja umrah mandiri sendirian sebagai wanita. Banyak yang tanya, aman nggak? AMAN BANGET!
+
+**Kenapa aman:**
+1. Saudi sekarang sangat aman, banyak CCTV & polisi
+2. Jamaah dari seluruh dunia, suasana sangat religius
+3. Hotel-hotel sangat kooperatif dengan solo traveler
+
+**Tips khusus wanita:**
+- Pilih hotel yang ada staff wanita
+- Simpan nomor darurat kedutaan Indonesia
+- Join grup WA jamaah Indonesia (banyak di FB)
+- Bawa obat-obatan pribadi yang cukup
+- Pakai gamis/abaya yang nyaman untuk jalan jauh
+
+**Pengalaman spiritual:**
+Justru umrah mandiri itu lebih khusyuk! Kita bisa atur pace sendiri, mau lama di Raudhah bisa, mau thawaf malam-malam juga bebas.
+
+Semoga bermanfaat! 💚""",
+                "likes": 89,
+                "comments": [
+                    {"author": "Rina", "text": "MasyaAllah inspiring sekali mbak! Jadi pengen coba", "time": "1 hari lalu"},
+                    {"author": "Dewi", "text": "Kalau mahram gimana mbak? Perlu nggak?", "time": "12 jam lalu"},
+                ],
+                "created_at": "2025-01-18",
+                "views": 512,
+            },
+            {
+                "id": "F003",
+                "author": "Ustadz Farid",
+                "author_city": "Bandung",
+                "avatar": "👳",
+                "title": "Panduan Lengkap Manasik Umrah Mandiri - Step by Step",
+                "category": "Panduan",
+                "content": """Bismillah, saya ingin berbagi panduan manasik untuk yang umrah mandiri:
+
+**PERSIAPAN SEBELUM BERANGKAT:**
+1. Niat yang ikhlas lillahi ta'ala
+2. Pelajari tata cara umrah (video, buku, atau ikut kajian)
+3. Hafal doa-doa: niat ihram, talbiyah, doa thawaf, doa sa'i
+4. Siapkan fisik - biasakan jalan kaki
+
+**SAAT DI MIQAT (Bir Ali/Bandara):**
+- Mandi sunnah (kalau memungkinkan)
+- Pakai pakaian ihram
+- Niat umrah & baca talbiyah
+
+**DI MASJIDIL HARAM:**
+1. **Thawaf** - 7 putaran, mulai dari Hajar Aswad
+2. **Sholat 2 rakaat** di belakang Maqam Ibrahim
+3. **Minum air zamzam**
+4. **Sa'i** - 7 kali antara Shafa dan Marwa
+5. **Tahallul** - potong/cukur rambut
+
+**TIPS PENTING:**
+- Jangan panik, ikuti arus jamaah
+- Kalau bingung, tanya jamaah Indonesia lain
+- Bawa buku saku doa-doa
+- Pakai sandal yang nyaman!
+
+Semoga Allah memudahkan perjalanan umrah kita semua. Aamiin.""",
+                "likes": 156,
+                "comments": [
+                    {"author": "Ahmad", "text": "Jazakallah khair ustadz, sangat lengkap!", "time": "3 hari lalu"},
+                    {"author": "Siti", "text": "Alhamdulillah dapat ilmu, bookmark dulu", "time": "2 hari lalu"},
+                ],
+                "created_at": "2025-01-15",
+                "views": 789,
+            },
+            {
+                "id": "F004",
+                "author": "Keluarga Santoso",
+                "author_city": "Yogyakarta",
+                "avatar": "👨‍👩‍👧‍👦",
+                "title": "Umrah Mandiri Sekeluarga (4 Orang) - Hemat Rp 40 Juta!",
+                "category": "Pengalaman",
+                "content": """Assalamualaikum, mau sharing pengalaman umrah mandiri sekeluarga:
+
+**Komposisi:** Saya, istri, 2 anak (12 & 8 tahun)
+
+**Perbandingan Biaya:**
+- Travel Agent: Rp 35 juta x 4 = **Rp 140 juta**
+- Umrah Mandiri: **Rp 100 juta** (untuk 4 orang!)
+- **HEMAT: Rp 40 juta!**
+
+**Rincian Biaya Mandiri (4 orang):**
+- Tiket PP x 4: Rp 32 juta
+- Visa x 4: Rp 2.4 juta
+- Hotel Makkah (family room, 5 malam): Rp 18 juta
+- Hotel Madinah (family room, 4 malam): Rp 12 juta
+- Sewa mobil + driver 10 hari: Rp 15 juta
+- Makan & misc: Rp 20 juta
+
+**Tips dengan Anak-anak:**
+1. Pilih waktu yang tidak terlalu panas (Januari-Februari)
+2. Hotel HARUS dekat Haram, anak-anak capek jalan jauh
+3. Bawa stroller untuk anak kecil
+4. Siapkan snack kesukaan anak
+5. Thawaf & sa'i waktu malam, lebih sejuk & sepi
+
+**Momen Terindah:**
+Melihat anak-anak excited di depan Ka'bah, priceless! 💚
+
+Silakan tanya-tanya ya!""",
+                "likes": 203,
+                "comments": [
+                    {"author": "Bunda Maya", "text": "MasyaAllah! Ini yang saya cari. Pengen ajak anak tapi budget terbatas", "time": "6 jam lalu"},
+                    {"author": "Pak Budi", "text": "Mantap pak! Sewa mobil dimana ya?", "time": "1 hari lalu"},
+                ],
+                "created_at": "2025-01-22",
+                "views": 634,
+            },
+            {
+                "id": "F005",
+                "author": "Via LABBAIK.AI",
+                "author_city": "Platform",
+                "avatar": "🤖",
+                "title": "Testimoni: Planning Umrah Mandiri Pakai LABBAIK - Mudah Banget!",
+                "category": "Testimoni LABBAIK",
+                "content": """Halo semuanya! Saya mau share pengalaman pakai LABBAIK.AI untuk planning umrah mandiri:
+
+**Kenapa pakai LABBAIK?**
+1. Bisa simulasi biaya dengan berbagai skenario
+2. AI-nya pinter, bisa jawab semua pertanyaan tentang umrah
+3. Ada rekomendasi hotel dan maskapai
+4. Bisa bandingkan paket Ekonomis vs Premium
+
+**Yang saya suka:**
+- Fitur "Cari Paket by Budget" - masukin budget, langsung keluar opsi
+- Chat AI 24 jam, tanya manasik dijawab lengkap
+- Perbandingan skenario sangat membantu decide
+
+**Hasil:**
+Dari awalnya bingung mau arrange sendiri, sekarang jadi PD! LABBAIK bantu breakdown semua:
+- Estimasi biaya realistis
+- Timeline persiapan
+- Checklist dokumen
+
+Recommended banget buat yang mau umrah mandiri tapi bingung mulai dari mana! 🌟
+
+#LABBAIK #UmrahMandiri #TestimoniAsli""",
+                "likes": 78,
+                "comments": [
+                    {"author": "Nana", "text": "Wah baru tau ada platform kayak gini, keren!", "time": "4 jam lalu"},
+                    {"author": "Rudi", "text": "Link nya mana nih? Mau coba juga", "time": "2 jam lalu"},
+                ],
+                "created_at": "2025-01-25",
+                "views": 445,
+            },
+        ]
+
+
+def render_umrah_mandiri():
+    """Render Umrah Mandiri Guide and Forum"""
+    init_forum_state()
+    
+    st.header("🕋 Umrah Mandiri")
+    st.markdown("Panduan lengkap umrah mandiri & forum sharing pengalaman!")
+    
+    # Tabs
+    tab1, tab2, tab3 = st.tabs(["📖 Apa itu Umrah Mandiri?", "💬 Forum Diskusi", "✍️ Tulis Pengalaman"])
+    
+    # ===== TAB 1: APA ITU UMRAH MANDIRI =====
+    with tab1:
+        # Hero Section
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 30px; border-radius: 20px; margin-bottom: 25px;">
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🕋</div>
+                <h2 style="color: {COLORS['gold']}; margin: 0;">Umrah Mandiri</h2>
+                <p style="color: {COLORS['sand']}; font-size: 1.1rem; margin-top: 10px;">
+                    Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # What is Umrah Mandiri
+        st.markdown("### 🤔 Apa Sih Umrah Mandiri Itu?")
+        
+        st.markdown("""
+        **Umrah Mandiri** adalah ibadah umrah yang kamu atur sendiri tanpa menggunakan jasa travel agent. 
+        Mulai dari tiket pesawat, hotel, visa, sampai transportasi di Arab Saudi - semuanya kamu yang handle!
+        
+        *"Lho, memangnya boleh?"* 
+        
+        **Boleh banget!** Sejak tahun 2019, Arab Saudi membuka **visa umrah elektronik (e-visa)** yang bisa diajukan 
+        secara online. Jadi sekarang siapa aja bisa umrah mandiri dengan legal dan aman. 👍
+        """)
+        
+        # Comparison Box
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(f"""
+            <div style="background: #E3F2FD; border: 2px solid #2196F3; border-radius: 15px; padding: 20px;">
+                <h4 style="color: #1565C0; margin-top: 0;">🏢 Via Travel Agent</h4>
+                <ul style="color: #333;">
+                    <li>Semua diurus travel</li>
+                    <li>Ada muthawwif/guide</li>
+                    <li>Jadwal sudah fix</li>
+                    <li>Berangkat rombongan</li>
+                    <li>Biaya: Rp 25-50 juta</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div style="background: #E8F5E9; border: 2px solid #4CAF50; border-radius: 15px; padding: 20px;">
+                <h4 style="color: #2E7D32; margin-top: 0;">🎒 Umrah Mandiri</h4>
+                <ul style="color: #333;">
+                    <li>Atur sendiri semuanya</li>
+                    <li>Belajar manasik sendiri</li>
+                    <li>Jadwal fleksibel</li>
+                    <li>Bisa solo/keluarga/grup kecil</li>
+                    <li>Biaya: Rp 15-25 juta</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # Legal Basis Section
+        st.markdown("### 📜 Dasar Hukum & Regulasi")
+        
+        st.markdown("""
+        Tenang, umrah mandiri itu **100% legal**! Ini dasar hukumnya:
+        """)
+        
+        with st.expander("🇸🇦 Regulasi Arab Saudi", expanded=True):
+            st.markdown("""
+            **1. Saudi Vision 2030 - Tourism Sector**
+            - Arab Saudi membuka diri untuk wisatawan termasuk jamaah umrah independen
+            - E-visa umrah bisa diajukan online sejak September 2019
+            - Processing time: 24-48 jam
+            - Biaya visa: ~SAR 300 (sekitar Rp 1.2 juta)
+            
+            **2. Nusuk Platform (Resmi dari Kemenag Saudi)**
+            - Platform resmi pemerintah Saudi untuk booking umrah
+            - Website: nusuk.sa
+            - Bisa booking hotel & paket umrah langsung
+            
+            **3. Syarat Visa Umrah Elektronik:**
+            - Paspor valid minimal 6 bulan
+            - Bukti akomodasi (hotel booking)
+            - Tiket pesawat PP
+            - Asuransi perjalanan
+            - Foto digital sesuai ketentuan
+            """)
+        
+        with st.expander("🇮🇩 Regulasi Indonesia"):
+            st.markdown("""
+            **1. Kementerian Agama RI**
+            - Tidak ada larangan untuk umrah mandiri
+            - Yang diatur ketat adalah **penyelenggara travel umrah** (harus berizin)
+            - Jamaah bebas memilih umrah via travel atau mandiri
+            
+            **2. Tips Legal di Indonesia:**
+            - Pastikan paspor masih berlaku > 6 bulan
+            - Daftar ke Siskohat (Sistem Komputerisasi Haji Terpadu) tidak wajib untuk umrah
+            - Simpan semua bukti booking sebagai dokumen perjalanan
+            
+            **3. Perlindungan Konsumen:**
+            - Jika umrah mandiri, tanggung jawab sepenuhnya di jamaah
+            - Disarankan beli asuransi perjalanan yang cover medical
+            - Simpan nomor KBRI Riyadh: +966-11-488-2800
+            """)
+        
+        with st.expander("✈️ Regulasi Penerbangan"):
+            st.markdown("""
+            **Maskapai yang Terbang Langsung ke Arab Saudi:**
+            - Garuda Indonesia (CGK-JED)
+            - Saudi Airlines (CGK/SUB-JED/MED)
+            - Emirates (via Dubai)
+            - Qatar Airways (via Doha)
+            - Etihad (via Abu Dhabi)
+            
+            **Tips Booking Tiket:**
+            - Bisa langsung ke website maskapai
+            - Atau via online travel agent (Traveloka, Tiket.com, dll)
+            - Tidak perlu surat keterangan dari travel agent
+            """)
+        
+        st.markdown("---")
+        
+        # Pros and Cons
+        st.markdown("### ⚖️ Kelebihan & Pertimbangan")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            **✅ Kelebihan Umrah Mandiri:**
+            
+            1. **💰 Lebih Hemat**
+               - Bisa hemat 30-50% dari travel agent
+               - Pilih hotel sesuai budget
+            
+            2. **⏰ Fleksibel**
+               - Tentukan tanggal sendiri
+               - Durasi sesuai keinginan
+               - Pace ibadah sesuai kemampuan
+            
+            3. **🕋 Lebih Khusyuk**
+               - Tidak terikat jadwal rombongan
+               - Bisa lama di Raudhah/Multazam
+               - Quality time dengan keluarga
+            
+            4. **📚 Pengalaman Belajar**
+               - Belajar manasik lebih dalam
+               - Lebih appreciate prosesnya
+               - Skill traveling meningkat
+            """)
+        
+        with col2:
+            st.markdown("""
+            **⚠️ Yang Perlu Dipertimbangkan:**
+            
+            1. **📋 Perlu Persiapan Matang**
+               - Riset hotel, tiket, visa sendiri
+               - Pelajari manasik dengan baik
+            
+            2. **🗣️ Kendala Bahasa**
+               - Bahasa Arab tidak semua paham
+               - Tapi banyak yang bisa Inggris
+            
+            3. **🚗 Transportasi**
+               - Perlu arrange sendiri
+               - Opsi: taksi, Uber/Careem, sewa mobil
+            
+            4. **👥 Tidak Ada Guide**
+               - Perlu hafal doa-doa sendiri
+               - Tapi banyak app & buku panduan
+            
+            5. **🆘 Handle Masalah Sendiri**
+               - Jika ada kendala, solve sendiri
+               - Tapi ada KBRI & komunitas Indonesia
+            """)
+        
+        st.markdown("---")
+        
+        # Step by Step Guide
+        st.markdown("### 📝 Langkah-Langkah Umrah Mandiri")
+        
+        steps = [
+            ("1️⃣", "Persiapan Dokumen", "Pastikan paspor valid > 6 bulan, siapkan foto digital, KTP"),
+            ("2️⃣", "Booking Tiket Pesawat", "Cari tiket PP ke Jeddah/Madinah, book 2-3 bulan sebelumnya untuk harga terbaik"),
+            ("3️⃣", "Booking Hotel", "Pesan via Booking.com, Agoda, atau langsung ke hotel. Pilih dekat Masjidil Haram/Nabawi"),
+            ("4️⃣", "Apply Visa Umrah", "Via platform resmi atau agen visa terpercaya. Processing 1-5 hari kerja"),
+            ("5️⃣", "Beli Asuransi Perjalanan", "Wajib! Cover minimal medical emergency di luar negeri"),
+            ("6️⃣", "Pelajari Manasik", "Hafal niat, talbiyah, doa thawaf, doa sa'i. Bisa via YouTube/buku/kajian"),
+            ("7️⃣", "Siapkan Perlengkapan", "Pakaian ihram, sandal nyaman, obat-obatan, adaptor colokan"),
+            ("8️⃣", "Berangkat & Nikmati!", "Bismillah, berangkat dengan niat lillahi ta'ala 🕋"),
+        ]
+        
+        for icon, title, desc in steps:
+            st.markdown(f"""
+            <div style="display: flex; align-items: flex-start; margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 10px; border-left: 4px solid {COLORS['gold']};">
+                <div style="font-size: 1.5rem; margin-right: 15px;">{icon}</div>
+                <div>
+                    <div style="font-weight: 700; color: #1A1A1A;">{title}</div>
+                    <div style="color: #666; font-size: 0.9rem;">{desc}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # Cost Estimation
+        st.markdown("### 💰 Estimasi Biaya Umrah Mandiri")
+        
+        st.markdown("""
+        <div style="background: #FFF8E1; border: 2px solid #FFB300; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+            <h4 style="color: #FF8F00; margin-top: 0;">💡 Perkiraan Budget (1 orang, 9-10 hari)</h4>
+            <table style="width: 100%;">
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 8px 0;"><strong>Item</strong></td>
+                    <td style="text-align: right;"><strong>Estimasi</strong></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 8px 0;">✈️ Tiket Pesawat PP</td>
+                    <td style="text-align: right;">Rp 7-12 juta</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 8px 0;">📄 Visa Umrah</td>
+                    <td style="text-align: right;">Rp 500rb - 1.5 juta</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 8px 0;">🏨 Hotel Makkah (4-5 malam)</td>
+                    <td style="text-align: right;">Rp 2-5 juta</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 8px 0;">🏨 Hotel Madinah (3-4 malam)</td>
+                    <td style="text-align: right;">Rp 1.5-4 juta</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 8px 0;">🚗 Transportasi Lokal</td>
+                    <td style="text-align: right;">Rp 1-2 juta</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #FFE082;">
+                    <td style="padding: 8px 0;">🍽️ Makan & Lain-lain</td>
+                    <td style="text-align: right;">Rp 1.5-3 juta</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 0;"><strong style="color: #FF8F00; font-size: 1.1rem;">TOTAL ESTIMASI</strong></td>
+                    <td style="text-align: right;"><strong style="color: #FF8F00; font-size: 1.1rem;">Rp 15-25 juta</strong></td>
+                </tr>
+            </table>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.info("💡 **Tips:** Gunakan fitur **Simulasi Biaya** LABBAIK untuk hitung estimasi lebih akurat sesuai preferensi kamu!")
+        
+        # FAQ
+        st.markdown("### ❓ FAQ Umrah Mandiri")
+        
+        with st.expander("Apakah wanita boleh umrah mandiri sendirian?"):
+            st.markdown("""
+            **Ya, boleh!** Sejak 2021, Arab Saudi sudah menghapus aturan mahram untuk wanita berusia 18+. 
+            Wanita dewasa bisa umrah/haji sendiri tanpa ditemani mahram.
+            
+            Tips untuk wanita solo:
+            - Pilih hotel yang aman dan dekat Masjid
+            - Join grup WA jamaah Indonesia untuk support
+            - Simpan nomor darurat KBRI
+            """)
+        
+        with st.expander("Bagaimana cara dapat visa umrah tanpa travel agent?"):
+            st.markdown("""
+            Ada beberapa cara:
+            1. **Via Nusuk.sa** - Platform resmi Saudi (self-apply)
+            2. **Via Agen Visa Online** - Banyak yang melayani, processing 1-5 hari
+            3. **Via VFS Global** - Partner resmi Kedutaan Saudi
+            
+            Syarat: Paspor valid, bukti hotel, tiket pesawat, foto digital.
+            """)
+        
+        with st.expander("Apakah perlu sertifikat vaksin?"):
+            st.markdown("""
+            Per 2024, persyaratan vaksin COVID-19 sudah **tidak wajib** untuk umrah.
+            Namun vaksin meningitis **tetap diwajibkan**. Bisa vaksin di Kantor Kesehatan Pelabuhan (KKP).
+            """)
+        
+        with st.expander("Bagaimana kalau tidak bisa bahasa Arab?"):
+            st.markdown("""
+            **Tidak masalah!** 
+            - Banyak petugas di Masjidil Haram yang bisa Inggris
+            - Jamaah Indonesia banyak, bisa minta bantuan
+            - Gunakan Google Translate untuk situasi darurat
+            - Yang penting: hafal doa-doa dalam bahasa Arab
+            """)
+    
+    # ===== TAB 2: FORUM DISKUSI =====
+    with tab2:
+        st.markdown("### 💬 Forum Umrah Mandiri")
+        st.markdown("Tempat sharing pengalaman, tips, dan tanya jawab seputar umrah mandiri!")
+        
+        # Stats
+        total_posts = len(st.session_state.forum_posts)
+        total_views = sum([p["views"] for p in st.session_state.forum_posts])
+        total_likes = sum([p["likes"] for p in st.session_state.forum_posts])
+        
+        stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
+        with stat_col1:
+            st.metric("📝 Total Post", total_posts)
+        with stat_col2:
+            st.metric("👀 Total Views", f"{total_views:,}")
+        with stat_col3:
+            st.metric("❤️ Total Likes", f"{total_likes:,}")
+        with stat_col4:
+            st.metric("💬 Diskusi Aktif", len([p for p in st.session_state.forum_posts if len(p["comments"]) > 0]))
+        
+        st.markdown("---")
+        
+        # Filter
+        filter_col1, filter_col2 = st.columns([2, 1])
+        with filter_col1:
+            category_filter = st.selectbox(
+                "🏷️ Filter Kategori",
+                options=["Semua", "Pengalaman", "Tips & Trik", "Panduan", "Testimoni LABBAIK", "Tanya Jawab"]
+            )
+        with filter_col2:
+            sort_by = st.selectbox(
+                "📊 Urutkan",
+                options=["Terbaru", "Paling Populer", "Paling Banyak Dilihat"]
+            )
+        
+        # Filter and sort posts
+        filtered_posts = st.session_state.forum_posts.copy()
+        
+        if category_filter != "Semua":
+            filtered_posts = [p for p in filtered_posts if p["category"] == category_filter]
+        
+        if sort_by == "Paling Populer":
+            filtered_posts.sort(key=lambda x: x["likes"], reverse=True)
+        elif sort_by == "Paling Banyak Dilihat":
+            filtered_posts.sort(key=lambda x: x["views"], reverse=True)
+        else:
+            filtered_posts.sort(key=lambda x: x["created_at"], reverse=True)
+        
+        st.markdown(f"**Menampilkan {len(filtered_posts)} postingan**")
+        st.markdown("---")
+        
+        # Display posts
+        for post in filtered_posts:
+            # Category colors
+            cat_colors = {
+                "Pengalaman": ("#4CAF50", "#E8F5E9"),
+                "Tips & Trik": ("#2196F3", "#E3F2FD"),
+                "Panduan": ("#9C27B0", "#F3E5F5"),
+                "Testimoni LABBAIK": ("#D4AF37", "#FFF8E1"),
+                "Tanya Jawab": ("#FF5722", "#FBE9E7"),
+            }
+            cat_color, cat_bg = cat_colors.get(post["category"], ("#666", "#f5f5f5"))
+            
+            st.markdown(f"""
+            <div style="background: white; border: 1px solid #e0e0e0; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="font-size: 2rem; margin-right: 12px;">{post['avatar']}</span>
+                        <div>
+                            <span style="font-weight: 600; color: #1A1A1A;">{post['author']}</span>
+                            <span style="color: #888; font-size: 0.85rem; margin-left: 8px;">• {post['author_city']}</span>
+                            <div style="font-size: 0.8rem; color: #999;">{post['created_at']}</div>
+                        </div>
+                    </div>
+                    <span style="background: {cat_bg}; color: {cat_color}; padding: 4px 12px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">
+                        {post['category']}
+                    </span>
+                </div>
+                <h4 style="color: #1A1A1A; margin: 0 0 10px 0; line-height: 1.4;">{post['title']}</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Content preview
+            with st.expander("📖 Baca Selengkapnya"):
+                st.markdown(post["content"])
+                
+                st.markdown("---")
+                
+                # Engagement stats
+                eng_col1, eng_col2, eng_col3, eng_col4 = st.columns(4)
+                with eng_col1:
+                    if st.button(f"❤️ {post['likes']}", key=f"like_{post['id']}"):
+                        post["likes"] += 1
+                        st.rerun()
+                with eng_col2:
+                    st.markdown(f"👀 {post['views']} views")
+                with eng_col3:
+                    st.markdown(f"💬 {len(post['comments'])} komentar")
+                with eng_col4:
+                    st.button("🔗 Share", key=f"share_{post['id']}")
+                
+                # Comments
+                if post["comments"]:
+                    st.markdown("**💬 Komentar:**")
+                    for comment in post["comments"]:
+                        st.markdown(f"""
+                        <div style="background: #f5f5f5; padding: 10px 15px; border-radius: 10px; margin-bottom: 8px;">
+                            <strong>{comment['author']}</strong> • <span style="color: #888; font-size: 0.85rem;">{comment['time']}</span>
+                            <div style="margin-top: 5px;">{comment['text']}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                
+                # Add comment
+                new_comment = st.text_input("Tulis komentar...", key=f"comment_input_{post['id']}")
+                if st.button("Kirim Komentar", key=f"send_comment_{post['id']}"):
+                    if new_comment:
+                        user = get_current_user()
+                        post["comments"].append({
+                            "author": user.get("name", "Guest") if user else "Guest",
+                            "text": new_comment,
+                            "time": "Baru saja"
+                        })
+                        st.success("Komentar terkirim!")
+                        st.rerun()
+    
+    # ===== TAB 3: TULIS PENGALAMAN =====
+    with tab3:
+        st.markdown("### ✍️ Bagikan Pengalaman Umrah Mandiri Kamu!")
+        st.markdown("Ceritakan pengalamanmu untuk menginspirasi jamaah lainnya.")
+        
+        user = get_current_user()
+        
+        if not user:
+            st.warning("🔐 Silakan login untuk menulis pengalaman.")
+        else:
+            with st.form("new_forum_post"):
+                post_title = st.text_input(
+                    "📌 Judul Postingan *",
+                    placeholder="Contoh: Pengalaman Umrah Mandiri Pertama Kali!"
+                )
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    post_category = st.selectbox(
+                        "🏷️ Kategori *",
+                        options=["Pengalaman", "Tips & Trik", "Panduan", "Testimoni LABBAIK", "Tanya Jawab"]
+                    )
+                with col2:
+                    author_city = st.text_input(
+                        "🏙️ Kota Kamu",
+                        value=user.get("city", "Indonesia")
+                    )
+                
+                post_content = st.text_area(
+                    "📝 Isi Postingan *",
+                    placeholder="Ceritakan pengalamanmu... Tips, biaya, momen berkesan, dll.",
+                    height=300
+                )
+                
+                st.markdown("""
+                **💡 Tips menulis yang menarik:**
+                - Ceritakan detail biaya untuk membantu jamaah lain
+                - Share tips praktis yang berguna
+                - Tambahkan momen berkesan untuk inspirasi
+                - Gunakan format yang mudah dibaca (poin-poin, emoji)
+                """)
+                
+                submitted = st.form_submit_button("🚀 Publikasikan", use_container_width=True)
+                
+                if submitted:
+                    if post_title and post_content:
+                        new_post = {
+                            "id": f"F{len(st.session_state.forum_posts) + 1:03d}",
+                            "author": user.get("name", "Anonymous"),
+                            "author_city": author_city,
+                            "avatar": "👤",
+                            "title": post_title,
+                            "category": post_category,
+                            "content": post_content,
+                            "likes": 0,
+                            "comments": [],
+                            "created_at": str(datetime.now().date()),
+                            "views": 0,
+                        }
+                        
+                        st.session_state.forum_posts.insert(0, new_post)
+                        st.success("✅ Postingan berhasil dipublikasikan!")
+                        st.balloons()
+                    else:
+                        st.error("❌ Mohon isi judul dan konten postingan.")
+        
+        # Guidelines
+        st.markdown("---")
+        st.markdown("### 📋 Panduan Komunitas")
+        
+        st.markdown("""
+        <div style="background: #E8F5E9; border-radius: 15px; padding: 20px;">
+            <h4 style="color: #2E7D32; margin-top: 0;">✅ Yang Boleh Diposting:</h4>
+            <ul>
+                <li>Pengalaman umrah mandiri (positif maupun tantangan)</li>
+                <li>Tips & trik hemat biaya</li>
+                <li>Panduan manasik dan doa-doa</li>
+                <li>Rekomendasi hotel, transportasi, kuliner</li>
+                <li>Pertanyaan seputar umrah mandiri</li>
+            </ul>
+            
+            <h4 style="color: #C62828; margin-top: 20px;">❌ Yang Tidak Diperbolehkan:</h4>
+            <ul>
+                <li>Promosi travel agent atau jasa komersial</li>
+                <li>Konten yang mengandung SARA</li>
+                <li>Informasi yang menyesatkan</li>
+                <li>Spam atau postingan berulang</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Bottom Section
+    st.markdown("---")
+    st.markdown(f"""
+    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); border-radius: 15px;">
+        <div style="color: {COLORS['gold']}; font-size: 1.3rem; margin-bottom: 10px;">🕋 Siap Umrah Mandiri?</div>
+        <div style="color: white; margin-bottom: 15px;">Gunakan LABBAIK untuk planning umrah mandiri yang terencana dan hemat!</div>
+        <div style="color: {COLORS['sand']}; font-size: 0.9rem;">💰 Simulasi Biaya • 🤖 AI Assistant • 📊 Perbandingan Paket</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 def render_settings():
     """Render settings page"""
     st.header("⚙️ Pengaturan")
@@ -2112,6 +2847,13 @@ def main():
         else:
             track_page_view("Umrah Bareng")
             render_umrah_bareng()
+    elif "Umrah Mandiri" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            track_page_view("Umrah Mandiri")
+            render_umrah_mandiri()
     elif "Perbandingan" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login untuk mengakses fitur ini")
