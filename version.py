@@ -1,7 +1,7 @@
 # version.py - LABBAIK Version Information
-# Updated: 2025-12-02
+# Updated: 2025-12-03
 
-__version__ = "3.4.0"
+__version__ = "3.4.1"
 
 DEVELOPER = {
     "name": "MS Hadianto",
@@ -30,6 +30,22 @@ APP_INFO = {
 # ============================================
 
 CHANGELOG = {
+    "3.4.1": {
+        "name": "PWA Support (Phase 1)",
+        "date": "2025-12-03",
+        "features": [
+            ("📱", "Progressive Web App (PWA) implementation"),
+            ("🏠", "Add to Home Screen capability"),
+            ("🎨", "Custom app icons (48px - 512px)"),
+            ("📄", "Web App Manifest configuration"),
+            ("⚙️", "Service Worker for caching"),
+            ("📴", "Offline fallback page"),
+            ("🔔", "Install banner prompt (auto 5 seconds)"),
+            ("📲", "Tab 'Install App' di Tentang Aplikasi"),
+            ("🎯", "Standalone display mode (fullscreen)"),
+            ("🌙", "Theme color integration (#D4AF37 gold)"),
+        ]
+    },
     "3.4.0": {
         "name": "Neon Database Integration",
         "date": "2025-12-02",
@@ -246,7 +262,7 @@ def get_developer_card():
     </div>
     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;">
         <p style="color: #aaa; font-size: 0.85rem; line-height: 1.6;">
-            Platform ini dikembangkan oleh MS Hadianto - profesional di bidang GRC & Internal Audit, 
+            Platform ini dikembangkan oleh non-developer profesional di bidang GRC & Internal Audit, 
             dengan memanfaatkan teknologi AI (Claude by Anthropic & Gemini by Google) untuk membantu 
             calon jamaah merencanakan perjalanan umrah yang terencana dan sesuai budget.
         </p>
