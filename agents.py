@@ -205,6 +205,12 @@ class AgentOrchestrator:
             "travel": TravelAgent(provider)
         }
         self.conversation_history: List[Dict] = []
+        self.is_initialized = False
+    
+    def initialize(self) -> Dict:
+        """Initialize the orchestrator and all agents"""
+        self.is_initialized = True
+        return {"status": "success", "message": "Orchestrator initialized", "agents": list(self.agents.keys())}
     
     def detect_intent(self, query: str) -> str:
         """Detect user intent to route to appropriate agent"""
