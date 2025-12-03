@@ -72,10 +72,10 @@ except ImportError:
     llm_config = LLMConfig()
     
     SCENARIO_TEMPLATES = {
-        "ekonomis": {"name": "Ekonomis", "multiplier": 1.0},
-        "standard": {"name": "Standard", "multiplier": 1.3},
-        "premium": {"name": "Premium", "multiplier": 1.8},
-        "vip": {"name": "VIP", "multiplier": 2.5}
+        "ekonomis": {"name": "Ekonomis", "multiplier": 1.0, "duration_days": 9},
+        "standard": {"name": "Standard", "multiplier": 1.3, "duration_days": 9},
+        "premium": {"name": "Premium", "multiplier": 1.8, "duration_days": 12},
+        "vip": {"name": "VIP", "multiplier": 2.5, "duration_days": 14}
     }
     
     DEPARTURE_CITIES = {
@@ -373,6 +373,67 @@ except ImportError:
         
         def clear_history(self):
             self.conversation_history = []
+        
+        def get_agent_status(self):
+            """Get status of all agents"""
+            return {
+                "status": "active" if self.client else "inactive",
+                "provider": self.provider,
+                "agents": ["planner", "budget", "manasik", "travel"],
+                "api_connected": self.client is not None,
+                "total_queries": len(self.conversation_history)
+            }
+        
+        def create_complete_plan(self, scenario="standard", num_people=1, duration_days=9, 
+                                  departure_month=None, special_requests=None):
+            """Create a complete umrah plan"""
+            planner = ScenarioPlanner()
+            result = planner.create_scenario(
+                scenario_type=scenario,
+                num_people=num_people,
+                duration_days=duration_days,
+                departure_month=departure_month
+            )
+            
+            # Build the plan
+            plan = {
+                "scenario": result,
+                "itinerary": self._generate_itinerary(duration_days),
+                "checklist": self._generate_checklist(),
+                "special_notes": special_requests or "",
+                "status": "success"
+            }
+            
+            return type('Plan', (), plan)()
+        
+        def _generate_itinerary(self, duration_days):
+            """Generate sample itinerary"""
+            itinerary = []
+            for day in range(1, duration_days + 1):
+                if day == 1:
+                    itinerary.append({"day": day, "title": "Keberangkatan", "activities": ["Check-in bandara", "Penerbangan ke Jeddah/Madinah"]})
+                elif day == 2:
+                    itinerary.append({"day": day, "title": "Tiba di Madinah", "activities": ["Check-in hotel", "Ziarah Masjid Nabawi"]})
+                elif day <= 4:
+                    itinerary.append({"day": day, "title": f"Madinah Hari {day-1}", "activities": ["Sholat di Masjid Nabawi", "Ziarah tempat bersejarah"]})
+                elif day == 5:
+                    itinerary.append({"day": day, "title": "Perjalanan ke Makkah", "activities": ["Miqat di Bir Ali", "Ihram", "Perjalanan ke Makkah"]})
+                elif day == 6:
+                    itinerary.append({"day": day, "title": "Umrah", "activities": ["Tawaf", "Sa'i", "Tahallul"]})
+                elif day < duration_days:
+                    itinerary.append({"day": day, "title": f"Makkah Hari {day-5}", "activities": ["Sholat di Masjidil Haram", "Ibadah sunnah"]})
+                else:
+                    itinerary.append({"day": day, "title": "Kepulangan", "activities": ["Check-out hotel", "Penerbangan pulang"]})
+            return itinerary
+        
+        def _generate_checklist(self):
+            """Generate preparation checklist"""
+            return [
+                {"category": "Dokumen", "items": ["Paspor (min 6 bulan)", "Visa Umrah", "Tiket pesawat", "Bukti hotel"]},
+                {"category": "Pakaian", "items": ["Ihram (pria)", "Mukena (wanita)", "Pakaian harian", "Sandal nyaman"]},
+                {"category": "Kesehatan", "items": ["Vaksin meningitis", "Obat pribadi", "Masker", "Hand sanitizer"]},
+                {"category": "Lainnya", "items": ["Uang SAR", "Power bank", "Buku doa", "Sajadah travel"]}
+            ]
 
 # ============================================
 # OTHER MODULE IMPORTS (with fallbacks)
@@ -380,9 +441,248 @@ except ImportError:
 try:
     from scenarios import ScenarioPlanner
 except ImportError:
-    class ScenarioPlanner:
-        def calculate_budget(self, **kwargs):
-            return type('Budget', (), {'total': 25000000})()
+    pass  # Will use fallback below
+
+# Always use this ScenarioPlanner to ensure compatibility
+class ScenarioPlanner:
+    """ScenarioPlanner with all required methods for app.py"""
+    
+    BASE_PRICES = {
+        "flight": 8000000,
+        "visa": 1500000,
+        "hotel_3star": 800000,
+        "hotel_4star": 1500000,
+        "hotel_5star": 3000000,
+        "transport": 500000,
+        "meals": 300000,
+    }
+    
+    SCENARIO_CONFIGS = {
+        "ekonomis": {
+            "multiplier": 1.0,
+            "hotel_star": 3,
+            "features": [
+                "Hotel bintang 3 (±500m dari Masjidil Haram)",
+                "Penerbangan ekonomi (transit)",
+                "Bus transportasi bersama",
+                "Makan 3x sehari (catering)",
+                "Visa umrah standar",
+                "Muthawwif berbahasa Indonesia"
+            ]
+        },
+        "standard": {
+            "multiplier": 1.3,
+            "hotel_star": 4,
+            "features": [
+                "Hotel bintang 4 (±300m dari Masjidil Haram)",
+                "Penerbangan ekonomi (direct)",
+                "Bus AC eksklusif",
+                "Makan 3x sehari (prasmanan)",
+                "Visa umrah + handling bandara",
+                "Muthawwif berpengalaman"
+            ]
+        },
+        "premium": {
+            "multiplier": 1.8,
+            "hotel_star": 5,
+            "features": [
+                "Hotel bintang 5 (±100m dari Masjidil Haram)",
+                "Penerbangan bisnis class",
+                "Private car per keluarga",
+                "Makan 3x sehari (fine dining)",
+                "Visa umrah + fast track imigrasi",
+                "Muthawwif pribadi"
+            ]
+        },
+        "vip": {
+            "multiplier": 2.5,
+            "hotel_star": 5,
+            "features": [
+                "Hotel bintang 5 (view Masjidil Haram)",
+                "Penerbangan first class",
+                "Limousine service",
+                "Makan premium + room service",
+                "Visa VIP + CIP lounge",
+                "Muthawwif eksklusif 24 jam"
+            ]
+        }
+    }
+    
+    def __init__(self):
+        self.scenarios = []
+    
+    def calculate_budget(self, **kwargs):
+        scenario = kwargs.get("scenario_type", kwargs.get("package_type", "standard"))
+        num_people = kwargs.get("num_people", 1)
+        duration = kwargs.get("duration_days", 9)
+        
+        config = self.SCENARIO_CONFIGS.get(scenario, self.SCENARIO_CONFIGS["standard"])
+        multiplier = config["multiplier"]
+        hotel_star = config["hotel_star"]
+        
+        flight = self.BASE_PRICES["flight"] * multiplier
+        visa = self.BASE_PRICES["visa"]
+        hotel_key = f"hotel_{hotel_star}star"
+        hotel = self.BASE_PRICES.get(hotel_key, self.BASE_PRICES["hotel_4star"]) * duration
+        transport = self.BASE_PRICES["transport"] * duration * (0.8 if multiplier > 1.5 else 1)
+        meals = self.BASE_PRICES["meals"] * duration * multiplier
+        
+        per_person = flight + visa + hotel + transport + meals
+        total = per_person * num_people
+        
+        return type('Budget', (), {
+            'total': total,
+            'per_person': per_person,
+            'flight': flight * num_people,
+            'visa': visa * num_people,
+            'hotel_makkah': hotel * 0.6 * num_people,
+            'hotel_madinah': hotel * 0.4 * num_people,
+            'transport': transport * num_people,
+            'meals': meals * num_people,
+            'misc': per_person * 0.05 * num_people,
+            'breakdown': {
+                'flight': flight * num_people,
+                'visa': visa * num_people,
+                'hotel': hotel * num_people,
+                'transport': transport * num_people,
+                'meals': meals * num_people
+            }
+        })()
+    
+    def create_scenario(self, scenario_type="standard", num_people=1, duration_days=9, departure_month=None, **kwargs):
+        """Create a budget scenario - handles both positional and keyword args"""
+        # Handle positional args (scenario_type might be passed as first positional arg)
+        if isinstance(scenario_type, str) and scenario_type in self.SCENARIO_CONFIGS:
+            pass  # scenario_type is already correct
+        
+        config = self.SCENARIO_CONFIGS.get(scenario_type, self.SCENARIO_CONFIGS["standard"])
+        budget = self.calculate_budget(
+            scenario_type=scenario_type,
+            num_people=num_people,
+            duration_days=duration_days
+        )
+        
+        scenario_names = {
+            "ekonomis": "Paket Ekonomis",
+            "standard": "Paket Standard", 
+            "premium": "Paket Premium",
+            "vip": "Paket VIP"
+        }
+        
+        # Season adjustment
+        season_multiplier = 1.0
+        if departure_month:
+            if departure_month in [1, 2, 3]:  # Ramadan period (approximate)
+                season_multiplier = 1.4
+            elif departure_month in [6, 7, 8]:  # Summer/high season
+                season_multiplier = 1.2
+            elif departure_month in [4, 5, 10, 11]:  # Shoulder season
+                season_multiplier = 1.0
+            else:  # Low season
+                season_multiplier = 0.9
+        
+        estimated_base = budget.total * season_multiplier
+        
+        # Return object with all expected attributes
+        return type('ScenarioResult', (), {
+            'name': scenario_names.get(scenario_type, "Paket Standard"),
+            'scenario_type': scenario_type,
+            'num_people': num_people,
+            'duration_days': duration_days,
+            'total': estimated_base,
+            'per_person': estimated_base / num_people,
+            'estimated_min': estimated_base * 0.9,
+            'estimated_max': estimated_base * 1.1,
+            'breakdown': budget.breakdown,
+            'monthly_savings': int(estimated_base / 12),
+            'features': config["features"],
+            'recommendations': [
+                "Booking hotel 3-6 bulan sebelumnya untuk harga terbaik",
+                "Pilih penerbangan transit untuk hemat biaya",
+                "Gunakan travel agent terpercaya dan berizin resmi"
+            ],
+            'flight': budget.flight,
+            'visa': budget.visa,
+            'hotel_makkah': budget.hotel_makkah,
+            'hotel_madinah': budget.hotel_madinah,
+            'transport': budget.transport,
+            'meals': budget.meals,
+            'misc': budget.misc,
+            'package_type': scenario_type,
+            'description': f"Estimasi biaya {scenario_names.get(scenario_type, 'Standard')} untuk {num_people} orang, {duration_days} hari",
+            # Additional attributes for comparison view
+            'hotel_star_makkah': config["hotel_star"],
+            'hotel_star_madinah': config["hotel_star"],
+            'hotel_distance_makkah': {"ekonomis": "500-800m", "standard": "200-400m", "premium": "50-150m", "vip": "< 50m (View Haram)"}.get(scenario_type, "200-400m"),
+            'meal_type': {"ekonomis": "tanpa_makan", "standard": "makan_3x", "premium": "makan_premium", "vip": "all_inclusive"}.get(scenario_type, "makan_3x")
+        })()
+    
+    def compare_scenarios(self, scenarios_list=None, num_people=1, duration_days=9):
+        """Compare multiple scenarios"""
+        if scenarios_list is None:
+            scenarios_list = ["ekonomis", "standard", "premium", "vip"]
+        
+        results = []
+        for scenario in scenarios_list:
+            result = self.create_scenario(scenario, num_people, duration_days)
+            results.append(result)
+        return results
+    
+    def get_recommendations(self, budget):
+        """Get recommendations based on budget"""
+        recs = []
+        for scenario_type in ["ekonomis", "standard", "premium", "vip"]:
+            result = self.create_scenario(scenario_type, 1, 9)
+            if result.total <= budget:
+                recs.append({
+                    "scenario": scenario_type,
+                    "name": result.name,
+                    "total": result.total,
+                    "features": result.features
+                })
+        return recs
+    
+    def analyze_best_time(self, priority="balanced"):
+        """Analyze best time to perform umrah based on priority"""
+        months_data = [
+            {"month": 1, "month_name": "Januari", "weather": "Sejuk", "price_multiplier": 0.85, "crowd_level": "Rendah", "recommendation_score": 85},
+            {"month": 2, "month_name": "Februari", "weather": "Sejuk", "price_multiplier": 0.85, "crowd_level": "Rendah", "recommendation_score": 85},
+            {"month": 3, "month_name": "Maret", "weather": "Hangat", "price_multiplier": 1.6, "crowd_level": "Sangat Tinggi (Ramadan)", "recommendation_score": 60},
+            {"month": 4, "month_name": "April", "weather": "Hangat", "price_multiplier": 1.0, "crowd_level": "Sedang", "recommendation_score": 75},
+            {"month": 5, "month_name": "Mei", "weather": "Panas", "price_multiplier": 1.0, "crowd_level": "Sedang", "recommendation_score": 70},
+            {"month": 6, "month_name": "Juni", "weather": "Panas", "price_multiplier": 1.3, "crowd_level": "Tinggi (Liburan)", "recommendation_score": 55},
+            {"month": 7, "month_name": "Juli", "weather": "Sangat Panas", "price_multiplier": 1.4, "crowd_level": "Tinggi (Liburan)", "recommendation_score": 50},
+            {"month": 8, "month_name": "Agustus", "weather": "Sangat Panas", "price_multiplier": 1.0, "crowd_level": "Sedang", "recommendation_score": 60},
+            {"month": 9, "month_name": "September", "weather": "Hangat", "price_multiplier": 0.85, "crowd_level": "Rendah", "recommendation_score": 90},
+            {"month": 10, "month_name": "Oktober", "weather": "Sejuk", "price_multiplier": 0.85, "crowd_level": "Rendah", "recommendation_score": 95},
+            {"month": 11, "month_name": "November", "weather": "Sejuk", "price_multiplier": 1.0, "crowd_level": "Sedang", "recommendation_score": 80},
+            {"month": 12, "month_name": "Desember", "weather": "Sejuk", "price_multiplier": 1.3, "crowd_level": "Tinggi (Liburan)", "recommendation_score": 65},
+        ]
+        
+        # Adjust scores based on priority
+        if priority == "cost":
+            for m in months_data:
+                m["recommendation_score"] = int(100 - (m["price_multiplier"] * 50))
+        elif priority == "crowd":
+            crowd_scores = {"Rendah": 100, "Sedang": 70, "Tinggi (Liburan)": 40, "Sangat Tinggi (Ramadan)": 30}
+            for m in months_data:
+                m["recommendation_score"] = crowd_scores.get(m["crowd_level"], 50)
+        
+        # Sort by recommendation score
+        sorted_months = sorted(months_data, key=lambda x: x["recommendation_score"], reverse=True)
+        
+        return {
+            "best_months": sorted_months[:3],
+            "avoid_months": sorted_months[-3:],
+            "analysis": months_data,
+            "notes": [
+                "Oktober-November adalah waktu terbaik untuk biaya dan kenyamanan",
+                "Hindari Juni-Juli jika ingin menghindari panas ekstrem",
+                "Ramadan (Maret/April) sangat ramai tapi bernilai pahala lebih",
+                "Booking 3-6 bulan sebelumnya untuk harga terbaik"
+            ],
+            "priority": priority
+        }
 
 try:
     from utils import format_currency, format_duration
@@ -2040,7 +2340,7 @@ def render_umrah_bareng():
             with filter_col4:
                 filter_city = st.selectbox(
                     "🏙️ Kota Keberangkatan",
-                    options=["Semua"] + DEPARTURE_CITIES
+                    options=["Semua"] + list(DEPARTURE_CITIES.keys())
                 )
         
         # Filter results
@@ -3601,10 +3901,26 @@ def render_user_profile():
     
     col1, col2 = st.columns([1, 2])
     with col1:
-        st.markdown(f"""<div style="background: linear-gradient(135deg, {role_info['color']}88, {role_info['color']}44); padding: 2rem; border-radius: 15px; text-align: center; border: 3px solid {role_info['color']};"><div style="font-size: 4rem;">{role_info['badge']}</div><h2>{user['name']}</h2><p style="color: {role_info['color']}; font-weight: bold;">{role_info['name']}</p></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div style="background: linear-gradient(135deg, {role_info['color']}88, {role_info['color']}44); padding: 2rem; border-radius: 15px; text-align: center; border: 3px solid {role_info['color']};"><div style="font-size: 4rem;">{role_info['badge']}</div><h2>{user.get('name', 'User')}</h2><p style="color: {role_info['color']}; font-weight: bold;">{role_info['name']}</p></div>""", unsafe_allow_html=True)
     with col2:
         st.markdown("### 📋 Informasi Akun")
-        st.markdown(f"""| Field | Value |\n|-------|-------|\n| **Username** | @{user['username']} |\n| **Email** | {user['email']} |\n| **Phone** | {user.get('phone', '-')} |\n| **Member Since** | {user.get('created_at', '-')[:10]} |\n| **Last Login** | {user.get('last_login', '-')[:16] if user.get('last_login') else '-'} |\n| **Status** | {'✅ Active' if user.get('status') == 'active' else '❌ Inactive'} |""")
+        username = user.get('username', user.get('email', '').split('@')[0])
+        created_at = user.get('created_at', '-')
+        created_display = created_at[:10] if created_at and created_at != '-' else '-'
+        last_login = user.get('last_login', '')
+        last_login_display = last_login[:16] if last_login else '-'
+        status = '✅ Active' if user.get('status', 'active') == 'active' else '❌ Inactive'
+        
+        st.markdown(f"""
+| Field | Value |
+|-------|-------|
+| **Username** | @{username} |
+| **Email** | {user.get('email', '-')} |
+| **Phone** | {user.get('phone', '-')} |
+| **Member Since** | {created_display} |
+| **Last Login** | {last_login_display} |
+| **Status** | {status} |
+""")
     
     st.markdown("---")
     if st.button("🚪 Logout", type="secondary"):
