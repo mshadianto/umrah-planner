@@ -21,6 +21,8 @@ class LLMConfig:
     groq_api_key: str = ""
     openai_api_key: str = ""
     model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "llama-3.3-70b-versatile"
+    openai_model: str = "gpt-4o-mini"
     temperature: float = 0.7
     max_tokens: int = 2000
     
