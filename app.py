@@ -14,7 +14,7 @@ See LICENSE and COPYRIGHT files for full terms.
 
 ================================================================================
 Platform: AI-Powered Umrah Planning Platform
-Version:  3.4.0
+Version:  3.5.0
 Codename: Labbaik
 Author:   MS Hadianto
 Email:    sopian.hadianto@gmail.com
@@ -22,9 +22,13 @@ Website:  labbaik.ai
 GitHub:   https://github.com/mshadianto
 ================================================================================
 
-Version: 3.4.1
-Updated: 2025-12-02
-Changes: Database integration with Neon PostgreSQL for persistent data storage
+Version: 3.5.0
+Updated: 2025-12-03
+Changes: 
+- Engagement & Gamification System (Points, Levels, Badges, Streaks)
+- Interactive Quiz & Learning Paths
+- Viral/Social Sharing Features
+- Referral System with Rewards
 """
 
 import streamlit as st
@@ -101,7 +105,7 @@ BRAND = {
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
     "full_tagline": "Labbaik Allahumma Labbaik - Aku Datang Memenuhi Panggilan-Mu",
-    "version": "3.4.1",
+    "version": "3.5.0",
 }
 
 COLORS = {
@@ -542,6 +546,7 @@ def render_sidebar():
                 "📋 Buat Rencana",
                 "✈️ Booking & Reservasi",
                 "🧰 Tools & Fitur",
+                "🎮 Rewards & Quiz",
             ]
             
             if user and user.get("role") in ["admin", "superadmin"]:
@@ -3201,9 +3206,60 @@ def render_user_profile():
         st.rerun()
 
 
+# ============================================
+# ENGAGEMENT PAGE - REWARDS & QUIZ
+# ============================================
+
+def render_engagement_page():
+    """Render the engagement hub with rewards, quiz, and referral"""
+    from quiz_learning import render_quiz_page, init_quiz_state
+    from social_viral import render_invite_modal, render_share_buttons
+    from engagement import (
+        render_engagement_hub, render_daily_reward_popup,
+        check_daily_login, generate_referral_code
+    )
+    
+    # Check daily login for streak
+    check_daily_login()
+    
+    # Header
+    st.markdown(f"""
+    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%); border-radius: 15px; margin-bottom: 20px;">
+        <div style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</div>
+        <h2 style="color: white; margin: 10px 0;">🎮 Rewards & Quiz Center</h2>
+        <p style="color: {COLORS['sand']};">Kumpulkan poin, unlock badge, dan naik level!</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Show daily reward popup if applicable
+    render_daily_reward_popup()
+    
+    # Main tabs
+    tab1, tab2, tab3 = st.tabs(["🏆 Rewards & Gamification", "🧠 Quiz & Learning", "🎁 Ajak Teman"])
+    
+    with tab1:
+        render_engagement_hub()
+    
+    with tab2:
+        init_quiz_state()
+        render_quiz_page()
+    
+    with tab3:
+        user = get_current_user()
+        user_id = user.get("id", "guest") if user else "guest"
+        ref_code = generate_referral_code(str(user_id))
+        render_invite_modal(ref_code)
+        
+        # Share buttons
+        st.markdown("---")
+        st.markdown("### 📤 Share LABBAIK")
+        render_share_buttons("app_invite")
+
+
 def main():
     """Main application entry point"""
     init_session_state()
+    init_engagement_state()  # Initialize engagement/gamification system
     
     # Initialize PWA support
     if PWA_AVAILABLE:
@@ -3310,6 +3366,13 @@ def main():
             st.markdown(f"""<div style="text-align: center; margin-bottom: 20px;"><span style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['arabic']}</span><span style="font-weight: 700; letter-spacing: 0.15em; margin-left: 10px;">{BRAND['name']}</span></div>""", unsafe_allow_html=True)
             st.header("🧰 Tools & Fitur Jamaah")
             render_additional_features()
+    elif "Rewards" in page or "Quiz" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            render_login_page()
+        else:
+            track_page_view("Rewards & Quiz")
+            render_engagement_page()
     elif "Analytics" in page:
         user = get_current_user()
         if not user or user.get("role") not in ["admin", "superadmin"]:
