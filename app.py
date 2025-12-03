@@ -1066,10 +1066,10 @@ def render_create_plan():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown(f"""<div style="background: #fff3e0; padding: 15px; border-radius: 10px; border-left: 4px solid #e65100;"><div style="font-weight: 700; color: #e65100; margin-bottom: 8px;">🕋 Hotel Mekkah</div><div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">{hotel_makkah['name']}</div><div style="font-size: 0.8rem; color: #888;">Rp {hotel_makkah['price']:,}/malam × {nights_makkah} malam</div><div style="font-size: 1.2rem; font-weight: 700; color: #e65100; margin-top: 8px;">Rp {cost_makkah:,}</div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #3D2817 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #FF8F00;"><div style="font-weight: 700; color: #FF8F00; margin-bottom: 8px;">🕋 Hotel Mekkah</div><div style="font-size: 0.85rem; color: #C9A86C; margin-bottom: 5px;">{hotel_makkah['name']}</div><div style="font-size: 0.8rem; color: #999;">Rp {hotel_makkah['price']:,}/malam × {nights_makkah} malam</div><div style="font-size: 1.2rem; font-weight: 700; color: #FF8F00; margin-top: 8px;">Rp {cost_makkah:,}</div></div>""", unsafe_allow_html=True)
     
     with col2:
-        st.markdown(f"""<div style="background: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #2e7d32;"><div style="font-weight: 700; color: #2e7d32; margin-bottom: 8px;">🕌 Hotel Madinah</div><div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">{hotel_madinah['name']}</div><div style="font-size: 0.8rem; color: #888;">Rp {hotel_madinah['price']:,}/malam × {nights_madinah} malam</div><div style="font-size: 1.2rem; font-weight: 700; color: #2e7d32; margin-top: 8px;">Rp {cost_madinah:,}</div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div style="background: linear-gradient(135deg, #1A1A1A 0%, #1E3D2F 100%); padding: 15px; border-radius: 10px; border-left: 4px solid #4CAF50;"><div style="font-weight: 700; color: #4CAF50; margin-bottom: 8px;">🕌 Hotel Madinah</div><div style="font-size: 0.85rem; color: #C9A86C; margin-bottom: 5px;">{hotel_madinah['name']}</div><div style="font-size: 0.8rem; color: #999;">Rp {hotel_madinah['price']:,}/malam × {nights_madinah} malam</div><div style="font-size: 1.2rem; font-weight: 700; color: #4CAF50; margin-top: 8px;">Rp {cost_madinah:,}</div></div>""", unsafe_allow_html=True)
     
     with col3:
         total_accommodation = cost_accommodation * num_people
@@ -2356,28 +2356,28 @@ Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
         
         with col1:
             st.markdown(f"""
-            <div style="background: #E3F2FD; border: 2px solid #2196F3; border-radius: 15px; padding: 20px;">
-                <h4 style="color: #1565C0; margin-top: 0;">🏢 Via Travel Agent</h4>
-                <ul style="color: #333;">
+            <div style="background: linear-gradient(135deg, #1A1A1A 0%, #1A2744 100%); border: 2px solid #2196F3; border-radius: 15px; padding: 20px;">
+                <h4 style="color: #64B5F6; margin-top: 0;">🏢 Via Travel Agent</h4>
+                <ul style="color: #E8E8E8;">
                     <li>Semua diurus travel</li>
                     <li>Ada muthawwif/guide</li>
                     <li>Jadwal sudah fix</li>
                     <li>Berangkat rombongan</li>
-                    <li>Biaya: Rp 25-50 juta</li>
+                    <li style="color: #FF9800; font-weight: 600;">Biaya: Rp 25-50 juta</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown(f"""
-            <div style="background: #E8F5E9; border: 2px solid #4CAF50; border-radius: 15px; padding: 20px;">
-                <h4 style="color: #2E7D32; margin-top: 0;">🎒 Umrah Mandiri</h4>
-                <ul style="color: #333;">
+            <div style="background: linear-gradient(135deg, #1A1A1A 0%, #1E3D2F 100%); border: 2px solid #4CAF50; border-radius: 15px; padding: 20px;">
+                <h4 style="color: #81C784; margin-top: 0;">🎒 Umrah Mandiri</h4>
+                <ul style="color: #E8E8E8;">
                     <li>Atur sendiri semuanya</li>
                     <li>Belajar manasik sendiri</li>
                     <li>Jadwal fleksibel</li>
                     <li>Bisa solo/keluarga/grup kecil</li>
-                    <li>Biaya: Rp 15-25 juta</li>
+                    <li style="color: #4CAF50; font-weight: 600;">Biaya: Rp 15-25 juta ✨</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
@@ -2534,40 +2534,40 @@ Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
         st.markdown("### 💰 Estimasi Biaya Umrah Mandiri")
         
         st.markdown("""
-<div style="background: #FFF8E1; border: 2px solid #FFB300; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-<h4 style="color: #FF8F00; margin-top: 0;">💡 Perkiraan Budget (1 orang, 9-10 hari)</h4>
-<table style="width: 100%;">
-<tr style="border-bottom: 1px solid #FFE082;">
-<td style="padding: 8px 0;"><strong>Item</strong></td>
-<td style="text-align: right;"><strong>Estimasi</strong></td>
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); border: 2px solid #D4AF37; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+<h4 style="color: #D4AF37; margin-top: 0;">💡 Perkiraan Budget (1 orang, 9-10 hari)</h4>
+<table style="width: 100%; color: #E8E8E8;">
+<tr style="border-bottom: 1px solid #D4AF3740;">
+<td style="padding: 8px 0; color: #C9A86C;"><strong>Item</strong></td>
+<td style="text-align: right; color: #C9A86C;"><strong>Estimasi</strong></td>
 </tr>
-<tr style="border-bottom: 1px solid #FFE082;">
-<td style="padding: 8px 0;">✈️ Tiket Pesawat PP</td>
-<td style="text-align: right;">Rp 7-12 juta</td>
+<tr style="border-bottom: 1px solid #D4AF3730;">
+<td style="padding: 8px 0; color: #E8E8E8;">✈️ Tiket Pesawat PP</td>
+<td style="text-align: right; color: #4CAF50; font-weight: 600;">Rp 7-12 juta</td>
 </tr>
-<tr style="border-bottom: 1px solid #FFE082;">
-<td style="padding: 8px 0;">📄 Visa Umrah</td>
-<td style="text-align: right;">Rp 500rb - 1.5 juta</td>
+<tr style="border-bottom: 1px solid #D4AF3730;">
+<td style="padding: 8px 0; color: #E8E8E8;">📄 Visa Umrah</td>
+<td style="text-align: right; color: #4CAF50; font-weight: 600;">Rp 500rb - 1.5 juta</td>
 </tr>
-<tr style="border-bottom: 1px solid #FFE082;">
-<td style="padding: 8px 0;">🏨 Hotel Makkah (4-5 malam)</td>
-<td style="text-align: right;">Rp 2-5 juta</td>
+<tr style="border-bottom: 1px solid #D4AF3730;">
+<td style="padding: 8px 0; color: #E8E8E8;">🏨 Hotel Makkah (4-5 malam)</td>
+<td style="text-align: right; color: #4CAF50; font-weight: 600;">Rp 2-5 juta</td>
 </tr>
-<tr style="border-bottom: 1px solid #FFE082;">
-<td style="padding: 8px 0;">🏨 Hotel Madinah (3-4 malam)</td>
-<td style="text-align: right;">Rp 1.5-4 juta</td>
+<tr style="border-bottom: 1px solid #D4AF3730;">
+<td style="padding: 8px 0; color: #E8E8E8;">🏨 Hotel Madinah (3-4 malam)</td>
+<td style="text-align: right; color: #4CAF50; font-weight: 600;">Rp 1.5-4 juta</td>
 </tr>
-<tr style="border-bottom: 1px solid #FFE082;">
-<td style="padding: 8px 0;">🚗 Transportasi Lokal</td>
-<td style="text-align: right;">Rp 1-2 juta</td>
+<tr style="border-bottom: 1px solid #D4AF3730;">
+<td style="padding: 8px 0; color: #E8E8E8;">🚗 Transportasi Lokal</td>
+<td style="text-align: right; color: #4CAF50; font-weight: 600;">Rp 1-2 juta</td>
 </tr>
-<tr style="border-bottom: 1px solid #FFE082;">
-<td style="padding: 8px 0;">🍽️ Makan & Lain-lain</td>
-<td style="text-align: right;">Rp 1.5-3 juta</td>
+<tr style="border-bottom: 1px solid #D4AF3730;">
+<td style="padding: 8px 0; color: #E8E8E8;">🍽️ Makan & Lain-lain</td>
+<td style="text-align: right; color: #4CAF50; font-weight: 600;">Rp 1.5-3 juta</td>
 </tr>
 <tr>
-<td style="padding: 12px 0;"><strong style="color: #FF8F00; font-size: 1.1rem;">TOTAL ESTIMASI</strong></td>
-<td style="text-align: right;"><strong style="color: #FF8F00; font-size: 1.1rem;">Rp 15-25 juta</strong></td>
+<td style="padding: 12px 0;"><strong style="color: #D4AF37; font-size: 1.1rem;">TOTAL ESTIMASI</strong></td>
+<td style="text-align: right;"><strong style="color: #D4AF37; font-size: 1.1rem;">Rp 15-25 juta</strong></td>
 </tr>
 </table>
 </div>
@@ -2829,9 +2829,9 @@ Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
     st.markdown("### 📋 Panduan Komunitas")
 
     st.markdown("""
-<div style="background: #E8F5E9; border-radius: 15px; padding: 20px;">
-<h4 style="color: #2E7D32; margin-top: 0;">✅ Yang Boleh Diposting:</h4>
-<ul>
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #1E3D2F 100%); border-radius: 15px; padding: 20px; border: 1px solid #4CAF5040;">
+<h4 style="color: #4CAF50; margin-top: 0;">✅ Yang Boleh Diposting:</h4>
+<ul style="color: #E8E8E8;">
 <li>Pengalaman umrah mandiri (positif maupun tantangan)</li>
 <li>Tips & trik hemat biaya</li>
 <li>Panduan manasik dan doa-doa</li>
@@ -2839,8 +2839,8 @@ Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
 <li>Pertanyaan seputar umrah mandiri</li>
 </ul>
 
-<h4 style="color: #C62828; margin-top: 20px;">❌ Yang Tidak Diperbolehkan:</h4>
-<ul>
+<h4 style="color: #EF5350; margin-top: 20px;">❌ Yang Tidak Diperbolehkan:</h4>
+<ul style="color: #E8E8E8;">
 <li>Promosi travel agent atau jasa komersial</li>
 <li>Konten yang mengandung SARA</li>
 <li>Informasi yang menyesatkan</li>
@@ -2861,12 +2861,12 @@ Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
     
     # DYOR Disclaimer for Umrah Mandiri
     st.markdown("""
-<div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border: 2px solid #1976D2; border-radius: 15px; padding: 25px; margin-top: 25px;">
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #1A2744 100%); border: 2px solid #2196F3; border-radius: 15px; padding: 25px; margin-top: 25px;">
 <div style="text-align: center; margin-bottom: 15px;">
-<span style="background: #1976D2; color: white; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">📋 DYOR - Do Your Own Research</span>
+<span style="background: #2196F3; color: white; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">📋 DYOR - Do Your Own Research</span>
 </div>
-<div style="color: #0D47A1; font-size: 0.95rem; line-height: 1.8;">
-<p style="text-align: center; font-weight: 600; margin-bottom: 15px;">Informasi di halaman ini bersifat <strong>panduan umum</strong> dan <strong>estimasi</strong>.<br>BUKAN pengganti riset pribadi Anda.</p>
+<div style="color: #E8E8E8; font-size: 0.95rem; line-height: 1.8;">
+<p style="text-align: center; font-weight: 600; margin-bottom: 15px;">Informasi di halaman ini bersifat <strong style="color: #64B5F6;">panduan umum</strong> dan <strong style="color: #64B5F6;">estimasi</strong>.<br>BUKAN pengganti riset pribadi Anda.</p>
 </div>
 </div>
 """, unsafe_allow_html=True)
@@ -2875,21 +2875,21 @@ Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("""
-<div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #4CAF50; margin-bottom: 15px;">
-<div style="font-weight: 700; color: #2E7D32; margin-bottom: 8px;">✅ Verifikasi Sumber Resmi:</div>
-<ul style="margin: 0; padding-left: 18px; color: #333; font-size: 0.9rem;">
-<li><strong>Arab Saudi:</strong> nusuk.sa</li>
-<li><strong>Indonesia:</strong> kemenag.go.id</li>
-<li><strong>KBRI Riyadh:</strong> +966-11-488-2800</li>
+<div style="background: #1A1A1A; padding: 15px; border-radius: 10px; border-left: 4px solid #4CAF50; margin-bottom: 15px;">
+<div style="font-weight: 700; color: #4CAF50; margin-bottom: 8px;">✅ Verifikasi Sumber Resmi:</div>
+<ul style="margin: 0; padding-left: 18px; color: #E8E8E8; font-size: 0.9rem;">
+<li><strong style="color: #C9A86C;">Arab Saudi:</strong> nusuk.sa</li>
+<li><strong style="color: #C9A86C;">Indonesia:</strong> kemenag.go.id</li>
+<li><strong style="color: #C9A86C;">KBRI Riyadh:</strong> +966-11-488-2800</li>
 </ul>
 </div>
 """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-<div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #FF9800; margin-bottom: 15px;">
-<div style="font-weight: 700; color: #E65100; margin-bottom: 8px;">⚠️ Perlu Diingat:</div>
-<ul style="margin: 0; padding-left: 18px; color: #333; font-size: 0.9rem;">
+<div style="background: #1A1A1A; padding: 15px; border-radius: 10px; border-left: 4px solid #FF9800; margin-bottom: 15px;">
+<div style="font-weight: 700; color: #FF9800; margin-bottom: 8px;">⚠️ Perlu Diingat:</div>
+<ul style="margin: 0; padding-left: 18px; color: #E8E8E8; font-size: 0.9rem;">
 <li>Harga dapat berubah sewaktu-waktu</li>
 <li>Regulasi visa dapat berubah</li>
 <li>Anda bertanggung jawab penuh</li>
@@ -2898,7 +2898,7 @@ Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
 """, unsafe_allow_html=True)
     
     st.markdown("""
-<div style="text-align: center; color: #5D4037; font-style: italic; padding: 15px; background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border-radius: 10px; margin-top: 10px;">
+<div style="text-align: center; color: #C9A86C; font-style: italic; padding: 15px; background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); border-radius: 10px; margin-top: 10px; border: 1px solid #D4AF3730;">
 "Sebaik-baik persiapan adalah ilmu, sebaik-baik bekal adalah taqwa" 🤲
 </div>
 """, unsafe_allow_html=True)
