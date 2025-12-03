@@ -1415,57 +1415,57 @@ def render_budget_finder():
 - Jika menabung Rp 1 juta/bulan: {} bulan lagi
 - Jika menabung Rp 2 juta/bulan: {} bulan lagi
 """.format(
-shortage,
-int(shortage / 1_000_000) + 1,
-int(shortage / 2_000_000) + 1
-))
+            shortage,
+            int(shortage / 1_000_000) + 1,
+            int(shortage / 2_000_000) + 1
+            ))
 
-with col2:
-st.markdown("""
-**🤝 Opsi Lain**
-- Cari promo early bird
-- Berangkat di low season (Januari-Februari)
-- Gabung dengan grup besar untuk diskon
-- Cicilan dari travel agent
-""")
+        with col2:
+            st.markdown("""
+            **🤝 Opsi Lain**
+            - Cari promo early bird
+            - Berangkat di low season (Januari-Februari)
+            - Gabung dengan grup besar untuk diskon
+            - Cicilan dari travel agent
+            """)
 
 # Show partial packages (almost affordable)
-if partial_packages:
-st.markdown("### 📦 Paket yang Hampir Terjangkau")
-for pkg in partial_packages:
-st.info(f"**{pkg['name']}** - Kurang Rp {pkg['shortage']:,.0f} (Minimum: Rp {pkg['min_required']:,.0f})")
+        if partial_packages:
+            st.markdown("### 📦 Paket yang Hampir Terjangkau")
+            for pkg in partial_packages:
+                st.info(f"**{pkg['name']}** - Kurang Rp {pkg['shortage']:,.0f} (Minimum: Rp {pkg['min_required']:,.0f})")
 
 # Tips section
-st.markdown("---")
-st.markdown("### 💡 Tips Mendapatkan Harga Terbaik")
+        st.markdown("---")
+        st.markdown("### 💡 Tips Mendapatkan Harga Terbaik")
 
-tips_col1, tips_col2 = st.columns(2)
+        tips_col1, tips_col2 = st.columns(2)
 
-with tips_col1:
-st.markdown("""
-**🗓️ Waktu Booking**
-- Book 3-4 bulan sebelumnya
-- Hindari musim haji & Ramadhan
-- Cari promo akhir tahun
+        with tips_col1:
+            st.markdown("""
+            **🗓️ Waktu Booking**
+            - Book 3-4 bulan sebelumnya
+            - Hindari musim haji & Ramadhan
+            - Cari promo akhir tahun
 
-**✈️ Penerbangan**
-- Flexible date = harga lebih murah
-- Transit 1x bisa hemat 20-30%
-- Cek berbagai maskapai
-""")
+            **✈️ Penerbangan**
+            - Flexible date = harga lebih murah
+            - Transit 1x bisa hemat 20-30%
+            - Cek berbagai maskapai
+            """)
 
-with tips_col2:
-st.markdown("""
-**🏨 Akomodasi**
-- Hotel agak jauh = lebih murah
-- Sharing room untuk hemat
-- Weekday lebih murah dari weekend
+        with tips_col2:
+            st.markdown("""
+            **🏨 Akomodasi**
+            - Hotel agak jauh = lebih murah
+            - Sharing room untuk hemat
+            - Weekday lebih murah dari weekend
 
-**👥 Grup**
-- Grup 10+ orang dapat diskon
-- Gabung open trip
-- Tanya promo travel agent
-""")
+            **👥 Grup**
+            - Grup 10+ orang dapat diskon
+            - Gabung open trip
+            - Tanya promo travel agent
+            """)
 
 
 # ============================================
@@ -1473,126 +1473,126 @@ st.markdown("""
 # ============================================
 
 def init_umrah_bareng_state():
-"""Initialize Umrah Bareng session state - load from database if available"""
-if "open_trips" not in st.session_state:
-# Try to load from database first
-if DB_AVAILABLE and is_db_available():
-try:
-db_trips = db_get_open_trips()
-if db_trips:
-st.session_state.open_trips = db_trips
-st.session_state.trips_from_db = True
-return
-except:
-pass
+    """Initialize Umrah Bareng session state - load from database if available"""
+    if "open_trips" not in st.session_state:
+        # Try to load from database first
+        if DB_AVAILABLE and is_db_available():
+            try:
+                db_trips = db_get_open_trips()
+                if db_trips:
+                    st.session_state.open_trips = db_trips
+                    st.session_state.trips_from_db = True
+                    return
+            except:
+                pass
 
-# Fallback to sample data for demonstration
-st.session_state.open_trips = [
-{
-"id": "OT001",
-"creator_name": "Ahmad Fauzi",
-"creator_phone": "+62812xxxx1234",
-"creator_city": "Jakarta",
-"title": "Umrah Bareng Keluarga Muda",
-"departure_date": "2025-03-15",
-"departure_city": "Jakarta (CGK)",
-"package_type": "standard",
-"budget_per_person": 38000000,
-"duration_days": 12,
-"nights_makkah": 5,
-"nights_madinah": 4,
-"current_members": 4,
-"max_members": 10,
-"gender_preference": "Campuran (Keluarga)",
-"age_preference": "25-40 tahun",
-"special_notes": "Fokus ibadah, tidak banyak shopping. Ada anak kecil.",
-"amenities": ["Muthawwif Indonesia", "Kursi Roda Tersedia", "Menu Indonesia"],
-"status": "open",
-"created_at": "2025-01-15",
-"whatsapp_group": "https://chat.whatsapp.com/xxx",
-},
-{
-"id": "OT002",
-"creator_name": "Hj. Siti Aminah",
-"creator_phone": "+62813xxxx5678",
-"creator_city": "Surabaya",
-"title": "Umrah Khusus Ibu-Ibu",
-"departure_date": "2025-04-10",
-"departure_city": "Surabaya (SUB)",
-"package_type": "premium",
-"budget_per_person": 55000000,
-"duration_days": 14,
-"nights_makkah": 6,
-"nights_madinah": 5,
-"current_members": 8,
-"max_members": 15,
-"gender_preference": "Wanita Only",
-"age_preference": "40+ tahun",
-"special_notes": "Tempo santai, banyak ziarah. Cocok untuk lansia.",
-"amenities": ["Ustadzah Pendamping", "Hotel Dekat Haram", "Wheelchair Friendly"],
-"status": "open",
-"created_at": "2025-01-10",
-"whatsapp_group": "https://chat.whatsapp.com/yyy",
-},
-{
-"id": "OT003",
-"creator_name": "Rizky Pratama",
-"creator_phone": "+62857xxxx9012",
-"creator_city": "Bandung",
-"title": "Umrah Backpacker Style",
-"departure_date": "2025-02-20",
-"departure_city": "Jakarta (CGK)",
-"package_type": "ekonomis",
-"budget_per_person": 25000000,
-"duration_days": 9,
-"nights_makkah": 4,
-"nights_madinah": 3,
-"current_members": 3,
-"max_members": 8,
-"gender_preference": "Pria Only",
-"age_preference": "20-35 tahun",
-"special_notes": "Budget terbatas tapi semangat tinggi! Siap jalan kaki.",
-"amenities": ["Guide Lokal", "Sharing Room"],
-"status": "open",
-"created_at": "2025-01-20",
-"whatsapp_group": "https://chat.whatsapp.com/zzz",
-},
-]
-st.session_state.trips_from_db = False
+        # Fallback to sample data for demonstration
+        st.session_state.open_trips = [
+            {
+                "id": "OT001",
+                "creator_name": "Ahmad Fauzi",
+                "creator_phone": "+62812xxxx1234",
+                "creator_city": "Jakarta",
+                "title": "Umrah Bareng Keluarga Muda",
+                "departure_date": "2025-03-15",
+                "departure_city": "Jakarta (CGK)",
+                "package_type": "standard",
+                "budget_per_person": 38000000,
+                "duration_days": 12,
+                "nights_makkah": 5,
+                "nights_madinah": 4,
+                "current_members": 4,
+                "max_members": 10,
+                "gender_preference": "Campuran (Keluarga)",
+                "age_preference": "25-40 tahun",
+                "special_notes": "Fokus ibadah, tidak banyak shopping. Ada anak kecil.",
+                "amenities": ["Muthawwif Indonesia", "Kursi Roda Tersedia", "Menu Indonesia"],
+                "status": "open",
+                "created_at": "2025-01-15",
+                "whatsapp_group": "https://chat.whatsapp.com/xxx",
+            },
+            {
+                "id": "OT002",
+                "creator_name": "Hj. Siti Aminah",
+                "creator_phone": "+62813xxxx5678",
+                "creator_city": "Surabaya",
+                "title": "Umrah Khusus Ibu-Ibu",
+                "departure_date": "2025-04-10",
+                "departure_city": "Surabaya (SUB)",
+                "package_type": "premium",
+                "budget_per_person": 55000000,
+                "duration_days": 14,
+                "nights_makkah": 6,
+                "nights_madinah": 5,
+                "current_members": 8,
+                "max_members": 15,
+                "gender_preference": "Wanita Only",
+                "age_preference": "40+ tahun",
+                "special_notes": "Tempo santai, banyak ziarah. Cocok untuk lansia.",
+                "amenities": ["Ustadzah Pendamping", "Hotel Dekat Haram", "Wheelchair Friendly"],
+                "status": "open",
+                "created_at": "2025-01-10",
+                "whatsapp_group": "https://chat.whatsapp.com/yyy",
+            },
+            {
+                "id": "OT003",
+                "creator_name": "Rizky Pratama",
+                "creator_phone": "+62857xxxx9012",
+                "creator_city": "Bandung",
+                "title": "Umrah Backpacker Style",
+                "departure_date": "2025-02-20",
+                "departure_city": "Jakarta (CGK)",
+                "package_type": "ekonomis",
+                "budget_per_person": 25000000,
+                "duration_days": 9,
+                "nights_makkah": 4,
+                "nights_madinah": 3,
+                "current_members": 3,
+                "max_members": 8,
+                "gender_preference": "Pria Only",
+                "age_preference": "20-35 tahun",
+                "special_notes": "Budget terbatas tapi semangat tinggi! Siap jalan kaki.",
+                "amenities": ["Guide Lokal", "Sharing Room"],
+                "status": "open",
+                "created_at": "2025-01-20",
+                "whatsapp_group": "https://chat.whatsapp.com/zzz",
+            },
+        ]
+        st.session_state.trips_from_db = False
 
 
 def render_umrah_bareng():
-"""Render Umrah Bareng (Open Trip) feature"""
-init_umrah_bareng_state()
+    """Render Umrah Bareng (Open Trip) feature"""
+    init_umrah_bareng_state()
 
-st.header("🤝 Umrah Bareng - Open Trip")
-st.markdown("Cari teman perjalanan umrah atau buat open trip sendiri!")
+    st.header("🤝 Umrah Bareng - Open Trip")
+    st.markdown("Cari teman perjalanan umrah atau buat open trip sendiri!")
 
-# Stats bar
-total_trips = len(st.session_state.open_trips)
-open_trips = len([t for t in st.session_state.open_trips if t["status"] == "open"])
-total_slots = sum([t["max_members"] - t["current_members"] for t in st.session_state.open_trips if t["status"] == "open"])
+    # Stats bar
+    total_trips = len(st.session_state.open_trips)
+    open_trips = len([t for t in st.session_state.open_trips if t["status"] == "open"])
+    total_slots = sum([t["max_members"] - t["current_members"] for t in st.session_state.open_trips if t["status"] == "open"])
 
-st.markdown(f"""
-<div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-<table style="width: 100%; color: white;">
-<tr>
-<td style="text-align: center; padding: 10px;">
-<div style="font-size: 2rem; font-weight: 700; color: #D4AF37;">{total_trips}</div>
-<div style="font-size: 0.85rem; color: #C9A86C;">Total Open Trip</div>
-</td>
-<td style="text-align: center; padding: 10px;">
-<div style="font-size: 2rem; font-weight: 700; color: #4CAF50;">{open_trips}</div>
-<div style="font-size: 0.85rem; color: #C9A86C;">Masih Tersedia</div>
-</td>
-<td style="text-align: center; padding: 10px;">
-<div style="font-size: 2rem; font-weight: 700; color: #2196F3;">{total_slots}</div>
-<div style="font-size: 0.85rem; color: #C9A86C;">Slot Kosong</div>
-</td>
-</tr>
-</table>
-</div>
-""", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+    <table style="width: 100%; color: white;">
+    <tr>
+    <td style="text-align: center; padding: 10px;">
+    <div style="font-size: 2rem; font-weight: 700; color: #D4AF37;">{total_trips}</div>
+    <div style="font-size: 0.85rem; color: #C9A86C;">Total Open Trip</div>
+    </td>
+    <td style="text-align: center; padding: 10px;">
+    <div style="font-size: 2rem; font-weight: 700; color: #4CAF50;">{open_trips}</div>
+    <div style="font-size: 0.85rem; color: #C9A86C;">Masih Tersedia</div>
+    </td>
+    <td style="text-align: center; padding: 10px;">
+    <div style="font-size: 2rem; font-weight: 700; color: #2196F3;">{total_slots}</div>
+    <div style="font-size: 0.85rem; color: #C9A86C;">Slot Kosong</div>
+    </td>
+    </tr>
+    </table>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Tabs
     tab1, tab2, tab3 = st.tabs(["🔍 Cari Open Trip", "➕ Buat Open Trip", "📋 Trip Saya"])
@@ -2733,54 +2733,54 @@ Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
 - Gunakan format yang mudah dibaca (poin-poin, emoji)
 """)
 
-submitted = st.form_submit_button("🚀 Publikasikan", use_container_width=True)
+                submitted = st.form_submit_button("🚀 Publikasikan", use_container_width=True)
 
-if submitted:
-if post_title and post_content:
-user_id = user.get("id") if user else None
-post_saved = False
+                if submitted:
+                    if post_title and post_content:
+                        user_id = user.get("id") if user else None
+                        post_saved = False
 
-# Try database first
-if DB_AVAILABLE and is_db_available() and user_id:
-try:
-result = db_create_post(user_id, post_title, post_category, post_content)
-if result.get("success"):
-st.success("✅ Postingan berhasil dipublikasikan!")
-st.balloons()
-post_saved = True
-# Refresh posts from database
-st.session_state.forum_posts = db_get_forum_posts()
-else:
-st.warning(f"Database error: {result.get('error')}")
-except Exception as e:
-st.warning(f"Database error, menyimpan secara lokal: {e}")
+                        # Try database first
+                        if DB_AVAILABLE and is_db_available() and user_id:
+                            try:
+                                result = db_create_post(user_id, post_title, post_category, post_content)
+                                if result.get("success"):
+                                    st.success("✅ Postingan berhasil dipublikasikan!")
+                                    st.balloons()
+                                    post_saved = True
+                                    # Refresh posts from database
+                                    st.session_state.forum_posts = db_get_forum_posts()
+                                else:
+                                    st.warning(f"Database error: {result.get('error')}")
+                            except Exception as e:
+                                st.warning(f"Database error, menyimpan secara lokal: {e}")
 
-# Fallback to session state if database fails
-if not post_saved:
-new_post = {
-"id": f"F{len(st.session_state.forum_posts) + 1:03d}",
-"author": user.get("name", "Anonymous"),
-"author_city": author_city,
-"avatar": "👤",
-"title": post_title,
-"category": post_category,
-"content": post_content,
-"likes": 0,
-"comments": [],
-"created_at": str(datetime.now().date()),
-"views": 0,
-}
-st.session_state.forum_posts.insert(0, new_post)
-st.success("✅ Postingan berhasil dipublikasikan!")
-st.balloons()
-else:
-st.error("❌ Mohon isi judul dan konten postingan.")
+                        # Fallback to session state if database fails
+                        if not post_saved:
+                            new_post = {
+                                "id": f"F{len(st.session_state.forum_posts) + 1:03d}",
+                                "author": user.get("name", "Anonymous"),
+                                "author_city": author_city,
+                                "avatar": "👤",
+                                "title": post_title,
+                                "category": post_category,
+                                "content": post_content,
+                                "likes": 0,
+                                "comments": [],
+                                "created_at": str(datetime.now().date()),
+                                "views": 0,
+                                }
+                            st.session_state.forum_posts.insert(0, new_post)
+                            st.success("✅ Postingan berhasil dipublikasikan!")
+                            st.balloons()
+                    else:
+                        st.error("❌ Mohon isi judul dan konten postingan.")
 
-# Guidelines
-st.markdown("---")
-st.markdown("### 📋 Panduan Komunitas")
+    # Guidelines
+    st.markdown("---")
+    st.markdown("### 📋 Panduan Komunitas")
 
-st.markdown("""
+    st.markdown("""
 <div style="background: #E8F5E9; border-radius: 15px; padding: 20px;">
 <h4 style="color: #2E7D32; margin-top: 0;">✅ Yang Boleh Diposting:</h4>
 <ul>
