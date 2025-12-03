@@ -45,17 +45,28 @@ def get_db_connection():
         if not db_url:
             db_url = os.environ.get("DATABASE_URL")
         
-        if db_url and 'PASSWORD_KAMU' not in db_url:  # Skip if placeholder password
+        if db_url and 'PASSWORD_KAMU' not in db_url and 'PASSWORD_ANDA' not in db_url:  # Skip if placeholder password
             _db_engine = create_engine(db_url, pool_pre_ping=True, pool_recycle=300)
             
             # Test connection and create tables if not exists
             with _db_engine.connect() as conn:
+                # Create visitor_stats table
                 conn.execute(text("""
                     CREATE TABLE IF NOT EXISTS visitor_stats (
                         id SERIAL PRIMARY KEY,
                         stat_key VARCHAR(100) UNIQUE NOT NULL,
                         stat_value INTEGER DEFAULT 0,
                         last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """))
+                
+                # Create page_views table
+                conn.execute(text("""
+                    CREATE TABLE IF NOT EXISTS page_views (
+                        id SERIAL PRIMARY KEY,
+                        page_name VARCHAR(100) NOT NULL,
+                        visitor_id VARCHAR(50),
+                        viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 """))
                 
@@ -169,16 +180,6 @@ def db_log_page_view(page_name: str, visitor_id: str):
     try:
         from sqlalchemy import text
         with engine.connect() as conn:
-            # Ensure page_views table exists
-            conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS page_views (
-                    id SERIAL PRIMARY KEY,
-                    page_name VARCHAR(100) NOT NULL,
-                    visitor_id VARCHAR(50),
-                    viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """))
-            
             # Insert page view
             conn.execute(text("""
                 INSERT INTO page_views (page_name, visitor_id) 
@@ -255,6 +256,7 @@ def get_visitor_stats() -> dict:
     
     total_visitors = get_visitor_count()
     total_views = get_page_view_count()
+    today_visitors = get_today_visitors()
     
     # Calculate session stats
     session_views = sum(st.session_state.page_views.values())
@@ -263,12 +265,35 @@ def get_visitor_stats() -> dict:
     return {
         "total_visitors": total_visitors,
         "total_views": total_views,
+        "today_visitors": today_visitors,
         "session_views": session_views,
         "session_duration": str(session_duration).split('.')[0],
         "visitor_id": st.session_state.visitor_id,
         "db_connected": DB_AVAILABLE,
         "pages_visited": dict(st.session_state.page_views)
     }
+
+
+def get_today_visitors() -> int:
+    """Get today's unique visitor count"""
+    engine = get_db_connection()
+    
+    if engine and DB_AVAILABLE:
+        try:
+            from sqlalchemy import text
+            with engine.connect() as conn:
+                result = conn.execute(text("""
+                    SELECT COUNT(DISTINCT visitor_id) 
+                    FROM page_views 
+                    WHERE DATE(viewed_at) = CURRENT_DATE
+                """))
+                row = result.fetchone()
+                return row[0] if row and row[0] else 0
+        except Exception as e:
+            print(f"[visitor_tracker] get_today_visitors error: {e}")
+    
+    # Fallback: return 1 (current session)
+    return 1
 
 
 def get_page_stats() -> dict:
@@ -311,14 +336,18 @@ def render_visitor_stats():
             <span style="color: #D4AF37; font-weight: 700;">📊 Statistik Pengunjung</span>
             <span style="font-size: 0.7rem; color: #666;">{db_badge}</span>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div style="background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px; text-align: center;">
-                <div style="color: #888; font-size: 0.8rem;">Total Visitors</div>
-                <div style="color: #D4AF37; font-size: 1.5rem; font-weight: 700;">{stats['total_visitors']:,}</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div style="background: rgba(212, 175, 55, 0.1); padding: 12px; border-radius: 10px; text-align: center;">
+                <div style="color: #888; font-size: 0.75rem;">Total Visitors</div>
+                <div style="color: #D4AF37; font-size: 1.3rem; font-weight: 700;">{stats['total_visitors']:,}</div>
             </div>
-            <div style="background: rgba(0, 107, 60, 0.1); padding: 15px; border-radius: 10px; text-align: center;">
-                <div style="color: #888; font-size: 0.8rem;">Total Views</div>
-                <div style="color: #4CAF50; font-size: 1.5rem; font-weight: 700;">{stats['total_views']:,}</div>
+            <div style="background: rgba(0, 107, 60, 0.1); padding: 12px; border-radius: 10px; text-align: center;">
+                <div style="color: #888; font-size: 0.75rem;">Total Views</div>
+                <div style="color: #4CAF50; font-size: 1.3rem; font-weight: 700;">{stats['total_views']:,}</div>
+            </div>
+            <div style="background: rgba(0, 122, 255, 0.1); padding: 12px; border-radius: 10px; text-align: center;">
+                <div style="color: #888; font-size: 0.75rem;">Today</div>
+                <div style="color: #007AFF; font-size: 1.3rem; font-weight: 700;">{stats['today_visitors']:,}</div>
             </div>
         </div>
         <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333; text-align: center;">
