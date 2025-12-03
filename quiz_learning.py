@@ -1,52 +1,43 @@
-# social_viral.py - LABBAIK Social & Viral Features
+# quiz_learning.py - LABBAIK Interactive Quiz & Learning Gamification
 # Version: 1.0.0
 # Updated: 2025-12-03
 # Author: MS Hadianto
 
 """
 ================================================================================
-🚀 LABBAIK VIRAL & SOCIAL FEATURES
+📚 LABBAIK QUIZ & LEARNING GAMIFICATION
 ================================================================================
 
-Features to drive viral growth and social engagement:
+Interactive learning features to increase engagement and knowledge:
 
-1. 🔗 SHAREABLE CONTENT
-   - Trip Plans as shareable cards
-   - Budget simulations as images
-   - Achievement cards
-   - Referral cards
+1. 🧠 QUIZZES
+   - Daily quiz challenges
+   - Topic-based quizzes (Manasik, Doa, Sejarah)
+   - Timed challenges
+   - Multiplayer quiz
 
-2. 📱 SOCIAL INTEGRATION
-   - WhatsApp sharing
-   - Instagram stories
-   - Facebook posts
-   - Twitter/X threads
+2. 📖 LEARNING PATHS
+   - Beginner to Expert progression
+   - Milestone rewards
+   - Certificates
 
-3. 🎯 VIRAL MECHANICS
-   - "Share to Unlock" features
-   - Group challenges
-   - Community goals
-   - Viral badges
-
-4. 📊 SOCIAL PROOF
-   - Live activity feed
-   - Success stories
-   - Testimonials carousel
+3. 🎯 MINI GAMES
+   - Doa matching game
+   - Timeline challenge
+   - Geography quiz
 
 ================================================================================
 """
 
 import streamlit as st
-from datetime import datetime, timedelta
 import random
-import urllib.parse
+from datetime import datetime
 
 # ============================================
 # BRAND COLORS
 # ============================================
 COLORS = {
     "gold": "#D4AF37",
-    "gold_light": "#F4E4BA",
     "dark": "#1A1A1A",
     "dark_light": "#2D2D2D",
     "green": "#4CAF50",
@@ -55,563 +46,624 @@ COLORS = {
     "orange": "#FF9800",
     "red": "#F44336",
     "sand": "#C9A86C",
-    "whatsapp": "#25D366",
-    "facebook": "#1877F2",
-    "twitter": "#1DA1F2",
-    "instagram": "#E4405F",
 }
 
 # ============================================
-# SHARE TEMPLATES
+# QUIZ DATABASE
 # ============================================
-SHARE_TEMPLATES = {
-    "app_invite": {
-        "whatsapp": "🕋 Assalamualaikum! Aku pakai LABBAIK untuk planning umrah. Gratis & ada AI-nya! Coba yuk: {url} 🤲",
-        "twitter": "Planning umrah jadi mudah pakai @LABBAIK_AI! 🕋✨ Simulasi biaya, AI assistant, & panduan lengkap. Gratis! 👇 {url}",
-        "facebook": "Alhamdulillah nemu platform bagus untuk planning umrah! 🕋 LABBAIK punya AI assistant, simulasi biaya real-time, dan panduan lengkap. Recommended banget! {url}",
+QUIZZES = {
+    "manasik": {
+        "title": "Quiz Manasik Umrah",
+        "icon": "🕋",
+        "description": "Uji pengetahuan manasik umrah kamu",
+        "difficulty": "medium",
+        "time_limit": 300,  # 5 minutes
+        "points_per_question": 10,
+        "questions": [
+            {
+                "question": "Apa rukun umrah yang pertama?",
+                "options": ["Ihram", "Tawaf", "Sa'i", "Tahallul"],
+                "correct": 0,
+                "explanation": "Ihram adalah rukun pertama umrah, yaitu niat memasuki ibadah umrah dengan memakai pakaian ihram."
+            },
+            {
+                "question": "Berapa kali putaran tawaf yang harus dilakukan?",
+                "options": ["5 kali", "6 kali", "7 kali", "8 kali"],
+                "correct": 2,
+                "explanation": "Tawaf dilakukan sebanyak 7 putaran mengelilingi Ka'bah, dimulai dari Hajar Aswad."
+            },
+            {
+                "question": "Sa'i dilakukan antara bukit apa saja?",
+                "options": ["Safa dan Marwa", "Arafah dan Muzdalifah", "Mina dan Arafah", "Jabal Nur dan Tsur"],
+                "correct": 0,
+                "explanation": "Sa'i adalah berjalan/berlari kecil antara bukit Safa dan Marwa sebanyak 7 kali."
+            },
+            {
+                "question": "Apa yang dimaksud dengan Tahallul?",
+                "options": ["Berdoa di Multazam", "Mencium Hajar Aswad", "Mencukur/memotong rambut", "Minum air zamzam"],
+                "correct": 2,
+                "explanation": "Tahallul adalah mencukur atau memotong rambut sebagai tanda selesainya ibadah umrah."
+            },
+            {
+                "question": "Miqat untuk jamaah dari Indonesia yang naik pesawat adalah?",
+                "options": ["Yalamlam", "Qarnul Manazil", "Juhfah", "Dzul Hulaifah"],
+                "correct": 1,
+                "explanation": "Qarnul Manazil (As-Sail Al-Kabir) adalah miqat untuk jamaah yang datang dari arah timur termasuk Indonesia."
+            },
+            {
+                "question": "Apa hukum melakukan umrah?",
+                "options": ["Wajib sekali seumur hidup", "Sunnah muakkadah", "Fardhu kifayah", "Mubah"],
+                "correct": 1,
+                "explanation": "Menurut mayoritas ulama, umrah hukumnya sunnah muakkadah (sangat dianjurkan)."
+            },
+            {
+                "question": "Idhtiba' adalah?",
+                "options": ["Berlari kecil saat tawaf", "Membuka bahu kanan saat tawaf", "Mencium Hajar Aswad", "Berdoa di Hijr Ismail"],
+                "correct": 1,
+                "explanation": "Idhtiba' adalah menyingkapkan/membuka bahu kanan dengan menaruh kain ihram di bawah ketiak kanan."
+            },
+            {
+                "question": "Ramal dilakukan pada putaran tawaf ke berapa?",
+                "options": ["Putaran 1-3", "Putaran 4-7", "Semua putaran", "Putaran terakhir saja"],
+                "correct": 0,
+                "explanation": "Ramal (berjalan cepat dengan langkah pendek) dilakukan pada 3 putaran pertama tawaf."
+            },
+            {
+                "question": "Di mana lokasi Hajar Aswad?",
+                "options": ["Pojok timur Ka'bah", "Pojok selatan Ka'bah", "Pojok barat Ka'bah", "Pojok utara Ka'bah"],
+                "correct": 0,
+                "explanation": "Hajar Aswad terletak di pojok timur Ka'bah, menjadi titik awal dan akhir tawaf."
+            },
+            {
+                "question": "Sholat sunnah setelah tawaf dilakukan di?",
+                "options": ["Hijr Ismail", "Belakang Maqam Ibrahim", "Multazam", "Di mana saja dalam Masjidil Haram"],
+                "correct": 1,
+                "explanation": "Sholat 2 rakaat setelah tawaf dianjurkan di belakang Maqam Ibrahim."
+            },
+        ]
     },
-    "budget_result": {
-        "whatsapp": "✨ Hasil Simulasi Umrah dari LABBAIK:\n\n📦 Paket: {package}\n💰 Estimasi: Rp {budget}\n📅 Waktu: {duration}\n\nCoba simulasi sendiri: {url}",
-        "twitter": "Baru simulasi biaya umrah di @LABBAIK_AI! 🕋\n\n📦 {package}\n💰 Rp {budget}\n\nSimulasi gratis: {url}",
+    "doa": {
+        "title": "Quiz Doa-Doa Umrah",
+        "icon": "🤲",
+        "description": "Seberapa hapal kamu dengan doa-doa umrah?",
+        "difficulty": "easy",
+        "time_limit": 240,
+        "points_per_question": 10,
+        "questions": [
+            {
+                "question": "Doa apa yang dibaca saat memulai tawaf?",
+                "options": [
+                    "Bismillahi Allahu Akbar",
+                    "Subhanallah walhamdulillah",
+                    "Rabbana atina fiddunya",
+                    "La ilaha illallah"
+                ],
+                "correct": 0,
+                "explanation": "Saat memulai tawaf dan setiap melewati Hajar Aswad, kita membaca 'Bismillahi Allahu Akbar'."
+            },
+            {
+                "question": "Doa yang dibaca di antara Rukun Yamani dan Hajar Aswad adalah?",
+                "options": [
+                    "Rabbana atina fiddunya hasanah...",
+                    "Allahumma inni as'aluka...",
+                    "Rabbi zidni ilma",
+                    "Subhanallahi wa bihamdihi"
+                ],
+                "correct": 0,
+                "explanation": "Di antara Rukun Yamani dan Hajar Aswad, dianjurkan membaca 'Rabbana atina fiddunya hasanah wa fil akhirati hasanah wa qina adzaban nar'."
+            },
+            {
+                "question": "Bacaan talbiyah yang benar adalah?",
+                "options": [
+                    "Labbaik Allahumma labbaik, labbaika la syarika laka labbaik...",
+                    "Subhanallah walhamdulillah wala ilaha illallah...",
+                    "Allahu Akbar Allahu Akbar...",
+                    "La hawla wala quwwata illa billah..."
+                ],
+                "correct": 0,
+                "explanation": "Talbiyah: Labbaik Allahumma labbaik, labbaika la syarika laka labbaik, innal hamda wan ni'mata laka wal mulk, la syarika lak."
+            },
+            {
+                "question": "Kapan talbiyah dihentikan?",
+                "options": [
+                    "Saat sampai di hotel",
+                    "Saat mulai tawaf",
+                    "Setelah selesai sa'i",
+                    "Saat tahallul"
+                ],
+                "correct": 1,
+                "explanation": "Talbiyah dihentikan saat mulai tawaf, yaitu saat menyentuh atau menghadap Hajar Aswad."
+            },
+            {
+                "question": "Doa naik ke bukit Safa adalah?",
+                "options": [
+                    "Innassafa wal marwata min sya'airillah...",
+                    "Rabbana taqabbal minna...",
+                    "Allahumma anta rabbi...",
+                    "Subhanaka Allahumma wa bihamdika"
+                ],
+                "correct": 0,
+                "explanation": "Saat naik ke Safa, dibaca: Innassafa wal marwata min sya'airillah (QS. Al-Baqarah: 158)."
+            },
+        ]
     },
-    "plan_created": {
-        "whatsapp": "🕋 Alhamdulillah! Rencana umrah-ku sudah jadi!\n\n📅 {departure_date}\n📦 Paket {package}\n💰 Budget: Rp {budget}\n\nBuat rencana kamu juga di LABBAIK: {url}",
-    },
-    "achievement": {
-        "whatsapp": "🏆 Alhamdulillah! Dapat badge '{badge_name}' di LABBAIK!\n\n{badge_desc}\n\nYuk ikutan: {url}",
-        "twitter": "Just unlocked '{badge_name}' badge on @LABBAIK_AI! 🏆✨\n\n{url}",
-    },
-    "referral": {
-        "whatsapp": "Assalamualaikum! 🕋\n\nAku mau ajak kamu pakai LABBAIK - platform AI untuk planning umrah.\n\nPakai kode referral: *{code}*\nKamu dapat 50 LP bonus! 🎁\n\nDownload: {url}",
-    },
-    "group_trip": {
-        "whatsapp": "🕋 Open Trip Umrah!\n\n📅 Berangkat: {date}\n📦 Paket: {package}\n💰 Budget: Rp {budget}/orang\n👥 Slot tersisa: {slots}\n\nGabung di LABBAIK: {url}",
-    },
-}
-
-
-# ============================================
-# SHARE FUNCTIONS
-# ============================================
-
-def generate_share_url(platform, template_type, **kwargs):
-    """Generate share URL for different platforms"""
-    base_url = "https://labbaik.streamlit.app"
-    
-    # Get template
-    template = SHARE_TEMPLATES.get(template_type, {}).get(platform, "")
-    if not template:
-        template = SHARE_TEMPLATES.get(template_type, {}).get("whatsapp", "Check out LABBAIK! {url}")
-    
-    # Add URL to kwargs
-    kwargs["url"] = base_url
-    
-    # Format message
-    message = template.format(**kwargs)
-    
-    # Generate platform-specific URL
-    encoded_message = urllib.parse.quote(message)
-    
-    if platform == "whatsapp":
-        return f"https://wa.me/?text={encoded_message}"
-    elif platform == "twitter":
-        return f"https://twitter.com/intent/tweet?text={encoded_message}"
-    elif platform == "facebook":
-        return f"https://www.facebook.com/sharer/sharer.php?quote={encoded_message}&u={urllib.parse.quote(base_url)}"
-    elif platform == "telegram":
-        return f"https://t.me/share/url?url={urllib.parse.quote(base_url)}&text={encoded_message}"
-    elif platform == "linkedin":
-        return f"https://www.linkedin.com/sharing/share-offsite/?url={urllib.parse.quote(base_url)}"
-    else:
-        return base_url
-
-
-def render_share_buttons(template_type="app_invite", size="medium", **kwargs):
-    """Render social share buttons"""
-    
-    button_configs = {
-        "small": {"padding": "8px 12px", "font_size": "0.8rem", "icon_size": "1rem"},
-        "medium": {"padding": "10px 16px", "font_size": "0.9rem", "icon_size": "1.2rem"},
-        "large": {"padding": "12px 20px", "font_size": "1rem", "icon_size": "1.4rem"},
+    "sejarah": {
+        "title": "Quiz Sejarah Ka'bah & Mekkah",
+        "icon": "📜",
+        "description": "Pelajari sejarah tempat suci",
+        "difficulty": "hard",
+        "time_limit": 360,
+        "points_per_question": 15,
+        "questions": [
+            {
+                "question": "Siapa yang pertama kali membangun Ka'bah?",
+                "options": ["Nabi Ibrahim AS", "Nabi Adam AS", "Nabi Ismail AS", "Nabi Muhammad SAW"],
+                "correct": 1,
+                "explanation": "Menurut riwayat, Ka'bah pertama kali dibangun oleh Nabi Adam AS, kemudian dibangun ulang oleh Nabi Ibrahim AS dan Ismail AS."
+            },
+            {
+                "question": "Apa nama sumur yang airnya diminum oleh jamaah haji/umrah?",
+                "options": ["Sumur Salsabil", "Sumur Zamzam", "Sumur Kautsar", "Sumur Barakah"],
+                "correct": 1,
+                "explanation": "Zamzam adalah sumur yang airnya memancar untuk Hajar dan Ismail AS, dan masih mengalir hingga kini."
+            },
+            {
+                "question": "Kapan Nabi Muhammad SAW meletakkan kembali Hajar Aswad?",
+                "options": ["Sebelum kenabian", "Saat hijrah", "Setelah Fathu Makkah", "Saat haji wada"],
+                "correct": 0,
+                "explanation": "Peristiwa peletakan Hajar Aswad terjadi 5 tahun sebelum kenabian saat renovasi Ka'bah oleh Quraisy."
+            },
+            {
+                "question": "Berapa tinggi Ka'bah saat ini?",
+                "options": ["10 meter", "13.1 meter", "15 meter", "20 meter"],
+                "correct": 1,
+                "explanation": "Ka'bah saat ini memiliki tinggi sekitar 13.1 meter (43 kaki)."
+            },
+            {
+                "question": "Kiswah (kain penutup Ka'bah) diganti setiap?",
+                "options": ["Setiap bulan", "Setiap Ramadhan", "Setiap tahun (9 Dzulhijjah)", "Setiap 5 tahun"],
+                "correct": 2,
+                "explanation": "Kiswah diganti setiap tahun pada tanggal 9 Dzulhijjah (hari Arafah)."
+            },
+        ]
     }
-    
-    config = button_configs.get(size, button_configs["medium"])
-    
-    platforms = [
-        ("whatsapp", "📱 WhatsApp", COLORS["whatsapp"]),
-        ("facebook", "📘 Facebook", COLORS["facebook"]),
-        ("twitter", "🐦 Twitter", COLORS["twitter"]),
-        ("telegram", "📨 Telegram", "#0088cc"),
-    ]
-    
-    cols = st.columns(len(platforms))
-    
-    for i, (platform, label, color) in enumerate(platforms):
-        with cols[i]:
-            share_url = generate_share_url(platform, template_type, **kwargs)
-            st.markdown(f"""
-            <a href="{share_url}" target="_blank" style="text-decoration: none;">
-                <div style="background: {color}; color: white; padding: {config['padding']};
-                            border-radius: 25px; text-align: center; font-weight: 600;
-                            font-size: {config['font_size']}; cursor: pointer;
-                            transition: transform 0.2s, box-shadow 0.2s;"
-                     onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 15px {color}50';"
-                     onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
-                    {label}
-                </div>
-            </a>
-            """, unsafe_allow_html=True)
+}
 
-
-def render_share_card(card_type, data):
-    """Render shareable card preview"""
-    
-    if card_type == "budget_result":
-        st.markdown(f"""
-        <div style="background: linear-gradient(135deg, {COLORS['dark']} 0%, #1E3D2F 100%);
-                    border-radius: 20px; padding: 25px; margin: 20px 0;
-                    border: 2px solid {COLORS['gold']};">
-            <!-- Header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div>
-                    <div style="color: {COLORS['gold']}; font-size: 0.8rem; font-weight: 600;">LABBAIK</div>
-                    <div style="color: white; font-size: 1.3rem; font-weight: 700;">Simulasi Biaya Umrah</div>
-                </div>
-                <div style="font-size: 2rem;">🕋</div>
-            </div>
-            
-            <!-- Content -->
-            <div style="background: {COLORS['dark']}80; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div>
-                        <div style="color: {COLORS['sand']}; font-size: 0.8rem;">Paket</div>
-                        <div style="color: white; font-size: 1.1rem; font-weight: 600;">{data.get('package', 'Standard')}</div>
-                    </div>
-                    <div>
-                        <div style="color: {COLORS['sand']}; font-size: 0.8rem;">Estimasi Biaya</div>
-                        <div style="color: {COLORS['gold']}; font-size: 1.3rem; font-weight: 700;">
-                            Rp {data.get('budget', 0):,.0f}
-                        </div>
-                    </div>
-                    <div>
-                        <div style="color: {COLORS['sand']}; font-size: 0.8rem;">Durasi</div>
-                        <div style="color: white; font-size: 1.1rem; font-weight: 600;">{data.get('duration', '9')} Hari</div>
-                    </div>
-                    <div>
-                        <div style="color: {COLORS['sand']}; font-size: 0.8rem;">Keberangkatan</div>
-                        <div style="color: white; font-size: 1.1rem; font-weight: 600;">{data.get('departure', 'Jakarta')}</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Footer -->
-            <div style="text-align: center; color: {COLORS['sand']}; font-size: 0.85rem;">
-                Simulasi gratis di <strong style="color: {COLORS['gold']};">labbaik.ai</strong>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    elif card_type == "achievement":
-        badge = data.get("badge", {})
-        st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #2D1F3D 0%, {COLORS['dark']} 100%);
-                    border-radius: 20px; padding: 30px; margin: 20px 0; text-align: center;
-                    border: 2px solid {COLORS['purple']};">
-            <div style="font-size: 4rem; margin-bottom: 15px;">{badge.get('icon', '🏆')}</div>
-            <div style="color: {COLORS['gold']}; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px;">
-                ACHIEVEMENT UNLOCKED
-            </div>
-            <div style="color: white; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">
-                {badge.get('name', 'Badge Name')}
-            </div>
-            <div style="color: {COLORS['sand']}; font-size: 0.9rem; margin-bottom: 20px;">
-                {badge.get('description', 'Badge description')}
-            </div>
-            <div style="background: {COLORS['gold']}; color: {COLORS['dark']}; padding: 8px 20px;
-                        border-radius: 20px; display: inline-block; font-weight: 700;">
-                +{badge.get('points', 0)} LP
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+# ============================================
+# LEARNING PATHS
+# ============================================
+LEARNING_PATHS = {
+    "beginner": {
+        "title": "Pemula - Mengenal Umrah",
+        "icon": "🌱",
+        "description": "Dasar-dasar umrah untuk jamaah pemula",
+        "modules": [
+            {"id": "intro", "title": "Apa itu Umrah?", "points": 20, "duration": 10},
+            {"id": "rukun", "title": "5 Rukun Umrah", "points": 30, "duration": 15},
+            {"id": "wajib", "title": "Wajib-Wajib Umrah", "points": 25, "duration": 12},
+            {"id": "sunnah", "title": "Sunnah-Sunnah Umrah", "points": 25, "duration": 12},
+            {"id": "larangan", "title": "Larangan Saat Ihram", "points": 30, "duration": 15},
+        ],
+        "completion_reward": 200,
+        "badge": "beginner_complete"
+    },
+    "intermediate": {
+        "title": "Menengah - Praktik Manasik",
+        "icon": "🌿",
+        "description": "Memperdalam praktik manasik umrah",
+        "modules": [
+            {"id": "ihram_detail", "title": "Ihram Lengkap", "points": 35, "duration": 20},
+            {"id": "tawaf_detail", "title": "Tawaf Lengkap", "points": 40, "duration": 25},
+            {"id": "sai_detail", "title": "Sa'i Lengkap", "points": 35, "duration": 20},
+            {"id": "doa_complete", "title": "Doa-Doa Lengkap", "points": 50, "duration": 30},
+            {"id": "ziarah", "title": "Ziarah di Mekkah & Madinah", "points": 40, "duration": 25},
+        ],
+        "completion_reward": 400,
+        "badge": "intermediate_complete"
+    },
+    "advanced": {
+        "title": "Mahir - Umrah Mandiri",
+        "icon": "🌳",
+        "description": "Persiapan umrah mandiri tanpa travel agent",
+        "modules": [
+            {"id": "visa", "title": "Proses Visa Umrah", "points": 50, "duration": 25},
+            {"id": "tiket", "title": "Tips Tiket Pesawat", "points": 40, "duration": 20},
+            {"id": "hotel", "title": "Booking Hotel", "points": 45, "duration": 22},
+            {"id": "transport", "title": "Transportasi Lokal", "points": 35, "duration": 18},
+            {"id": "emergency", "title": "Penanganan Darurat", "points": 55, "duration": 28},
+        ],
+        "completion_reward": 600,
+        "badge": "advanced_complete"
+    }
+}
 
 
 # ============================================
-# VIRAL MECHANICS
+# QUIZ FUNCTIONS
 # ============================================
 
-def render_share_to_unlock(feature_name, unlock_action="share"):
-    """Render share-to-unlock feature gate"""
+def init_quiz_state():
+    """Initialize quiz session state"""
+    if "quiz" not in st.session_state:
+        st.session_state.quiz = {
+            "active": False,
+            "current_quiz": None,
+            "current_question": 0,
+            "answers": [],
+            "score": 0,
+            "start_time": None,
+            "completed_quizzes": [],
+        }
+
+
+def start_quiz(quiz_id):
+    """Start a new quiz"""
+    init_quiz_state()
+    quiz = QUIZZES.get(quiz_id)
+    if quiz:
+        st.session_state.quiz["active"] = True
+        st.session_state.quiz["current_quiz"] = quiz_id
+        st.session_state.quiz["current_question"] = 0
+        st.session_state.quiz["answers"] = []
+        st.session_state.quiz["score"] = 0
+        st.session_state.quiz["start_time"] = datetime.now()
+
+
+def submit_answer(answer_index):
+    """Submit an answer for current question"""
+    quiz_id = st.session_state.quiz["current_quiz"]
+    quiz = QUIZZES.get(quiz_id)
+    current_q = st.session_state.quiz["current_question"]
+    
+    question = quiz["questions"][current_q]
+    is_correct = answer_index == question["correct"]
+    
+    st.session_state.quiz["answers"].append({
+        "question": current_q,
+        "answer": answer_index,
+        "correct": is_correct
+    })
+    
+    if is_correct:
+        st.session_state.quiz["score"] += quiz["points_per_question"]
+    
+    # Move to next question or finish
+    if current_q + 1 < len(quiz["questions"]):
+        st.session_state.quiz["current_question"] += 1
+    else:
+        finish_quiz()
+
+
+def finish_quiz():
+    """Finish the current quiz"""
+    quiz_id = st.session_state.quiz["current_quiz"]
+    st.session_state.quiz["active"] = False
+    st.session_state.quiz["completed_quizzes"].append({
+        "quiz_id": quiz_id,
+        "score": st.session_state.quiz["score"],
+        "completed_at": datetime.now().isoformat()
+    })
+
+
+# ============================================
+# QUIZ UI COMPONENTS
+# ============================================
+
+def render_quiz_hub():
+    """Render main quiz hub"""
+    init_quiz_state()
     
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, {COLORS['dark']} 0%, #1E2A3A 100%);
-                border: 2px dashed {COLORS['gold']}50; border-radius: 20px; padding: 30px;
-                text-align: center; margin: 20px 0;">
-        <div style="font-size: 3rem; margin-bottom: 15px;">🔒</div>
-        <div style="color: white; font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">
-            {feature_name}
+    <div style="text-align: center; padding: 20px 0;">
+        <h1 style="color: {COLORS['gold']}; font-size: 2rem; margin-bottom: 5px;">
+            🧠 Quiz & Learning Center
+        </h1>
+        <p style="color: {COLORS['sand']};">
+            Uji dan tingkatkan pengetahuan umrah kamu!
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Daily Challenge Banner
+    render_daily_quiz_banner()
+    
+    st.markdown("### 📚 Pilih Kategori Quiz")
+    
+    cols = st.columns(3)
+    for i, (quiz_id, quiz) in enumerate(QUIZZES.items()):
+        with cols[i % 3]:
+            completed = quiz_id in [q["quiz_id"] for q in st.session_state.quiz.get("completed_quizzes", [])]
+            
+            difficulty_colors = {"easy": COLORS["green"], "medium": COLORS["orange"], "hard": COLORS["red"]}
+            diff_color = difficulty_colors.get(quiz["difficulty"], COLORS["gold"])
+            
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, {COLORS['dark']} 0%, {COLORS['dark_light']} 100%);
+                        border-radius: 15px; padding: 20px; margin-bottom: 15px; cursor: pointer;
+                        border: 1px solid {COLORS['gold'] if completed else COLORS['dark_light']};
+                        transition: transform 0.2s, box-shadow 0.2s;"
+                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.3)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="font-size: 2.5rem; text-align: center; margin-bottom: 10px;">{quiz['icon']}</div>
+                <div style="color: white; font-weight: 700; text-align: center; margin-bottom: 5px;">
+                    {quiz['title']} {'✅' if completed else ''}
+                </div>
+                <div style="color: {COLORS['sand']}; font-size: 0.8rem; text-align: center; margin-bottom: 10px;">
+                    {quiz['description']}
+                </div>
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <span style="background: {diff_color}30; color: {diff_color}; padding: 3px 10px; 
+                                border-radius: 10px; font-size: 0.7rem; font-weight: 600;">
+                        {quiz['difficulty'].upper()}
+                    </span>
+                    <span style="background: {COLORS['gold']}30; color: {COLORS['gold']}; padding: 3px 10px;
+                                border-radius: 10px; font-size: 0.7rem; font-weight: 600;">
+                        {len(quiz['questions'])} soal
+                    </span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(f"Mulai Quiz", key=f"start_{quiz_id}", use_container_width=True):
+                start_quiz(quiz_id)
+                st.rerun()
+
+
+def render_daily_quiz_banner():
+    """Render daily quiz challenge banner"""
+    
+    # Random daily quiz
+    daily_quiz = random.choice(list(QUIZZES.keys()))
+    quiz = QUIZZES[daily_quiz]
+    
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #2D1F3D 0%, {COLORS['dark']} 100%);
+                border: 2px solid {COLORS['purple']}; border-radius: 20px; padding: 20px;
+                margin-bottom: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="color: {COLORS['purple']}; font-size: 0.8rem; font-weight: 600; margin-bottom: 5px;">
+                    ⚡ TANTANGAN HARIAN
+                </div>
+                <div style="color: white; font-size: 1.2rem; font-weight: 700;">
+                    {quiz['icon']} {quiz['title']}
+                </div>
+                <div style="color: {COLORS['sand']}; font-size: 0.85rem;">
+                    Selesaikan untuk mendapat bonus poin!
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="background: {COLORS['gold']}; color: {COLORS['dark']}; padding: 10px 20px;
+                            border-radius: 25px; font-weight: 700;">
+                    +{len(quiz['questions']) * quiz['points_per_question'] * 2} LP
+                </div>
+                <div style="color: {COLORS['sand']}; font-size: 0.75rem; margin-top: 5px;">
+                    2x poin hari ini!
+                </div>
+            </div>
         </div>
-        <div style="color: {COLORS['sand']}; font-size: 0.9rem; margin-bottom: 20px;">
-            Share LABBAIK untuk membuka fitur ini!
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def render_active_quiz():
+    """Render active quiz interface"""
+    init_quiz_state()
+    
+    if not st.session_state.quiz["active"]:
+        return False
+    
+    quiz_id = st.session_state.quiz["current_quiz"]
+    quiz = QUIZZES.get(quiz_id)
+    current_q = st.session_state.quiz["current_question"]
+    question = quiz["questions"][current_q]
+    
+    # Progress header
+    progress = (current_q / len(quiz["questions"])) * 100
+    
+    st.markdown(f"""
+    <div style="background: {COLORS['dark']}; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+        <!-- Progress -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="color: white; font-weight: 600;">
+                {quiz['icon']} {quiz['title']}
+            </div>
+            <div style="color: {COLORS['gold']}; font-weight: 700;">
+                Skor: {st.session_state.quiz['score']}
+            </div>
+        </div>
+        <div style="background: {COLORS['dark_light']}; border-radius: 10px; height: 8px; margin-bottom: 10px; overflow: hidden;">
+            <div style="background: {COLORS['gold']}; height: 100%; width: {progress}%;"></div>
+        </div>
+        <div style="text-align: center; color: {COLORS['sand']}; font-size: 0.85rem;">
+            Pertanyaan {current_q + 1} dari {len(quiz['questions'])}
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    render_share_buttons("app_invite")
+    # Question card
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, {COLORS['dark']} 0%, #1E3D2F 100%);
+                border-radius: 20px; padding: 30px; margin-bottom: 20px;
+                border: 1px solid {COLORS['gold']}40;">
+        <div style="color: white; font-size: 1.3rem; font-weight: 600; text-align: center; line-height: 1.6;">
+            {question['question']}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Check if shared (simplified - in real app would track actual shares)
-    if st.button("✅ Sudah Share!", use_container_width=True):
-        st.session_state[f"unlocked_{feature_name}"] = True
-        st.success("🎉 Fitur berhasil dibuka!")
-        st.rerun()
+    # Answer options
+    for i, option in enumerate(question["options"]):
+        if st.button(f"{chr(65+i)}. {option}", key=f"answer_{i}", use_container_width=True):
+            submit_answer(i)
+            
+            # Show result
+            if i == question["correct"]:
+                st.success(f"✅ Benar! {question['explanation']}")
+            else:
+                st.error(f"❌ Salah. Jawaban yang benar: {question['options'][question['correct']]}")
+                st.info(question['explanation'])
+            
+            st.rerun()
+    
+    return True
 
 
-def render_community_goal():
-    """Render community goal progress"""
+def render_quiz_results():
+    """Render quiz results"""
+    init_quiz_state()
     
-    # Sample community goal
-    goal = {
-        "title": "10,000 Jamaah Baru",
-        "description": "Ajak teman untuk mencapai target komunitas!",
-        "current": 7823,
-        "target": 10000,
-        "reward": "Semua member dapat 500 LP!",
-        "deadline": "31 Desember 2025"
-    }
+    if st.session_state.quiz["active"]:
+        return False
     
-    progress = (goal["current"] / goal["target"]) * 100
+    if not st.session_state.quiz["completed_quizzes"]:
+        return False
+    
+    last_quiz = st.session_state.quiz["completed_quizzes"][-1]
+    quiz = QUIZZES.get(last_quiz["quiz_id"])
+    score = last_quiz["score"]
+    max_score = len(quiz["questions"]) * quiz["points_per_question"]
+    percentage = (score / max_score) * 100
+    
+    # Determine grade
+    if percentage >= 90:
+        grade = {"letter": "A+", "text": "Luar Biasa!", "color": COLORS["gold"], "icon": "🏆"}
+    elif percentage >= 80:
+        grade = {"letter": "A", "text": "Sangat Bagus!", "color": COLORS["green"], "icon": "⭐"}
+    elif percentage >= 70:
+        grade = {"letter": "B", "text": "Bagus!", "color": COLORS["blue"], "icon": "👍"}
+    elif percentage >= 60:
+        grade = {"letter": "C", "text": "Cukup Baik", "color": COLORS["orange"], "icon": "📚"}
+    else:
+        grade = {"letter": "D", "text": "Perlu Belajar Lagi", "color": COLORS["red"], "icon": "💪"}
     
     st.markdown(f"""
     <div style="background: linear-gradient(135deg, {COLORS['dark']} 0%, #2D1F3D 100%);
-                border-radius: 20px; padding: 25px; margin-bottom: 20px;
-                border: 1px solid {COLORS['purple']}40;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div>
-                <div style="color: {COLORS['gold']}; font-size: 0.85rem; font-weight: 600;">🎯 GOAL KOMUNITAS</div>
-                <div style="color: white; font-size: 1.2rem; font-weight: 700;">{goal['title']}</div>
-            </div>
-            <div style="background: {COLORS['purple']}30; color: {COLORS['purple']}; padding: 5px 12px;
-                        border-radius: 15px; font-size: 0.8rem;">
-                Deadline: {goal['deadline']}
-            </div>
+                border-radius: 25px; padding: 40px; text-align: center; margin: 20px 0;
+                border: 2px solid {grade['color']};">
+        <div style="font-size: 4rem; margin-bottom: 15px;">{grade['icon']}</div>
+        <div style="color: {grade['color']}; font-size: 3rem; font-weight: 800; margin-bottom: 10px;">
+            {grade['letter']}
+        </div>
+        <div style="color: white; font-size: 1.5rem; font-weight: 600; margin-bottom: 5px;">
+            {grade['text']}
+        </div>
+        <div style="color: {COLORS['sand']}; font-size: 1.1rem; margin-bottom: 20px;">
+            Skor: {score}/{max_score} ({percentage:.0f}%)
         </div>
         
-        <div style="color: {COLORS['sand']}; font-size: 0.9rem; margin-bottom: 15px;">
-            {goal['description']}
-        </div>
-        
-        <!-- Progress Bar -->
-        <div style="position: relative; background: {COLORS['dark']}; border-radius: 10px; 
-                    height: 25px; overflow: hidden; margin-bottom: 10px;">
-            <div style="background: linear-gradient(90deg, {COLORS['purple']} 0%, {COLORS['gold']} 100%);
-                        height: 100%; width: {progress}%; transition: width 0.5s ease;"></div>
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                        color: white; font-weight: 700; font-size: 0.9rem;">
-                {goal['current']:,} / {goal['target']:,}
+        <div style="background: {COLORS['dark']}; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+            <div style="color: {COLORS['gold']}; font-size: 1.8rem; font-weight: 700;">
+                +{score} LP
             </div>
-        </div>
-        
-        <!-- Reward Info -->
-        <div style="background: {COLORS['gold']}20; border-radius: 10px; padding: 12px; text-align: center;">
-            <span style="color: {COLORS['gold']};">🎁 Reward: </span>
-            <span style="color: white; font-weight: 600;">{goal['reward']}</span>
+            <div style="color: {COLORS['sand']}; font-size: 0.85rem;">
+                Poin ditambahkan ke akun kamu
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-
-# ============================================
-# SOCIAL PROOF
-# ============================================
-
-def render_live_activity_feed():
-    """Render live activity feed showing recent user actions"""
     
-    # Sample activities (in real app, would come from database)
-    activities = [
-        {"user": "Ahmad F.", "city": "Jakarta", "action": "bergabung dengan LABBAIK", "time": "2 menit lalu", "icon": "👋"},
-        {"user": "Siti A.", "city": "Surabaya", "action": "membuat rencana umrah", "time": "5 menit lalu", "icon": "📋"},
-        {"user": "Muhammad R.", "city": "Bandung", "action": "mendapat badge 'Perencana Cerdas'", "time": "8 menit lalu", "icon": "🏆"},
-        {"user": "Fatimah Z.", "city": "Medan", "action": "mengajak 3 teman bergabung", "time": "12 menit lalu", "icon": "🎁"},
-        {"user": "Ibrahim H.", "city": "Makassar", "action": "menyelesaikan simulasi biaya", "time": "15 menit lalu", "icon": "💰"},
-    ]
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🔄 Ulangi Quiz", use_container_width=True):
+            start_quiz(last_quiz["quiz_id"])
+            st.rerun()
+    with col2:
+        if st.button("📚 Quiz Lainnya", use_container_width=True):
+            st.session_state.quiz["completed_quizzes"] = []
+            st.rerun()
+    
+    return True
+
+
+def render_learning_paths():
+    """Render learning paths section"""
     
     st.markdown(f"""
-    <div style="background: {COLORS['dark']}; border-radius: 15px; padding: 15px; margin-bottom: 20px;
-                max-height: 300px; overflow-y: auto;">
-        <div style="color: {COLORS['gold']}; font-weight: 700; margin-bottom: 15px; 
-                    display: flex; align-items: center; gap: 8px;">
-            <span style="width: 8px; height: 8px; background: {COLORS['green']}; border-radius: 50%;
-                        animation: pulse 1s infinite;"></span>
-            Live Activity
-        </div>
-    """, unsafe_allow_html=True)
-    
-    for activity in activities:
-        st.markdown(f"""
-        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;
-                    border-bottom: 1px solid {COLORS['dark_light']};">
-            <span style="font-size: 1.3rem;">{activity['icon']}</span>
-            <div style="flex: 1;">
-                <div style="color: white; font-size: 0.85rem;">
-                    <strong>{activity['user']}</strong> dari {activity['city']} {activity['action']}
-                </div>
-                <div style="color: {COLORS['sand']}; font-size: 0.75rem;">{activity['time']}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("""
+    <div style="margin-top: 30px; margin-bottom: 20px;">
+        <h3 style="color: {COLORS['gold']};">📖 Learning Paths</h3>
+        <p style="color: {COLORS['sand']};">Ikuti jalur pembelajaran terstruktur</p>
     </div>
-    <style>
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-
-def render_success_stories_carousel():
-    """Render success stories carousel"""
-    
-    stories = [
-        {
-            "name": "Keluarga Bapak Hasan",
-            "city": "Jakarta",
-            "story": "Alhamdulillah berkat LABBAIK, kami bisa merencanakan umrah keluarga dengan budget pas. Hemat hampir Rp 5 juta!",
-            "savings": "Rp 5 Juta",
-            "avatar": "👨‍👩‍👧‍👦",
-            "rating": 5
-        },
-        {
-            "name": "Ibu Aisyah",
-            "city": "Surabaya", 
-            "story": "Fitur simulasi biayanya sangat membantu. Bisa compare berbagai paket dengan mudah.",
-            "savings": "Rp 3.5 Juta",
-            "avatar": "👩",
-            "rating": 5
-        },
-        {
-            "name": "Komunitas Pengajian Al-Hikmah",
-            "city": "Bandung",
-            "story": "Kami pakai fitur Umrah Bareng untuk mengorganisir perjalanan 15 jamaah. Sangat praktis!",
-            "savings": "Rp 8 Juta",
-            "avatar": "👥",
-            "rating": 5
-        },
-    ]
-    
-    st.markdown(f"""
-    <div style="margin-bottom: 20px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <div style="color: {COLORS['gold']}; font-size: 1.2rem; font-weight: 700;">
-                💬 Cerita Sukses Jamaah
-            </div>
-            <div style="color: {COLORS['sand']}; font-size: 0.9rem;">
-                Lihat bagaimana LABBAIK membantu jamaah lain
-            </div>
-        </div>
     """, unsafe_allow_html=True)
     
-    cols = st.columns(len(stories))
-    for i, story in enumerate(stories):
-        with cols[i]:
-            stars = "⭐" * story["rating"]
+    for path_id, path in LEARNING_PATHS.items():
+        # Calculate progress (placeholder)
+        completed_modules = random.randint(0, len(path["modules"]))
+        progress = (completed_modules / len(path["modules"])) * 100
+        total_points = sum(m["points"] for m in path["modules"])
+        
+        with st.expander(f"{path['icon']} {path['title']}", expanded=False):
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, {COLORS['dark']} 0%, {COLORS['dark_light']} 100%);
-                        border-radius: 15px; padding: 20px; height: 100%;
-                        border: 1px solid {COLORS['gold']}20;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                    <span style="font-size: 2rem;">{story['avatar']}</span>
-                    <div>
-                        <div style="color: white; font-weight: 600;">{story['name']}</div>
-                        <div style="color: {COLORS['sand']}; font-size: 0.75rem;">📍 {story['city']}</div>
-                    </div>
+            <div style="margin-bottom: 15px;">
+                <div style="color: {COLORS['sand']}; margin-bottom: 10px;">{path['description']}</div>
+                <div style="background: {COLORS['dark']}; border-radius: 10px; height: 10px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, {COLORS['green']} 0%, {COLORS['gold']} 100%);
+                                height: 100%; width: {progress}%;"></div>
                 </div>
-                <div style="color: {COLORS['sand']}; font-size: 0.85rem; line-height: 1.5; margin-bottom: 15px;">
-                    "{story['story']}"
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="color: {COLORS['gold']}; font-size: 0.8rem;">{stars}</div>
-                    <div style="background: {COLORS['green']}20; color: {COLORS['green']}; padding: 5px 10px;
-                                border-radius: 10px; font-size: 0.75rem; font-weight: 600;">
-                        Hemat {story['savings']}
-                    </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                    <span style="color: {COLORS['sand']}; font-size: 0.8rem;">{completed_modules}/{len(path['modules'])} modul</span>
+                    <span style="color: {COLORS['gold']}; font-size: 0.8rem;">Total: {total_points} LP</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-def render_social_proof_banner():
-    """Render social proof statistics banner"""
-    
-    stats = {
-        "users": 15000,
-        "simulations": 45000,
-        "savings": 2500000000,  # Total savings in Rupiah
-        "rating": 4.9
-    }
-    
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, {COLORS['gold']}20 0%, {COLORS['dark']} 100%);
-                border-radius: 20px; padding: 25px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-around; text-align: center;">
-            <div>
-                <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800;">
-                    {stats['users']:,}+
+            
+            for module in path["modules"]:
+                is_complete = random.choice([True, False])
+                st.markdown(f"""
+                <div style="background: {COLORS['dark']}; border-radius: 10px; padding: 12px; margin-bottom: 8px;
+                            display: flex; justify-content: space-between; align-items: center;
+                            border-left: 3px solid {COLORS['green'] if is_complete else COLORS['dark_light']};">
+                    <div>
+                        <div style="color: white; font-weight: 600;">{module['title']} {'✅' if is_complete else ''}</div>
+                        <div style="color: {COLORS['sand']}; font-size: 0.75rem;">⏱️ {module['duration']} menit</div>
+                    </div>
+                    <div style="color: {COLORS['gold']}; font-weight: 600;">+{module['points']} LP</div>
                 </div>
-                <div style="color: {COLORS['sand']}; font-size: 0.85rem;">Jamaah Terdaftar</div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div style="background: {COLORS['gold']}20; border-radius: 10px; padding: 12px; margin-top: 15px;
+                        text-align: center;">
+                <span style="color: {COLORS['gold']};">🎁 Selesaikan semua untuk bonus </span>
+                <span style="color: white; font-weight: 700;">+{path['completion_reward']} LP + Badge!</span>
             </div>
-            <div style="width: 1px; background: {COLORS['gold']}30;"></div>
-            <div>
-                <div style="color: {COLORS['green']}; font-size: 2rem; font-weight: 800;">
-                    {stats['simulations']:,}+
-                </div>
-                <div style="color: {COLORS['sand']}; font-size: 0.85rem;">Simulasi Dibuat</div>
-            </div>
-            <div style="width: 1px; background: {COLORS['gold']}30;"></div>
-            <div>
-                <div style="color: {COLORS['blue']}; font-size: 2rem; font-weight: 800;">
-                    Rp {stats['savings']/1000000000:.1f}M+
-                </div>
-                <div style="color: {COLORS['sand']}; font-size: 0.85rem;">Total Penghematan</div>
-            </div>
-            <div style="width: 1px; background: {COLORS['gold']}30;"></div>
-            <div>
-                <div style="color: {COLORS['orange']}; font-size: 2rem; font-weight: 800;">
-                    ⭐ {stats['rating']}
-                </div>
-                <div style="color: {COLORS['sand']}; font-size: 0.85rem;">Rating Pengguna</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
 
 # ============================================
-# INVITE FRIENDS MODAL
+# MAIN RENDER FUNCTION
 # ============================================
 
-def render_invite_modal(referral_code):
-    """Render invite friends modal/section"""
+def render_quiz_page():
+    """Main quiz page render function"""
+    init_quiz_state()
     
-    share_url = f"https://labbaik.streamlit.app?ref={referral_code}"
+    # Check if quiz is active
+    if render_active_quiz():
+        return
     
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, {COLORS['dark']} 0%, #1E3D2F 100%);
-                border-radius: 25px; padding: 30px; margin: 20px 0;
-                border: 2px solid {COLORS['green']}40; text-align: center;">
-        
-        <!-- Header -->
-        <div style="font-size: 3rem; margin-bottom: 15px;">🎁</div>
-        <div style="color: white; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">
-            Ajak Teman, Dapat Bonus!
-        </div>
-        <div style="color: {COLORS['sand']}; margin-bottom: 25px;">
-            Kamu dan temanmu masing-masing dapat <strong style="color: {COLORS['gold']};">bonus LP!</strong>
-        </div>
-        
-        <!-- Rewards Breakdown -->
-        <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 25px;">
-            <div style="background: {COLORS['dark']}; border-radius: 15px; padding: 15px 25px;">
-                <div style="color: {COLORS['sand']}; font-size: 0.8rem;">Kamu Dapat</div>
-                <div style="color: {COLORS['gold']}; font-size: 1.5rem; font-weight: 700;">+200 LP</div>
-            </div>
-            <div style="background: {COLORS['dark']}; border-radius: 15px; padding: 15px 25px;">
-                <div style="color: {COLORS['sand']}; font-size: 0.8rem;">Teman Dapat</div>
-                <div style="color: {COLORS['green']}; font-size: 1.5rem; font-weight: 700;">+75 LP</div>
-            </div>
-        </div>
-        
-        <!-- Referral Code -->
-        <div style="background: {COLORS['dark']}; border: 2px dashed {COLORS['gold']}50;
-                    border-radius: 15px; padding: 15px; margin-bottom: 20px;">
-            <div style="color: {COLORS['sand']}; font-size: 0.8rem; margin-bottom: 5px;">Kode Referral</div>
-            <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800; letter-spacing: 4px;">
-                {referral_code}
-            </div>
-        </div>
-        
-        <!-- Link -->
-        <div style="background: {COLORS['dark_light']}; border-radius: 10px; padding: 12px;
-                    margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <span style="color: {COLORS['sand']}; font-size: 0.85rem; word-break: break-all;">
-                {share_url}
-            </span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Check if showing results
+    if render_quiz_results():
+        return
     
-    # Share buttons
-    render_share_buttons("referral", size="large", code=referral_code)
-
-
-# ============================================
-# NOTIFICATION TRIGGERS
-# ============================================
-
-def trigger_viral_notification(notification_type, data=None):
-    """Trigger viral notification based on user action"""
+    # Show quiz hub
+    render_quiz_hub()
     
-    notifications = {
-        "friend_joined": {
-            "title": "🎉 Temanmu Bergabung!",
-            "message": f"{data.get('friend_name', 'Seseorang')} bergabung pakai kode referralmu. +200 LP!",
-            "type": "success"
-        },
-        "almost_badge": {
-            "title": "🏆 Hampir Dapat Badge!",
-            "message": f"Kamu tinggal {data.get('remaining', 1)} langkah lagi untuk badge {data.get('badge_name', '')}!",
-            "type": "info"
-        },
-        "streak_reminder": {
-            "title": "🔥 Jaga Streak-mu!",
-            "message": "Jangan lupa login hari ini untuk menjaga streak-mu!",
-            "type": "warning"
-        },
-        "community_milestone": {
-            "title": "🎯 Goal Komunitas Tercapai!",
-            "message": "Selamat! Komunitas LABBAIK mencapai 10,000 jamaah. Check reward-mu!",
-            "type": "success"
-        }
-    }
-    
-    notif = notifications.get(notification_type, {})
-    if notif:
-        if notif["type"] == "success":
-            st.success(f"**{notif['title']}** - {notif['message']}")
-        elif notif["type"] == "info":
-            st.info(f"**{notif['title']}** - {notif['message']}")
-        elif notif["type"] == "warning":
-            st.warning(f"**{notif['title']}** - {notif['message']}")
+    # Show learning paths
+    render_learning_paths()
 
 
 # ============================================
 # EXPORT
 # ============================================
 __all__ = [
-    # Share Functions
-    "generate_share_url",
-    "render_share_buttons",
-    "render_share_card",
-    
-    # Viral Mechanics
-    "render_share_to_unlock",
-    "render_community_goal",
-    
-    # Social Proof
-    "render_live_activity_feed",
-    "render_success_stories_carousel",
-    "render_social_proof_banner",
-    
-    # Invite
-    "render_invite_modal",
-    
-    # Notifications
-    "trigger_viral_notification",
-    
-    # Constants
-    "SHARE_TEMPLATES",
+    "init_quiz_state",
+    "start_quiz",
+    "render_quiz_page",
+    "render_quiz_hub",
+    "render_active_quiz",
+    "render_quiz_results",
+    "render_learning_paths",
+    "QUIZZES",
+    "LEARNING_PATHS",
 ]
