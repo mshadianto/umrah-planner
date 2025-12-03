@@ -6,7 +6,7 @@ __version__ = "3.4.1"
 DEVELOPER = {
     "name": "MS Hadianto",
     "role": "Founder & Lead Developer",
-    "company": "MSH Consulting",
+    "company": "KIM Consulting",
     "email": "sopian.hadianto@gmail.com",
     "whatsapp": "6281596588833",
     "github": "https://github.com/mshadianto",
@@ -31,7 +31,7 @@ APP_INFO = {
 
 CHANGELOG = {
     "3.4.1": {
-        "name": "PWA Support (Phase 1)",
+        "name": "PWA Support & Visitor Database",
         "date": "2025-12-03",
         "features": [
             ("📱", "Progressive Web App (PWA) implementation"),
@@ -40,10 +40,11 @@ CHANGELOG = {
             ("📄", "Web App Manifest configuration"),
             ("⚙️", "Service Worker for caching"),
             ("📴", "Offline fallback page"),
-            ("🔔", "Install banner prompt (auto 5 seconds)"),
             ("📲", "Tab 'Install App' di Tentang Aplikasi"),
             ("🎯", "Standalone display mode (fullscreen)"),
-            ("🌙", "Theme color integration (#D4AF37 gold)"),
+            ("📊", "Visitor counter persistent ke database Neon"),
+            ("🔄", "Auto-fallback jika database tidak tersedia"),
+            ("📈", "Page view tracking per halaman"),
         ]
     },
     "3.4.0": {
@@ -215,17 +216,17 @@ TECH_STACK = {
 # ============================================
 
 ROADMAP = {
-    "Q1 2025": [
+    "Q1 2026": [
         ("📱", "Android Mobile App (Play Store)"),
         ("🍎", "iOS Mobile App (App Store)"),
         ("🔔", "Push notifications"),
     ],
-    "Q2 2025": [
+    "Q2 2026": [
         ("💳", "Payment gateway integration"),
         ("🤝", "Travel agent partnership portal"),
         ("📍", "Real-time location tracking"),
     ],
-    "Q3 2025": [
+    "Q3 2026": [
         ("🌐", "Multi-language support (Arabic, English)"),
         ("🎤", "Voice assistant integration"),
         ("📸", "Photo gallery & sharing"),
