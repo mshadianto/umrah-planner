@@ -2930,7 +2930,7 @@ def render_about():
         
         st.markdown(f"""
         <div style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #2E7D32; margin-top: 0;">📱 Q1 2025 - Mobile App</h4>
+            <h4 style="color: #2E7D32; margin-top: 0;">📱 Q1 2026 - Mobile App</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🤖 <strong>Android App</strong> - Play Store release</li>
                 <li>🍎 <strong>iOS App</strong> - App Store release</li>
@@ -2940,7 +2940,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #1565C0; margin-top: 0;">💳 Q2 2025 - Payment & Partnership</h4>
+            <h4 style="color: #1565C0; margin-top: 0;">💳 Q2 2026 - Payment & Partnership</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>💰 <strong>Payment Gateway</strong> - Bayar langsung via app</li>
                 <li>🤝 <strong>Travel Agent Portal</strong> - Partnership dashboard</li>
@@ -2950,7 +2950,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #E65100; margin-top: 0;">🌐 Q3 2025 - Global Expansion</h4>
+            <h4 style="color: #E65100; margin-top: 0;">🌐 Q3 2026 - Global Expansion</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🗣️ <strong>Multi-language</strong> - Arabic, English, Malay</li>
                 <li>🎤 <strong>Voice Assistant</strong> - Tanya dengan suara</li>
@@ -2960,7 +2960,7 @@ def render_about():
         </div>
         
         <div style="background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); border-radius: 15px; padding: 20px;">
-            <h4 style="color: #7B1FA2; margin-top: 0;">🚀 Q4 2025 - Advanced Features</h4>
+            <h4 style="color: #7B1FA2; margin-top: 0;">🚀 Q4 2026 - Advanced Features</h4>
             <ul style="color: #333; line-height: 1.8;">
                 <li>🧠 <strong>AI Travel Planner</strong> - Personalized itinerary</li>
                 <li>👥 <strong>Group Management</strong> - Kelola rombongan</li>
@@ -3142,7 +3142,7 @@ def render_about():
         st.markdown("---")
         st.markdown("### 🚀 Coming Soon")
         st.info("""
-        **Play Store & App Store (Q1 2025)**
+        **Play Store & App Store (Q1 2026)**
         
         Kami sedang mengembangkan aplikasi native untuk pengalaman yang lebih optimal:
         - 🤖 Android App di Google Play Store
