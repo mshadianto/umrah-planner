@@ -25,6 +25,7 @@ USER_ROLES = {
     "guest": {
         "name": "Tamu",
         "icon": "👤",
+        "badge": "👤",
         "color": "#888888",
         "permissions": ["view_public"],
         "limits": {
@@ -35,6 +36,7 @@ USER_ROLES = {
     "user": {
         "name": "Member",
         "icon": "⭐",
+        "badge": "⭐",
         "color": "#4CAF50",
         "permissions": ["view_public", "use_simulator", "use_ai", "save_plans"],
         "limits": {
@@ -46,6 +48,7 @@ USER_ROLES = {
     "premium": {
         "name": "Premium",
         "icon": "💎",
+        "badge": "💎",
         "color": "#2196F3",
         "permissions": ["view_public", "use_simulator", "use_ai", "save_plans", "export_pdf", "priority_support"],
         "limits": {
@@ -57,6 +60,7 @@ USER_ROLES = {
     "admin": {
         "name": "Admin",
         "icon": "👑",
+        "badge": "👑",
         "color": "#D4AF37",
         "permissions": ["all"],
         "limits": {
