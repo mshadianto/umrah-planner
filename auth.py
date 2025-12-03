@@ -121,8 +121,57 @@ def init_auth_state():
 
 
 def init_user_database():
-    """Initialize user database (alias for init_auth_state)"""
+    """Initialize user database with demo users"""
     init_auth_state()
+    
+    # Add demo users if not exists
+    demo_users = {
+        "demo@labbaik.id": {
+            "id": "demo001",
+            "email": "demo@labbaik.id",
+            "name": "Demo User",
+            "phone": "081234567890",
+            "password_hash": hash_password("demo123"),
+            "created_at": "2024-01-01T00:00:00",
+            "is_active": True,
+            "role": "user"
+        },
+        "admin@labbaik.id": {
+            "id": "admin001",
+            "email": "admin@labbaik.id",
+            "name": "Admin LABBAIK",
+            "phone": "081234567891",
+            "password_hash": hash_password("admin123"),
+            "created_at": "2024-01-01T00:00:00",
+            "is_active": True,
+            "role": "admin"
+        },
+        "superadmin@labbaik.id": {
+            "id": "superadmin001",
+            "email": "superadmin@labbaik.id",
+            "name": "Super Admin",
+            "phone": "081234567892",
+            "password_hash": hash_password("super123"),
+            "created_at": "2024-01-01T00:00:00",
+            "is_active": True,
+            "role": "admin"
+        },
+        "premium@labbaik.id": {
+            "id": "premium001",
+            "email": "premium@labbaik.id",
+            "name": "Premium User",
+            "phone": "081234567893",
+            "password_hash": hash_password("premium123"),
+            "created_at": "2024-01-01T00:00:00",
+            "is_active": True,
+            "role": "premium"
+        }
+    }
+    
+    # Add demo users to database if not exists
+    for email, user_data in demo_users.items():
+        if email not in st.session_state.users_db:
+            st.session_state.users_db[email] = user_data
 
 
 # ============================================
@@ -321,6 +370,7 @@ def render_register_form():
 def render_login_page():
     """Render complete login/register page"""
     init_auth_state()
+    init_user_database()  # Ensure demo users exist
     
     col1, col2, col3 = st.columns([1, 2, 1])
     
@@ -336,8 +386,31 @@ def render_login_page():
         
         with tab1:
             render_login_form()
+            
             st.markdown("---")
-            st.info("💡 Belum punya akun? Klik tab **Daftar** di atas.")
+            
+            # Demo credentials info
+            with st.expander("🔑 Demo Login Credentials", expanded=False):
+                st.markdown("""
+                <div style="background: #1A1A1A; padding: 15px; border-radius: 10px; font-size: 0.85rem;">
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #4CAF50;">👤 Demo User:</strong><br>
+                        <code>demo@labbaik.id</code> / <code>demo123</code>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #2196F3;">💎 Premium:</strong><br>
+                        <code>premium@labbaik.id</code> / <code>premium123</code>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #D4AF37;">👑 Admin:</strong><br>
+                        <code>admin@labbaik.id</code> / <code>admin123</code>
+                    </div>
+                    <div>
+                        <strong style="color: #9C27B0;">🔮 Super Admin:</strong><br>
+                        <code>superadmin@labbaik.id</code> / <code>super123</code>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
         
         with tab2:
             render_register_form()
