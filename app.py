@@ -45,7 +45,7 @@ try:
     )
 except ImportError:
     # Fallback config
-    from dataclasses import dataclass
+    from dataclasses import dataclass, field
     import os
     
     @dataclass
@@ -59,6 +59,11 @@ except ImportError:
         groq_api_key: str = ""
         openai_api_key: str = ""
         model: str = "llama-3.3-70b-versatile"
+        groq_model: str = "llama-3.3-70b-versatile"
+        openai_model: str = "gpt-4o-mini"
+        temperature: float = 0.7
+        max_tokens: int = 2000
+        
         def __post_init__(self):
             self.groq_api_key = os.getenv("GROQ_API_KEY", "")
             self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
