@@ -38,10 +38,53 @@ import pandas as pd
 from datetime import datetime
 
 # Import modules
-from config import (
-    app_config, llm_config, SCENARIO_TEMPLATES, 
-    DEPARTURE_CITIES, SEASONS
-)
+try:
+    from config import (
+        app_config, llm_config, SCENARIO_TEMPLATES, 
+        DEPARTURE_CITIES, SEASONS
+    )
+except ImportError:
+    # Fallback config
+    from dataclasses import dataclass
+    import os
+    
+    @dataclass
+    class AppConfig:
+        name: str = "LABBAIK"
+        version: str = "3.5.0"
+    
+    @dataclass
+    class LLMConfig:
+        provider: str = "groq"
+        groq_api_key: str = ""
+        openai_api_key: str = ""
+        model: str = "llama-3.3-70b-versatile"
+        def __post_init__(self):
+            self.groq_api_key = os.getenv("GROQ_API_KEY", "")
+            self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+    
+    app_config = AppConfig()
+    llm_config = LLMConfig()
+    
+    SCENARIO_TEMPLATES = {
+        "ekonomis": {"name": "Ekonomis", "multiplier": 1.0},
+        "standard": {"name": "Standard", "multiplier": 1.3},
+        "premium": {"name": "Premium", "multiplier": 1.8},
+        "vip": {"name": "VIP", "multiplier": 2.5}
+    }
+    
+    DEPARTURE_CITIES = {
+        "Jakarta": {"code": "CGK", "multiplier": 1.0},
+        "Surabaya": {"code": "SUB", "multiplier": 1.05},
+        "Medan": {"code": "KNO", "multiplier": 1.1},
+        "Bandung": {"code": "BDO", "multiplier": 1.08}
+    }
+    
+    SEASONS = {
+        "low": {"name": "Low Season", "multiplier": 0.85},
+        "regular": {"name": "Regular", "multiplier": 1.0},
+        "high": {"name": "High Season", "multiplier": 1.4}
+    }
 
 # ============================================
 # ENGAGEMENT SYSTEM IMPORTS (Optional - graceful fallback)
@@ -85,29 +128,174 @@ except ImportError:
         st.info("🧠 Quiz module coming soon!")
     def init_quiz_state(): pass
 
-from agents import AgentOrchestrator
-from scenarios import ScenarioPlanner
-from utils import format_currency, format_duration
-from features import render_additional_features
-from booking import render_booking_features
-from version import (
-    __version__, DEVELOPER, APP_INFO, CHANGELOG, TECH_STACK,
-    get_version_badge, get_developer_card, get_changelog_markdown, get_app_age
-)
-from monetization import (
-    render_monetization_page, render_monetization_sidebar,
-    render_quick_quote_widget, init_monetization_state, PRICING_TIERS
-)
-from auth import (
-    init_user_database, is_logged_in, get_current_user, get_user_role_info,
-    render_login_page, render_user_badge, render_upgrade_prompt,
-    render_admin_dashboard, has_permission, check_limit, increment_usage,
-    USER_ROLES, logout_user
-)
-from visitor_tracker import (
-    track_page_view, get_visitor_count, get_page_view_count,
-    get_visitor_stats, render_visitor_stats, render_analytics_dashboard
-)
+# ============================================
+# AGENTS IMPORT (with fallback for compatibility)
+# ============================================
+try:
+    from agents import AgentOrchestrator
+    AGENTS_AVAILABLE = True
+except ImportError:
+    AGENTS_AVAILABLE = False
+    
+    # Inline fallback AgentOrchestrator
+    class AgentOrchestrator:
+        """Fallback Agent Orchestrator"""
+        def __init__(self, provider="groq"):
+            self.provider = provider
+            self.conversation_history = []
+            
+            # Try to init Groq client
+            try:
+                from groq import Groq
+                import os
+                api_key = os.getenv("GROQ_API_KEY", "")
+                self.client = Groq(api_key=api_key) if api_key else None
+            except:
+                self.client = None
+        
+        def run(self, query, context=None):
+            """Run query through LLM"""
+            if not self.client:
+                return type('Response', (), {
+                    'content': "⚠️ API tidak tersedia. Pastikan GROQ_API_KEY sudah dikonfigurasi di Settings.",
+                    'agent_name': 'System',
+                    'success': False
+                })()
+            
+            try:
+                system_prompt = """Anda adalah asisten perencana umrah yang ahli. 
+                Bantu pengguna merencanakan perjalanan umrah dengan informasi tentang:
+                - Biaya dan budget
+                - Manasik dan tata cara ibadah
+                - Hotel dan transportasi
+                - Visa dan regulasi
+                Gunakan bahasa Indonesia yang ramah."""
+                
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": query}
+                ]
+                
+                response = self.client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=messages,
+                    max_tokens=2000,
+                    temperature=0.7
+                )
+                
+                return type('Response', (), {
+                    'content': response.choices[0].message.content,
+                    'agent_name': 'Umrah Assistant',
+                    'success': True
+                })()
+                
+            except Exception as e:
+                return type('Response', (), {
+                    'content': f"Error: {str(e)}",
+                    'agent_name': 'System',
+                    'success': False
+                })()
+        
+        def clear_history(self):
+            self.conversation_history = []
+
+# ============================================
+# OTHER MODULE IMPORTS (with fallbacks)
+# ============================================
+try:
+    from scenarios import ScenarioPlanner
+except ImportError:
+    class ScenarioPlanner:
+        def calculate_budget(self, **kwargs):
+            return type('Budget', (), {'total': 25000000})()
+
+try:
+    from utils import format_currency, format_duration
+except ImportError:
+    def format_currency(amount, currency="Rp"):
+        return f"{currency} {amount:,.0f}".replace(",", ".")
+    def format_duration(days):
+        return f"{days} hari"
+
+try:
+    from features import render_additional_features
+except ImportError:
+    def render_additional_features():
+        st.info("Features module not available")
+
+try:
+    from booking import render_booking_features
+except ImportError:
+    def render_booking_features():
+        st.info("Booking module not available")
+
+# Version module
+try:
+    from version import (
+        __version__, DEVELOPER, APP_INFO, CHANGELOG, TECH_STACK,
+        get_version_badge, get_developer_card, get_changelog_markdown, get_app_age
+    )
+except ImportError:
+    __version__ = "3.5.0"
+    DEVELOPER = {"name": "KIM Consulting", "role": "Developer"}
+    APP_INFO = {"name": "LABBAIK", "version": __version__}
+    CHANGELOG = []
+    TECH_STACK = []
+    def get_version_badge(): return f"v{__version__}"
+    def get_developer_card(): return ""
+    def get_changelog_markdown(): return ""
+    def get_app_age(): return "0 days"
+
+# Monetization module
+try:
+    from monetization import (
+        render_monetization_page, render_monetization_sidebar,
+        render_quick_quote_widget, init_monetization_state, PRICING_TIERS
+    )
+except ImportError:
+    def render_monetization_page(): st.info("Monetization module coming soon")
+    def render_monetization_sidebar(): pass
+    def render_quick_quote_widget(): pass
+    def init_monetization_state(): pass
+    PRICING_TIERS = {}
+
+# Auth module
+try:
+    from auth import (
+        init_user_database, is_logged_in, get_current_user, get_user_role_info,
+        render_login_page, render_user_badge, render_upgrade_prompt,
+        render_admin_dashboard, has_permission, check_limit, increment_usage,
+        USER_ROLES, logout_user
+    )
+except ImportError:
+    def init_user_database(): pass
+    def is_logged_in(): return False
+    def get_current_user(): return None
+    def get_user_role_info(role): return {"name": role, "icon": "👤"}
+    def render_login_page(): 
+        st.warning("Auth module not available")
+    def render_user_badge(user): pass
+    def render_upgrade_prompt(feature): pass
+    def render_admin_dashboard(): pass
+    def has_permission(user, perm): return True
+    def check_limit(user, limit): return True
+    def increment_usage(user, usage): pass
+    USER_ROLES = {}
+    def logout_user(): pass
+
+# Visitor tracker module
+try:
+    from visitor_tracker import (
+        track_page_view, get_visitor_count, get_page_view_count,
+        get_visitor_stats, render_visitor_stats, render_analytics_dashboard
+    )
+except ImportError:
+    def track_page_view(page): pass
+    def get_visitor_count(): return 0
+    def get_page_view_count(): return 0
+    def get_visitor_stats(): return {}
+    def render_visitor_stats(): pass
+    def render_analytics_dashboard(): st.info("Analytics not available")
 
 # ============================================
 # PWA (Progressive Web App) SUPPORT
