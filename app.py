@@ -732,7 +732,7 @@ def render_sidebar():
         # Custom user badge with dark background for sidebar visibility
         user = get_current_user()
         if user:
-            role_info = get_user_role_info()
+            role_info = get_user_role_info(user.get("role", "user"))
             badge_html = f"""
 <div style="background: linear-gradient(135deg, {role_info['color']}40, {role_info['color']}20); 
             border: 2px solid {role_info['color']}; border-radius: 15px; padding: 20px; 
@@ -960,7 +960,7 @@ def render_home():
         
     else:
         user = get_current_user()
-        role_info = get_user_role_info()
+        role_info = get_user_role_info(user.get("role", "user") if user else "guest")
         
         welcome_html = f"""
 <div style="background: linear-gradient(135deg, {role_info['color']}22, {role_info['color']}11); border-left: 4px solid {role_info['color']}; padding: 15px 20px; border-radius: 0 10px 10px 0; margin-bottom: 20px;">
@@ -3433,7 +3433,7 @@ def render_user_profile():
         return
     
     st.header("👤 Profil Saya")
-    role_info = get_user_role_info()
+    role_info = get_user_role_info(user.get("role", "user"))
     
     col1, col2 = st.columns([1, 2])
     with col1:
