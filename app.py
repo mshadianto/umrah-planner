@@ -3080,63 +3080,65 @@ def render_about():
     with tab7:
         st.markdown("### 📱 Install LABBAIK sebagai Aplikasi")
         
-        # Install instructions - direct HTML without pwa_component dependency
+        # Install instructions - use st.columns for better rendering
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); 
-                    border: 2px solid rgba(212, 175, 55, 0.25); border-radius: 20px; padding: 25px; margin: 20px 0;">
-            
-            <div style="text-align: center; margin-bottom: 20px;">
-                <span style="font-size: 3rem;">📱</span>
-                <h3 style="color: #D4AF37; margin: 10px 0 5px 0;">Install LABBAIK di HP Anda</h3>
-                <p style="color: #888; font-size: 0.9rem; margin: 0;">
-                    Akses LABBAIK langsung dari home screen - seperti aplikasi native!
-                </p>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <!-- Android -->
-                <div style="background: #1E1E1E; border-radius: 15px; padding: 20px; border: 1px solid #333;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <span style="font-size: 1.5rem;">🤖</span>
-                        <span style="color: #4CAF50; font-weight: 700;">Android</span>
-                    </div>
-                    <ol style="color: #aaa; font-size: 0.85rem; line-height: 1.8; padding-left: 20px; margin: 0;">
-                        <li>Buka di <strong style="color: #4CAF50;">Chrome</strong></li>
-                        <li>Tap menu <strong style="color: #4CAF50;">⋮</strong> (kanan atas)</li>
-                        <li>Pilih "<strong style="color: #4CAF50;">Add to Home screen</strong>"</li>
-                        <li>Tap "<strong style="color: #4CAF50;">Add</strong>"</li>
-                    </ol>
-                    <div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.15); border-radius: 8px; text-align: center;">
-                        <span style="color: #4CAF50; font-size: 0.8rem;">✓ Gratis &amp; Instant</span>
-                    </div>
-                </div>
-                
-                <!-- iPhone -->
-                <div style="background: #1E1E1E; border-radius: 15px; padding: 20px; border: 1px solid #333;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <span style="font-size: 1.5rem;">🍎</span>
-                        <span style="color: #007AFF; font-weight: 700;">iPhone / iPad</span>
-                    </div>
-                    <ol style="color: #aaa; font-size: 0.85rem; line-height: 1.8; padding-left: 20px; margin: 0;">
-                        <li>Buka di <strong style="color: #007AFF;">Safari</strong></li>
-                        <li>Tap tombol <strong style="color: #007AFF;">Share</strong> 📤</li>
-                        <li>Scroll, pilih "<strong style="color: #007AFF;">Add to Home Screen</strong>"</li>
-                        <li>Tap "<strong style="color: #007AFF;">Add</strong>"</li>
-                    </ol>
-                    <div style="margin-top: 15px; padding: 10px; background: rgba(0, 122, 255, 0.15); border-radius: 8px; text-align: center;">
-                        <span style="color: #007AFF; font-size: 0.8rem;">✓ No App Store needed</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 20px; padding: 15px; background: rgba(212, 175, 55, 0.1); border-radius: 10px; text-align: center;">
-                <div style="color: #D4AF37; font-weight: 600; margin-bottom: 5px;">💡 Keuntungan Install:</div>
-                <div style="color: #888; font-size: 0.85rem;">
-                    Akses cepat • Layar penuh • Hemat data • Seperti app native
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); border: 2px solid rgba(212, 175, 55, 0.25); border-radius: 20px; padding: 25px; margin: 10px 0;">
+<div style="text-align: center; margin-bottom: 20px;">
+<span style="font-size: 3rem;">📱</span>
+<h3 style="color: #D4AF37; margin: 10px 0 5px 0;">Install LABBAIK di HP Anda</h3>
+<p style="color: #888; font-size: 0.9rem; margin: 0;">Akses LABBAIK langsung dari home screen - seperti aplikasi native!</p>
+</div>
+</div>
+""", unsafe_allow_html=True)
+        
+        # Use columns for Android and iPhone instructions
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+<div style="background: #1E1E1E; border-radius: 15px; padding: 20px; border: 1px solid #333; height: 100%;">
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+<span style="font-size: 1.5rem;">🤖</span>
+<span style="color: #4CAF50; font-weight: 700; font-size: 1.1rem;">Android</span>
+</div>
+<div style="color: #aaa; font-size: 0.9rem; line-height: 2;">
+1. Buka di <strong style="color: #4CAF50;">Chrome</strong><br>
+2. Tap menu <strong style="color: #4CAF50;">⋮</strong> (kanan atas)<br>
+3. Pilih "<strong style="color: #4CAF50;">Add to Home screen</strong>"<br>
+4. Tap "<strong style="color: #4CAF50;">Add</strong>"
+</div>
+<div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.15); border-radius: 8px; text-align: center;">
+<span style="color: #4CAF50; font-size: 0.85rem;">✓ Gratis & Instant</span>
+</div>
+</div>
+""", unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown("""
+<div style="background: #1E1E1E; border-radius: 15px; padding: 20px; border: 1px solid #333; height: 100%;">
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+<span style="font-size: 1.5rem;">🍎</span>
+<span style="color: #007AFF; font-weight: 700; font-size: 1.1rem;">iPhone / iPad</span>
+</div>
+<div style="color: #aaa; font-size: 0.9rem; line-height: 2;">
+1. Buka di <strong style="color: #007AFF;">Safari</strong><br>
+2. Tap tombol <strong style="color: #007AFF;">Share</strong> 📤<br>
+3. Scroll, pilih "<strong style="color: #007AFF;">Add to Home Screen</strong>"<br>
+4. Tap "<strong style="color: #007AFF;">Add</strong>"
+</div>
+<div style="margin-top: 15px; padding: 10px; background: rgba(0, 122, 255, 0.15); border-radius: 8px; text-align: center;">
+<span style="color: #007AFF; font-size: 0.85rem;">✓ No App Store needed</span>
+</div>
+</div>
+""", unsafe_allow_html=True)
+        
+        # Benefits section
+        st.markdown("""
+<div style="margin-top: 20px; padding: 15px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 10px; text-align: center;">
+<div style="color: #D4AF37; font-weight: 600; margin-bottom: 5px;">💡 Keuntungan Install:</div>
+<div style="color: #888; font-size: 0.9rem;">Akses cepat • Layar penuh • Hemat data • Seperti app native</div>
+</div>
+""", unsafe_allow_html=True)
         
         # Coming soon features
         st.markdown("---")
