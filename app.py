@@ -148,6 +148,7 @@ except ImportError:
         def __init__(self, provider="groq"):
             self.provider = provider
             self.conversation_history = []
+            self.is_initialized = False
             
             # Try to init Groq client
             try:
@@ -157,6 +158,11 @@ except ImportError:
                 self.client = Groq(api_key=api_key) if api_key else None
             except:
                 self.client = None
+        
+        def initialize(self):
+            """Initialize the orchestrator"""
+            self.is_initialized = True
+            return {"status": "success", "message": "Orchestrator initialized"}
         
         def run(self, query, context=None):
             """Run query through LLM"""
