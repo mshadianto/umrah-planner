@@ -25,6 +25,8 @@ PWA_CONFIG = {
 def inject_pwa_head():
     """Inject PWA meta tags into page head"""
     
+    # Streamlit Cloud serves static from /app/static/
+    # But we need to check both paths
     pwa_head = f"""
     <!-- PWA Meta Tags - LABBAIK -->
     <meta name="application-name" content="{PWA_CONFIG['name']}">
@@ -40,24 +42,16 @@ def inject_pwa_head():
     <!-- Viewport for mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="app/static/manifest.json">
+    <!-- PWA Manifest - Try multiple paths -->
+    <link rel="manifest" href="./static/manifest.json">
     
     <!-- Favicon & Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="app/static/icons/icon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="app/static/icons/icon-16x16.png">
-    <link rel="apple-touch-icon" href="app/static/icons/icon-180x180.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="app/static/icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="app/static/icons/icon-180x180.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="app/static/icons/icon-167x167.png">
-    
-    <!-- Splash Screens iOS -->
-    <link rel="apple-touch-startup-image" href="app/static/splash/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px)">
-    <link rel="apple-touch-startup-image" href="app/static/splash/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px)">
-    <link rel="apple-touch-startup-image" href="app/static/splash/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px)">
-    
-    <!-- MS Tile -->
-    <meta name="msapplication-TileImage" content="app/static/icons/icon-144x144.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./static/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./static/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="./static/icons/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="./static/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./static/icons/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="./static/icons/icon-167x167.png">
     
     <style>
         /* PWA Optimizations */
@@ -198,21 +192,26 @@ def inject_service_worker():
         let deferredPrompt = null;
         let installBannerShown = false;
         
-        // Register Service Worker
+        // Register Service Worker - try multiple paths
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', async () => {
-                try {
-                    const registration = await navigator.serviceWorker.register('app/static/service-worker.js', {
-                        scope: '/'
-                    });
-                    console.log('🕋 LABBAIK SW registered:', registration.scope);
-                    
-                    // Check for updates
-                    registration.addEventListener('updatefound', () => {
-                        console.log('🔄 LABBAIK SW update found');
-                    });
-                } catch (error) {
-                    console.log('⚠️ SW registration failed:', error);
+                // Try different paths for Streamlit Cloud
+                const swPaths = [
+                    './static/service-worker.js',
+                    '/app/static/service-worker.js',
+                    'static/service-worker.js'
+                ];
+                
+                for (const swPath of swPaths) {
+                    try {
+                        const registration = await navigator.serviceWorker.register(swPath, {
+                            scope: '/'
+                        });
+                        console.log('🕋 LABBAIK SW registered from:', swPath);
+                        break;
+                    } catch (error) {
+                        console.log('SW path failed:', swPath, error.message);
+                    }
                 }
             });
         }
@@ -223,13 +222,13 @@ def inject_service_worker():
             deferredPrompt = e;
             console.log('📱 Install prompt captured');
             
-            // Show install banner after 10 seconds if not dismissed before
+            // Show install banner after 5 seconds if not dismissed before
             if (!localStorage.getItem('pwa-banner-dismissed') && !installBannerShown && !isInstalled) {
                 setTimeout(() => {
                     if (deferredPrompt && !installBannerShown) {
                         showInstallBanner();
                     }
-                }, 10000);
+                }, 5000);
             }
         });
         
@@ -257,6 +256,7 @@ def inject_service_worker():
         async function installPWA() {
             if (!deferredPrompt) {
                 console.log('No install prompt available');
+                alert('Untuk install LABBAIK:\\n\\n📱 Android: Tap menu ⋮ → Add to Home screen\\n🍎 iPhone: Tap Share 📤 → Add to Home Screen');
                 return;
             }
             
@@ -298,6 +298,8 @@ def inject_service_worker():
         // Log PWA status
         if (isInstalled) {
             console.log('📱 Running as installed PWA');
+        } else {
+            console.log('🌐 Running in browser');
         }
     </script>
     """
