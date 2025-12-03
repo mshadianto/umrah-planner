@@ -1,14 +1,13 @@
 """
 LABBAIK Authentication Module
-Simple session-based authentication
+Complete authentication system with roles and permissions
 """
 
 import streamlit as st
 import hashlib
 import secrets
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
-import json
+from typing import Optional, Dict, Any, List
 
 # Try to import bcrypt, fallback to hashlib
 try:
@@ -18,13 +17,67 @@ except ImportError:
     BCRYPT_AVAILABLE = False
 
 
+# ============================================
+# USER ROLES CONFIGURATION
+# ============================================
+
+USER_ROLES = {
+    "guest": {
+        "name": "Tamu",
+        "icon": "👤",
+        "color": "#888888",
+        "permissions": ["view_public"],
+        "limits": {
+            "simulations_per_day": 3,
+            "ai_queries_per_day": 5
+        }
+    },
+    "user": {
+        "name": "Member",
+        "icon": "⭐",
+        "color": "#4CAF50",
+        "permissions": ["view_public", "use_simulator", "use_ai", "save_plans"],
+        "limits": {
+            "simulations_per_day": 20,
+            "ai_queries_per_day": 50,
+            "saved_plans": 10
+        }
+    },
+    "premium": {
+        "name": "Premium",
+        "icon": "💎",
+        "color": "#2196F3",
+        "permissions": ["view_public", "use_simulator", "use_ai", "save_plans", "export_pdf", "priority_support"],
+        "limits": {
+            "simulations_per_day": 100,
+            "ai_queries_per_day": 200,
+            "saved_plans": 50
+        }
+    },
+    "admin": {
+        "name": "Admin",
+        "icon": "👑",
+        "color": "#D4AF37",
+        "permissions": ["all"],
+        "limits": {
+            "simulations_per_day": -1,
+            "ai_queries_per_day": -1,
+            "saved_plans": -1
+        }
+    }
+}
+
+
+# ============================================
+# PASSWORD UTILITIES
+# ============================================
+
 def hash_password(password: str) -> str:
     """Hash a password securely"""
     if BCRYPT_AVAILABLE:
         salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode(), salt).decode()
     else:
-        # Fallback to SHA256 with salt
         salt = secrets.token_hex(16)
         hashed = hashlib.sha256((password + salt).encode()).hexdigest()
         return f"{salt}:{hashed}"
@@ -38,7 +91,6 @@ def verify_password(password: str, hashed: str) -> bool:
         except:
             return False
     else:
-        # Fallback verification
         try:
             salt, stored_hash = hashed.split(":")
             check_hash = hashlib.sha256((password + salt).encode()).hexdigest()
@@ -46,6 +98,10 @@ def verify_password(password: str, hashed: str) -> bool:
         except:
             return False
 
+
+# ============================================
+# STATE INITIALIZATION
+# ============================================
 
 def init_auth_state():
     """Initialize authentication state"""
@@ -58,19 +114,28 @@ def init_auth_state():
         }
     
     if "users_db" not in st.session_state:
-        # Simple in-memory user store (for demo purposes)
         st.session_state.users_db = {}
+    
+    if "usage_tracking" not in st.session_state:
+        st.session_state.usage_tracking = {}
 
+
+def init_user_database():
+    """Initialize user database (alias for init_auth_state)"""
+    init_auth_state()
+
+
+# ============================================
+# USER MANAGEMENT
+# ============================================
 
 def register_user(email: str, password: str, name: str, phone: str = "") -> Dict[str, Any]:
     """Register a new user"""
     init_auth_state()
     
-    # Check if email already exists
     if email.lower() in st.session_state.users_db:
         return {"success": False, "error": "Email sudah terdaftar"}
     
-    # Create user
     user_id = secrets.token_hex(8)
     user = {
         "id": user_id,
@@ -84,7 +149,6 @@ def register_user(email: str, password: str, name: str, phone: str = "") -> Dict
     }
     
     st.session_state.users_db[email.lower()] = user
-    
     return {"success": True, "user_id": user_id}
 
 
@@ -92,17 +156,14 @@ def login_user(email: str, password: str) -> Dict[str, Any]:
     """Login a user"""
     init_auth_state()
     
-    # Find user
     user = st.session_state.users_db.get(email.lower())
     
     if not user:
         return {"success": False, "error": "Email tidak ditemukan"}
     
-    # Verify password
     if not verify_password(password, user["password_hash"]):
         return {"success": False, "error": "Password salah"}
     
-    # Create session
     token = secrets.token_hex(32)
     
     st.session_state.auth = {
@@ -146,15 +207,67 @@ def get_current_user() -> Optional[Dict]:
     return None
 
 
-def require_login(func):
-    """Decorator to require login for a function"""
-    def wrapper(*args, **kwargs):
-        if not is_logged_in():
-            st.warning("🔐 Silakan login untuk mengakses fitur ini")
-            return None
-        return func(*args, **kwargs)
-    return wrapper
+def get_user_role_info(role: str) -> Dict:
+    """Get role information"""
+    return USER_ROLES.get(role, USER_ROLES["guest"])
 
+
+# ============================================
+# PERMISSIONS & LIMITS
+# ============================================
+
+def has_permission(user: Optional[Dict], permission: str) -> bool:
+    """Check if user has a specific permission"""
+    if not user:
+        role_info = USER_ROLES["guest"]
+    else:
+        role_info = USER_ROLES.get(user.get("role", "guest"), USER_ROLES["guest"])
+    
+    if "all" in role_info["permissions"]:
+        return True
+    
+    return permission in role_info["permissions"]
+
+
+def check_limit(user: Optional[Dict], limit_type: str) -> bool:
+    """Check if user is within usage limits"""
+    init_auth_state()
+    
+    if not user:
+        role_info = USER_ROLES["guest"]
+        user_id = "guest"
+    else:
+        role_info = USER_ROLES.get(user.get("role", "guest"), USER_ROLES["guest"])
+        user_id = user.get("id", "guest")
+    
+    limit = role_info["limits"].get(limit_type, 0)
+    
+    if limit == -1:
+        return True
+    
+    today = datetime.now().strftime("%Y-%m-%d")
+    tracking_key = f"{user_id}_{limit_type}_{today}"
+    
+    current_usage = st.session_state.usage_tracking.get(tracking_key, 0)
+    
+    return current_usage < limit
+
+
+def increment_usage(user: Optional[Dict], usage_type: str):
+    """Increment usage counter"""
+    init_auth_state()
+    
+    user_id = user.get("id", "guest") if user else "guest"
+    today = datetime.now().strftime("%Y-%m-%d")
+    tracking_key = f"{user_id}_{usage_type}_{today}"
+    
+    current = st.session_state.usage_tracking.get(tracking_key, 0)
+    st.session_state.usage_tracking[tracking_key] = current + 1
+
+
+# ============================================
+# UI COMPONENTS
+# ============================================
 
 def render_login_form():
     """Render login form"""
@@ -212,15 +325,59 @@ def render_login_page():
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        st.markdown("## 🔐 Masuk ke LABBAIK")
+        st.markdown("""
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 2rem; color: #D4AF37;">🔐</div>
+            <h2 style="color: white; margin: 10px 0;">Masuk ke LABBAIK</h2>
+        </div>
+        """, unsafe_allow_html=True)
         
-        tab1, tab2 = st.tabs(["Masuk", "Daftar"])
+        tab1, tab2 = st.tabs(["🚪 Masuk", "📝 Daftar"])
         
         with tab1:
             render_login_form()
+            st.markdown("---")
+            st.info("💡 Belum punya akun? Klik tab **Daftar** di atas.")
         
         with tab2:
             render_register_form()
+
+
+def render_user_badge(user: Optional[Dict]):
+    """Render user badge with role info"""
+    if not user:
+        return
+    
+    role = user.get("role", "user")
+    role_info = get_user_role_info(role)
+    
+    st.markdown(f"""
+    <div style="display: inline-flex; align-items: center; gap: 8px; 
+                background: {role_info['color']}20; padding: 5px 12px; 
+                border-radius: 20px; border: 1px solid {role_info['color']}50;">
+        <span>{role_info['icon']}</span>
+        <span style="color: {role_info['color']}; font-weight: 600; font-size: 0.85rem;">
+            {role_info['name']}
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def render_upgrade_prompt(feature_name: str):
+    """Render upgrade prompt for locked features"""
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D1F3D 100%);
+                border-radius: 15px; padding: 20px; text-align: center;
+                border: 2px dashed #9C27B050; margin: 20px 0;">
+        <div style="font-size: 2rem; margin-bottom: 10px;">🔒</div>
+        <div style="color: white; font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+            Fitur {feature_name} Terkunci
+        </div>
+        <div style="color: #C9A86C; margin-bottom: 15px;">
+            Upgrade ke Premium untuk mengakses fitur ini
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def render_user_menu():
@@ -230,6 +387,57 @@ def render_user_menu():
     if user:
         with st.expander(f"👤 {user['name']}", expanded=False):
             st.write(f"📧 {user['email']}")
+            render_user_badge(user)
+            st.markdown("---")
             if st.button("🚪 Logout", use_container_width=True):
                 logout_user()
                 st.rerun()
+
+
+def render_admin_dashboard():
+    """Render admin dashboard"""
+    user = get_current_user()
+    
+    if not user or user.get("role") != "admin":
+        st.error("⛔ Akses ditolak. Halaman ini hanya untuk admin.")
+        return
+    
+    st.header("👑 Admin Dashboard")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("Total Users", len(st.session_state.get("users_db", {})))
+    
+    with col2:
+        st.metric("Active Sessions", 1)
+    
+    with col3:
+        st.metric("Today's Queries", sum(
+            v for k, v in st.session_state.get("usage_tracking", {}).items()
+            if datetime.now().strftime("%Y-%m-%d") in k
+        ))
+    
+    st.markdown("---")
+    
+    st.subheader("📊 User List")
+    
+    users = st.session_state.get("users_db", {})
+    if users:
+        for email, user_data in users.items():
+            with st.expander(f"👤 {user_data['name']} ({email})"):
+                st.write(f"**Role:** {user_data.get('role', 'user')}")
+                st.write(f"**Created:** {user_data.get('created_at', 'N/A')}")
+                st.write(f"**Active:** {'✅' if user_data.get('is_active', True) else '❌'}")
+    else:
+        st.info("Belum ada user terdaftar.")
+
+
+def require_login(func):
+    """Decorator to require login for a function"""
+    def wrapper(*args, **kwargs):
+        if not is_logged_in():
+            st.warning("🔐 Silakan login untuk mengakses fitur ini")
+            return None
+        return func(*args, **kwargs)
+    return wrapper
