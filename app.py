@@ -92,26 +92,134 @@ except ImportError:
     }
 
 # ============================================
-# ENGAGEMENT SYSTEM IMPORTS (Optional - graceful fallback)
+# ENGAGEMENT SYSTEM (INLINE - always works)
 # ============================================
-try:
-    from engagement import (
-        init_engagement_state, render_engagement_hub, 
-        render_daily_reward_popup, check_daily_login,
-        generate_referral_code, award_points, POINTS_CONFIG
-    )
-    ENGAGEMENT_AVAILABLE = True
-except ImportError:
-    ENGAGEMENT_AVAILABLE = False
-    def init_engagement_state(): pass
-    def render_engagement_hub(): 
-        import streamlit as st
-        st.info("🎮 Engagement module coming soon!")
-    def render_daily_reward_popup(): pass
-    def check_daily_login(): return {"status": "unavailable"}
-    def generate_referral_code(user_id): return f"LBK{user_id[:8].upper()}"
-    def award_points(amount, reason=""): pass
-    POINTS_CONFIG = {}
+ENGAGEMENT_AVAILABLE = True
+POINTS_CONFIG = {
+    "daily_login": 10,
+    "complete_simulation": 25,
+    "share_social": 50,
+    "referral_signup": 200,
+    "referral_bonus": 75,
+}
+
+def init_engagement_state():
+    """Initialize engagement state"""
+    if "engagement" not in st.session_state:
+        st.session_state.engagement = {
+            "points": 0,
+            "level": 1,
+            "streak": 0,
+            "badges": [],
+            "daily_claimed": False,
+            "referral_count": 0
+        }
+
+def generate_referral_code(user_id):
+    """Generate referral code from user ID"""
+    import hashlib
+    hash_str = hashlib.md5(str(user_id).encode()).hexdigest()[:8].upper()
+    return f"LBK{hash_str}"
+
+def award_points(amount, reason=""):
+    """Award points to user"""
+    init_engagement_state()
+    st.session_state.engagement["points"] += amount
+
+def check_daily_login():
+    """Check daily login status"""
+    init_engagement_state()
+    return {"status": "available" if not st.session_state.engagement.get("daily_claimed") else "claimed"}
+
+def render_daily_reward_popup():
+    """Render daily reward popup"""
+    pass  # Can be implemented later
+
+def render_engagement_hub():
+    """Main engagement hub with proper HTML rendering"""
+    init_engagement_state()
+    
+    points = st.session_state.engagement.get("points", 0)
+    streak = st.session_state.engagement.get("streak", 0)
+    level = 1 + (points // 500)
+    
+    # Header
+    st.markdown("""
+    <div style="text-align: center; padding: 20px 0;">
+        <h1 style="color: #D4AF37; font-size: 2rem; margin-bottom: 5px;">
+            🎮 Pusat Reward & Engagement
+        </h1>
+        <p style="color: #C9A86C;">
+            Kumpulkan poin, unlock badge, dan naik level!
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Stats row
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+                    border-radius: 20px; padding: 25px; text-align: center;
+                    border: 2px solid #D4AF3740;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">⭐</div>
+            <div style="color: #D4AF37; font-size: 2.5rem; font-weight: 800;">{points:,}</div>
+            <div style="color: #C9A86C;">LABBAIK Points</div>
+            <div style="margin-top: 15px; color: #4CAF50; font-weight: 600;">Level {level}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #1A1A1A 0%, #3D2817 100%);
+                    border-radius: 20px; padding: 25px; text-align: center;
+                    border: 2px solid #FF980040;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🔥</div>
+            <div style="color: #FF9800; font-size: 2.5rem; font-weight: 800;">{streak}</div>
+            <div style="color: #C9A86C;">Hari Berturut-turut</div>
+            <div style="margin-top: 15px; color: #C9A86C; font-size: 0.85rem;">Login setiap hari!</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Daily claim button
+    if not st.session_state.engagement.get("daily_claimed"):
+        if st.button("🎁 Klaim Bonus Harian (+10 LP)", use_container_width=True):
+            award_points(10, "Daily login")
+            st.session_state.engagement["daily_claimed"] = True
+            st.session_state.engagement["streak"] += 1
+            st.success("✅ +10 LP diklaim!")
+            st.rerun()
+    else:
+        st.info("✅ Bonus harian sudah diklaim. Kembali besok!")
+    
+    st.markdown("---")
+    
+    # Quick challenges
+    st.markdown("### 📋 Tantangan Harian")
+    
+    challenges = [
+        {"icon": "🔍", "title": "Lakukan 1x Simulasi", "points": 25, "done": False},
+        {"icon": "📱", "title": "Share ke WhatsApp", "points": 50, "done": False},
+        {"icon": "📚", "title": "Baca 1 Panduan Manasik", "points": 15, "done": False},
+    ]
+    
+    for ch in challenges:
+        status_color = "#4CAF50" if ch["done"] else "#666"
+        status_icon = "✅" if ch["done"] else "⬜"
+        st.markdown(f"""
+        <div style="background: #1A1A1A; border-radius: 12px; padding: 15px; margin-bottom: 10px;
+                    border: 1px solid #D4AF3730; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.5rem;">{ch['icon']}</span>
+                <span style="color: white;">{ch['title']}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: #D4AF37; font-weight: 700;">+{ch['points']} LP</span>
+                <span style="color: {status_color};">{status_icon}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 try:
     from social_viral import render_share_buttons
