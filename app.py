@@ -42,6 +42,49 @@ from config import (
     app_config, llm_config, SCENARIO_TEMPLATES, 
     DEPARTURE_CITIES, SEASONS
 )
+
+# ============================================
+# ENGAGEMENT SYSTEM IMPORTS (Optional - graceful fallback)
+# ============================================
+try:
+    from engagement import (
+        init_engagement_state, render_engagement_hub, 
+        render_daily_reward_popup, check_daily_login,
+        generate_referral_code, award_points, POINTS_CONFIG
+    )
+    ENGAGEMENT_AVAILABLE = True
+except ImportError:
+    ENGAGEMENT_AVAILABLE = False
+    def init_engagement_state(): pass
+    def render_engagement_hub(): 
+        import streamlit as st
+        st.info("🎮 Engagement module coming soon!")
+    def render_daily_reward_popup(): pass
+    def check_daily_login(): return {"status": "unavailable"}
+    def generate_referral_code(user_id): return f"LBK{user_id[:8].upper()}"
+    def award_points(amount, reason=""): pass
+    POINTS_CONFIG = {}
+
+try:
+    from social_viral import render_share_buttons, render_invite_modal
+    SOCIAL_AVAILABLE = True
+except ImportError:
+    SOCIAL_AVAILABLE = False
+    def render_share_buttons(*args, **kwargs): pass
+    def render_invite_modal(*args, **kwargs):
+        import streamlit as st
+        st.info("🎁 Referral system coming soon!")
+
+try:
+    from quiz_learning import render_quiz_page, init_quiz_state
+    QUIZ_AVAILABLE = True
+except ImportError:
+    QUIZ_AVAILABLE = False
+    def render_quiz_page():
+        import streamlit as st
+        st.info("🧠 Quiz module coming soon!")
+    def init_quiz_state(): pass
+
 from agents import AgentOrchestrator
 from scenarios import ScenarioPlanner
 from utils import format_currency, format_duration
@@ -3212,13 +3255,6 @@ def render_user_profile():
 
 def render_engagement_page():
     """Render the engagement hub with rewards, quiz, and referral"""
-    from quiz_learning import render_quiz_page, init_quiz_state
-    from social_viral import render_invite_modal, render_share_buttons
-    from engagement import (
-        render_engagement_hub, render_daily_reward_popup,
-        check_daily_login, generate_referral_code
-    )
-    
     # Check daily login for streak
     check_daily_login()
     
@@ -3230,6 +3266,19 @@ def render_engagement_page():
         <p style="color: {COLORS['sand']};">Kumpulkan poin, unlock badge, dan naik level!</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Check if engagement modules are available
+    if not ENGAGEMENT_AVAILABLE:
+        st.warning("⚠️ Modul engagement belum tersedia. Fitur ini akan segera hadir!")
+        st.info("""
+        **🎮 Fitur yang Akan Hadir:**
+        - 🏆 Points & Levels System
+        - 🔥 Daily Streak Rewards
+        - 🏅 Badges & Achievements
+        - 🧠 Interactive Quiz
+        - 🎁 Referral Program
+        """)
+        return
     
     # Show daily reward popup if applicable
     render_daily_reward_popup()
