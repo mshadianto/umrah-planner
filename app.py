@@ -1132,11 +1132,11 @@ def render_budget_finder():
     
     # Display budget per person
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
-        <div style="color: #C9A86C; font-size: 0.9rem;">Budget Per Orang</div>
-        <div style="color: #D4AF37; font-size: 2rem; font-weight: 700;">Rp {budget_per_person:,.0f}</div>
-    </div>
-    """, unsafe_allow_html=True)
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+<div style="color: #C9A86C; font-size: 0.9rem;">Budget Per Orang</div>
+<div style="color: #D4AF37; font-size: 2rem; font-weight: 700;">Rp {budget_per_person:,.0f}</div>
+</div>
+""", unsafe_allow_html=True)
     
     # Analyze what packages are available
     st.markdown("### 📊 Analisis Paket yang Tersedia")
@@ -1396,13 +1396,13 @@ def render_budget_finder():
         shortage = min_ekonomis - budget_per_person
         
         st.markdown(f"""
-        <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; border-radius: 0 10px 10px 0;">
-            <h4 style="color: #e65100; margin-top: 0;">💡 Saran untuk Anda</h4>
-            <p>Budget per orang: <strong>Rp {budget_per_person:,.0f}</strong></p>
-            <p>Minimum untuk Paket Ekonomis: <strong>Rp {min_ekonomis:,.0f}</strong></p>
-            <p>Kekurangan: <strong style="color: #e65100;">Rp {shortage:,.0f}</strong></p>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; border-radius: 0 10px 10px 0;">
+<h4 style="color: #e65100; margin-top: 0;">💡 Saran untuk Anda</h4>
+<p>Budget per orang: <strong>Rp {budget_per_person:,.0f}</strong></p>
+<p>Minimum untuk Paket Ekonomis: <strong>Rp {min_ekonomis:,.0f}</strong></p>
+<p>Kekurangan: <strong style="color: #e65100;">Rp {shortage:,.0f}</strong></p>
+</div>
+""", unsafe_allow_html=True)
         
         st.markdown("### 📈 Opsi yang Bisa Anda Lakukan:")
         
@@ -1410,62 +1410,62 @@ def render_budget_finder():
         
         with col1:
             st.markdown("""
-            **💰 Tambah Tabungan**
-            - Target tambahan: Rp {:,.0f}
-            - Jika menabung Rp 1 juta/bulan: {} bulan lagi
-            - Jika menabung Rp 2 juta/bulan: {} bulan lagi
-            """.format(
-                shortage,
-                int(shortage / 1_000_000) + 1,
-                int(shortage / 2_000_000) + 1
-            ))
-        
-        with col2:
-            st.markdown("""
-            **🤝 Opsi Lain**
-            - Cari promo early bird
-            - Berangkat di low season (Januari-Februari)
-            - Gabung dengan grup besar untuk diskon
-            - Cicilan dari travel agent
-            """)
-        
-        # Show partial packages (almost affordable)
-        if partial_packages:
-            st.markdown("### 📦 Paket yang Hampir Terjangkau")
-            for pkg in partial_packages:
-                st.info(f"**{pkg['name']}** - Kurang Rp {pkg['shortage']:,.0f} (Minimum: Rp {pkg['min_required']:,.0f})")
-    
-    # Tips section
-    st.markdown("---")
-    st.markdown("### 💡 Tips Mendapatkan Harga Terbaik")
-    
-    tips_col1, tips_col2 = st.columns(2)
-    
-    with tips_col1:
-        st.markdown("""
-        **🗓️ Waktu Booking**
-        - Book 3-4 bulan sebelumnya
-        - Hindari musim haji & Ramadhan
-        - Cari promo akhir tahun
-        
-        **✈️ Penerbangan**
-        - Flexible date = harga lebih murah
-        - Transit 1x bisa hemat 20-30%
-        - Cek berbagai maskapai
-        """)
-    
-    with tips_col2:
-        st.markdown("""
-        **🏨 Akomodasi**
-        - Hotel agak jauh = lebih murah
-        - Sharing room untuk hemat
-        - Weekday lebih murah dari weekend
-        
-        **👥 Grup**
-        - Grup 10+ orang dapat diskon
-        - Gabung open trip
-        - Tanya promo travel agent
-        """)
+**💰 Tambah Tabungan**
+- Target tambahan: Rp {:,.0f}
+- Jika menabung Rp 1 juta/bulan: {} bulan lagi
+- Jika menabung Rp 2 juta/bulan: {} bulan lagi
+""".format(
+shortage,
+int(shortage / 1_000_000) + 1,
+int(shortage / 2_000_000) + 1
+))
+
+with col2:
+st.markdown("""
+**🤝 Opsi Lain**
+- Cari promo early bird
+- Berangkat di low season (Januari-Februari)
+- Gabung dengan grup besar untuk diskon
+- Cicilan dari travel agent
+""")
+
+# Show partial packages (almost affordable)
+if partial_packages:
+st.markdown("### 📦 Paket yang Hampir Terjangkau")
+for pkg in partial_packages:
+st.info(f"**{pkg['name']}** - Kurang Rp {pkg['shortage']:,.0f} (Minimum: Rp {pkg['min_required']:,.0f})")
+
+# Tips section
+st.markdown("---")
+st.markdown("### 💡 Tips Mendapatkan Harga Terbaik")
+
+tips_col1, tips_col2 = st.columns(2)
+
+with tips_col1:
+st.markdown("""
+**🗓️ Waktu Booking**
+- Book 3-4 bulan sebelumnya
+- Hindari musim haji & Ramadhan
+- Cari promo akhir tahun
+
+**✈️ Penerbangan**
+- Flexible date = harga lebih murah
+- Transit 1x bisa hemat 20-30%
+- Cek berbagai maskapai
+""")
+
+with tips_col2:
+st.markdown("""
+**🏨 Akomodasi**
+- Hotel agak jauh = lebih murah
+- Sharing room untuk hemat
+- Weekday lebih murah dari weekend
+
+**👥 Grup**
+- Grup 10+ orang dapat diskon
+- Gabung open trip
+- Tanya promo travel agent
+""")
 
 
 # ============================================
@@ -1473,126 +1473,126 @@ def render_budget_finder():
 # ============================================
 
 def init_umrah_bareng_state():
-    """Initialize Umrah Bareng session state - load from database if available"""
-    if "open_trips" not in st.session_state:
-        # Try to load from database first
-        if DB_AVAILABLE and is_db_available():
-            try:
-                db_trips = db_get_open_trips()
-                if db_trips:
-                    st.session_state.open_trips = db_trips
-                    st.session_state.trips_from_db = True
-                    return
-            except:
-                pass
-        
-        # Fallback to sample data for demonstration
-        st.session_state.open_trips = [
-            {
-                "id": "OT001",
-                "creator_name": "Ahmad Fauzi",
-                "creator_phone": "+62812xxxx1234",
-                "creator_city": "Jakarta",
-                "title": "Umrah Bareng Keluarga Muda",
-                "departure_date": "2025-03-15",
-                "departure_city": "Jakarta (CGK)",
-                "package_type": "standard",
-                "budget_per_person": 38000000,
-                "duration_days": 12,
-                "nights_makkah": 5,
-                "nights_madinah": 4,
-                "current_members": 4,
-                "max_members": 10,
-                "gender_preference": "Campuran (Keluarga)",
-                "age_preference": "25-40 tahun",
-                "special_notes": "Fokus ibadah, tidak banyak shopping. Ada anak kecil.",
-                "amenities": ["Muthawwif Indonesia", "Kursi Roda Tersedia", "Menu Indonesia"],
-                "status": "open",
-                "created_at": "2025-01-15",
-                "whatsapp_group": "https://chat.whatsapp.com/xxx",
-            },
-            {
-                "id": "OT002",
-                "creator_name": "Hj. Siti Aminah",
-                "creator_phone": "+62813xxxx5678",
-                "creator_city": "Surabaya",
-                "title": "Umrah Khusus Ibu-Ibu",
-                "departure_date": "2025-04-10",
-                "departure_city": "Surabaya (SUB)",
-                "package_type": "premium",
-                "budget_per_person": 55000000,
-                "duration_days": 14,
-                "nights_makkah": 6,
-                "nights_madinah": 5,
-                "current_members": 8,
-                "max_members": 15,
-                "gender_preference": "Wanita Only",
-                "age_preference": "40+ tahun",
-                "special_notes": "Tempo santai, banyak ziarah. Cocok untuk lansia.",
-                "amenities": ["Ustadzah Pendamping", "Hotel Dekat Haram", "Wheelchair Friendly"],
-                "status": "open",
-                "created_at": "2025-01-10",
-                "whatsapp_group": "https://chat.whatsapp.com/yyy",
-            },
-            {
-                "id": "OT003",
-                "creator_name": "Rizky Pratama",
-                "creator_phone": "+62857xxxx9012",
-                "creator_city": "Bandung",
-                "title": "Umrah Backpacker Style",
-                "departure_date": "2025-02-20",
-                "departure_city": "Jakarta (CGK)",
-                "package_type": "ekonomis",
-                "budget_per_person": 25000000,
-                "duration_days": 9,
-                "nights_makkah": 4,
-                "nights_madinah": 3,
-                "current_members": 3,
-                "max_members": 8,
-                "gender_preference": "Pria Only",
-                "age_preference": "20-35 tahun",
-                "special_notes": "Budget terbatas tapi semangat tinggi! Siap jalan kaki.",
-                "amenities": ["Guide Lokal", "Sharing Room"],
-                "status": "open",
-                "created_at": "2025-01-20",
-                "whatsapp_group": "https://chat.whatsapp.com/zzz",
-            },
-        ]
-        st.session_state.trips_from_db = False
+"""Initialize Umrah Bareng session state - load from database if available"""
+if "open_trips" not in st.session_state:
+# Try to load from database first
+if DB_AVAILABLE and is_db_available():
+try:
+db_trips = db_get_open_trips()
+if db_trips:
+st.session_state.open_trips = db_trips
+st.session_state.trips_from_db = True
+return
+except:
+pass
+
+# Fallback to sample data for demonstration
+st.session_state.open_trips = [
+{
+"id": "OT001",
+"creator_name": "Ahmad Fauzi",
+"creator_phone": "+62812xxxx1234",
+"creator_city": "Jakarta",
+"title": "Umrah Bareng Keluarga Muda",
+"departure_date": "2025-03-15",
+"departure_city": "Jakarta (CGK)",
+"package_type": "standard",
+"budget_per_person": 38000000,
+"duration_days": 12,
+"nights_makkah": 5,
+"nights_madinah": 4,
+"current_members": 4,
+"max_members": 10,
+"gender_preference": "Campuran (Keluarga)",
+"age_preference": "25-40 tahun",
+"special_notes": "Fokus ibadah, tidak banyak shopping. Ada anak kecil.",
+"amenities": ["Muthawwif Indonesia", "Kursi Roda Tersedia", "Menu Indonesia"],
+"status": "open",
+"created_at": "2025-01-15",
+"whatsapp_group": "https://chat.whatsapp.com/xxx",
+},
+{
+"id": "OT002",
+"creator_name": "Hj. Siti Aminah",
+"creator_phone": "+62813xxxx5678",
+"creator_city": "Surabaya",
+"title": "Umrah Khusus Ibu-Ibu",
+"departure_date": "2025-04-10",
+"departure_city": "Surabaya (SUB)",
+"package_type": "premium",
+"budget_per_person": 55000000,
+"duration_days": 14,
+"nights_makkah": 6,
+"nights_madinah": 5,
+"current_members": 8,
+"max_members": 15,
+"gender_preference": "Wanita Only",
+"age_preference": "40+ tahun",
+"special_notes": "Tempo santai, banyak ziarah. Cocok untuk lansia.",
+"amenities": ["Ustadzah Pendamping", "Hotel Dekat Haram", "Wheelchair Friendly"],
+"status": "open",
+"created_at": "2025-01-10",
+"whatsapp_group": "https://chat.whatsapp.com/yyy",
+},
+{
+"id": "OT003",
+"creator_name": "Rizky Pratama",
+"creator_phone": "+62857xxxx9012",
+"creator_city": "Bandung",
+"title": "Umrah Backpacker Style",
+"departure_date": "2025-02-20",
+"departure_city": "Jakarta (CGK)",
+"package_type": "ekonomis",
+"budget_per_person": 25000000,
+"duration_days": 9,
+"nights_makkah": 4,
+"nights_madinah": 3,
+"current_members": 3,
+"max_members": 8,
+"gender_preference": "Pria Only",
+"age_preference": "20-35 tahun",
+"special_notes": "Budget terbatas tapi semangat tinggi! Siap jalan kaki.",
+"amenities": ["Guide Lokal", "Sharing Room"],
+"status": "open",
+"created_at": "2025-01-20",
+"whatsapp_group": "https://chat.whatsapp.com/zzz",
+},
+]
+st.session_state.trips_from_db = False
 
 
 def render_umrah_bareng():
-    """Render Umrah Bareng (Open Trip) feature"""
-    init_umrah_bareng_state()
-    
-    st.header("🤝 Umrah Bareng - Open Trip")
-    st.markdown("Cari teman perjalanan umrah atau buat open trip sendiri!")
-    
-    # Stats bar
-    total_trips = len(st.session_state.open_trips)
-    open_trips = len([t for t in st.session_state.open_trips if t["status"] == "open"])
-    total_slots = sum([t["max_members"] - t["current_members"] for t in st.session_state.open_trips if t["status"] == "open"])
-    
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-        <table style="width: 100%; color: white;">
-            <tr>
-                <td style="text-align: center; padding: 10px;">
-                    <div style="font-size: 2rem; font-weight: 700; color: #D4AF37;">{total_trips}</div>
-                    <div style="font-size: 0.85rem; color: #C9A86C;">Total Open Trip</div>
-                </td>
-                <td style="text-align: center; padding: 10px;">
-                    <div style="font-size: 2rem; font-weight: 700; color: #4CAF50;">{open_trips}</div>
-                    <div style="font-size: 0.85rem; color: #C9A86C;">Masih Tersedia</div>
-                </td>
-                <td style="text-align: center; padding: 10px;">
-                    <div style="font-size: 2rem; font-weight: 700; color: #2196F3;">{total_slots}</div>
-                    <div style="font-size: 0.85rem; color: #C9A86C;">Slot Kosong</div>
-                </td>
-            </tr>
-        </table>
-    </div>
-    """, unsafe_allow_html=True)
+"""Render Umrah Bareng (Open Trip) feature"""
+init_umrah_bareng_state()
+
+st.header("🤝 Umrah Bareng - Open Trip")
+st.markdown("Cari teman perjalanan umrah atau buat open trip sendiri!")
+
+# Stats bar
+total_trips = len(st.session_state.open_trips)
+open_trips = len([t for t in st.session_state.open_trips if t["status"] == "open"])
+total_slots = sum([t["max_members"] - t["current_members"] for t in st.session_state.open_trips if t["status"] == "open"])
+
+st.markdown(f"""
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+<table style="width: 100%; color: white;">
+<tr>
+<td style="text-align: center; padding: 10px;">
+<div style="font-size: 2rem; font-weight: 700; color: #D4AF37;">{total_trips}</div>
+<div style="font-size: 0.85rem; color: #C9A86C;">Total Open Trip</div>
+</td>
+<td style="text-align: center; padding: 10px;">
+<div style="font-size: 2rem; font-weight: 700; color: #4CAF50;">{open_trips}</div>
+<div style="font-size: 0.85rem; color: #C9A86C;">Masih Tersedia</div>
+</td>
+<td style="text-align: center; padding: 10px;">
+<div style="font-size: 2rem; font-weight: 700; color: #2196F3;">{total_slots}</div>
+<div style="font-size: 0.85rem; color: #C9A86C;">Slot Kosong</div>
+</td>
+</tr>
+</table>
+</div>
+""", unsafe_allow_html=True)
     
     # Tabs
     tab1, tab2, tab3 = st.tabs(["🔍 Cari Open Trip", "➕ Buat Open Trip", "📋 Trip Saya"])
@@ -2035,21 +2035,21 @@ def render_umrah_bareng():
         - 📱 Koordinasi mudah via WhatsApp
         """)
     
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-left: 4px solid #FF9800; border-radius: 10px; padding: 20px; margin-top: 20px;">
-        <div style="color: #E65100; font-weight: 700; font-size: 1rem; margin-bottom: 10px;">⚠️ Disclaimer - Umrah Bareng</div>
-        <div style="color: #5D4037; font-size: 0.9rem; line-height: 1.7;">
-            <p style="margin-bottom: 10px;"><strong>LABBAIK hanya memfasilitasi pertemuan antar calon jamaah.</strong></p>
-            <ul style="margin: 0; padding-left: 20px;">
-                <li>Segala transaksi dilakukan langsung antar peserta</li>
-                <li>Verifikasi identitas peserta secara mandiri</li>
-                <li>Pilih travel agent resmi berizin Kemenag RI</li>
-                <li>Cek legalitas di: <strong>siskopatuh.kemenag.go.id</strong></li>
-            </ul>
-            <p style="margin-top: 10px; font-style: italic; color: #795548;">"Bertawakkal setelah berikhtiar dengan maksimal"</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""
+<div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-left: 4px solid #FF9800; border-radius: 10px; padding: 20px; margin-top: 20px;">
+<div style="color: #E65100; font-weight: 700; font-size: 1rem; margin-bottom: 10px;">⚠️ Disclaimer - Umrah Bareng</div>
+<div style="color: #5D4037; font-size: 0.9rem; line-height: 1.7;">
+<p style="margin-bottom: 10px;"><strong>LABBAIK hanya memfasilitasi pertemuan antar calon jamaah.</strong></p>
+<ul style="margin: 0; padding-left: 20px;">
+<li>Segala transaksi dilakukan langsung antar peserta</li>
+<li>Verifikasi identitas peserta secara mandiri</li>
+<li>Pilih travel agent resmi berizin Kemenag RI</li>
+<li>Cek legalitas di: <strong>siskopatuh.kemenag.go.id</strong></li>
+</ul>
+<p style="margin-top: 10px; font-style: italic; color: #795548;">"Bertawakkal setelah berikhtiar dengan maksimal"</p>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ============================================
@@ -2279,16 +2279,16 @@ def render_umrah_mandiri():
     with tab1:
         # Hero Section
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 30px; border-radius: 20px; margin-bottom: 25px;">
-            <div style="text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 10px;">🕋</div>
-                <h2 style="color: {COLORS['gold']}; margin: 0;">Umrah Mandiri</h2>
-                <p style="color: {COLORS['sand']}; font-size: 1.1rem; margin-top: 10px;">
-                    Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
-                </p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 30px; border-radius: 20px; margin-bottom: 25px;">
+<div style="text-align: center;">
+<div style="font-size: 3rem; margin-bottom: 10px;">🕋</div>
+<h2 style="color: {COLORS['gold']}; margin: 0;">Umrah Mandiri</h2>
+<p style="color: {COLORS['sand']}; font-size: 1.1rem; margin-top: 10px;">
+Ibadah Umrah yang Diatur Sendiri, Fleksibel, dan Lebih Hemat
+</p>
+</div>
+</div>
+""", unsafe_allow_html=True)
         
         # What is Umrah Mandiri
         st.markdown("### 🤔 Apa Sih Umrah Mandiri Itu?")
@@ -2486,44 +2486,44 @@ def render_umrah_mandiri():
         st.markdown("### 💰 Estimasi Biaya Umrah Mandiri")
         
         st.markdown("""
-        <div style="background: #FFF8E1; border: 2px solid #FFB300; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #FF8F00; margin-top: 0;">💡 Perkiraan Budget (1 orang, 9-10 hari)</h4>
-            <table style="width: 100%;">
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 8px 0;"><strong>Item</strong></td>
-                    <td style="text-align: right;"><strong>Estimasi</strong></td>
-                </tr>
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 8px 0;">✈️ Tiket Pesawat PP</td>
-                    <td style="text-align: right;">Rp 7-12 juta</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 8px 0;">📄 Visa Umrah</td>
-                    <td style="text-align: right;">Rp 500rb - 1.5 juta</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 8px 0;">🏨 Hotel Makkah (4-5 malam)</td>
-                    <td style="text-align: right;">Rp 2-5 juta</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 8px 0;">🏨 Hotel Madinah (3-4 malam)</td>
-                    <td style="text-align: right;">Rp 1.5-4 juta</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 8px 0;">🚗 Transportasi Lokal</td>
-                    <td style="text-align: right;">Rp 1-2 juta</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 8px 0;">🍽️ Makan & Lain-lain</td>
-                    <td style="text-align: right;">Rp 1.5-3 juta</td>
-                </tr>
-                <tr>
-                    <td style="padding: 12px 0;"><strong style="color: #FF8F00; font-size: 1.1rem;">TOTAL ESTIMASI</strong></td>
-                    <td style="text-align: right;"><strong style="color: #FF8F00; font-size: 1.1rem;">Rp 15-25 juta</strong></td>
-                </tr>
-            </table>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background: #FFF8E1; border: 2px solid #FFB300; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+<h4 style="color: #FF8F00; margin-top: 0;">💡 Perkiraan Budget (1 orang, 9-10 hari)</h4>
+<table style="width: 100%;">
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 8px 0;"><strong>Item</strong></td>
+<td style="text-align: right;"><strong>Estimasi</strong></td>
+</tr>
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 8px 0;">✈️ Tiket Pesawat PP</td>
+<td style="text-align: right;">Rp 7-12 juta</td>
+</tr>
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 8px 0;">📄 Visa Umrah</td>
+<td style="text-align: right;">Rp 500rb - 1.5 juta</td>
+</tr>
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 8px 0;">🏨 Hotel Makkah (4-5 malam)</td>
+<td style="text-align: right;">Rp 2-5 juta</td>
+</tr>
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 8px 0;">🏨 Hotel Madinah (3-4 malam)</td>
+<td style="text-align: right;">Rp 1.5-4 juta</td>
+</tr>
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 8px 0;">🚗 Transportasi Lokal</td>
+<td style="text-align: right;">Rp 1-2 juta</td>
+</tr>
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 8px 0;">🍽️ Makan & Lain-lain</td>
+<td style="text-align: right;">Rp 1.5-3 juta</td>
+</tr>
+<tr>
+<td style="padding: 12px 0;"><strong style="color: #FF8F00; font-size: 1.1rem;">TOTAL ESTIMASI</strong></td>
+<td style="text-align: right;"><strong style="color: #FF8F00; font-size: 1.1rem;">Rp 15-25 juta</strong></td>
+</tr>
+</table>
+</div>
+""", unsafe_allow_html=True)
         
         st.info("💡 **Tips:** Gunakan fitur **Simulasi Biaya** LABBAIK untuk hitung estimasi lebih akurat sesuai preferensi kamu!")
         
@@ -2726,131 +2726,134 @@ def render_umrah_mandiri():
                 )
                 
                 st.markdown("""
-                **💡 Tips menulis yang menarik:**
-                - Ceritakan detail biaya untuk membantu jamaah lain
-                - Share tips praktis yang berguna
-                - Tambahkan momen berkesan untuk inspirasi
-                - Gunakan format yang mudah dibaca (poin-poin, emoji)
-                """)
-                
-                submitted = st.form_submit_button("🚀 Publikasikan", use_container_width=True)
-                
-                if submitted:
-                    if post_title and post_content:
-                        user_id = user.get("id") if user else None
-                        post_saved = False
-                        
-                        # Try database first
-                        if DB_AVAILABLE and is_db_available() and user_id:
-                            try:
-                                result = db_create_post(user_id, post_title, post_category, post_content)
-                                if result.get("success"):
-                                    st.success("✅ Postingan berhasil dipublikasikan!")
-                                    st.balloons()
-                                    post_saved = True
-                                    # Refresh posts from database
-                                    st.session_state.forum_posts = db_get_forum_posts()
-                                else:
-                                    st.warning(f"Database error: {result.get('error')}")
-                            except Exception as e:
-                                st.warning(f"Database error, menyimpan secara lokal: {e}")
-                        
-                        # Fallback to session state if database fails
-                        if not post_saved:
-                            new_post = {
-                                "id": f"F{len(st.session_state.forum_posts) + 1:03d}",
-                                "author": user.get("name", "Anonymous"),
-                                "author_city": author_city,
-                                "avatar": "👤",
-                                "title": post_title,
-                                "category": post_category,
-                                "content": post_content,
-                                "likes": 0,
-                                "comments": [],
-                                "created_at": str(datetime.now().date()),
-                                "views": 0,
-                            }
-                            st.session_state.forum_posts.insert(0, new_post)
-                            st.success("✅ Postingan berhasil dipublikasikan!")
-                            st.balloons()
-                    else:
-                        st.error("❌ Mohon isi judul dan konten postingan.")
-        
-        # Guidelines
-        st.markdown("---")
-        st.markdown("### 📋 Panduan Komunitas")
-        
-        st.markdown("""
-        <div style="background: #E8F5E9; border-radius: 15px; padding: 20px;">
-            <h4 style="color: #2E7D32; margin-top: 0;">✅ Yang Boleh Diposting:</h4>
-            <ul>
-                <li>Pengalaman umrah mandiri (positif maupun tantangan)</li>
-                <li>Tips & trik hemat biaya</li>
-                <li>Panduan manasik dan doa-doa</li>
-                <li>Rekomendasi hotel, transportasi, kuliner</li>
-                <li>Pertanyaan seputar umrah mandiri</li>
-            </ul>
-            
-            <h4 style="color: #C62828; margin-top: 20px;">❌ Yang Tidak Diperbolehkan:</h4>
-            <ul>
-                <li>Promosi travel agent atau jasa komersial</li>
-                <li>Konten yang mengandung SARA</li>
-                <li>Informasi yang menyesatkan</li>
-                <li>Spam atau postingan berulang</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+**💡 Tips menulis yang menarik:**
+- Ceritakan detail biaya untuk membantu jamaah lain
+- Share tips praktis yang berguna
+- Tambahkan momen berkesan untuk inspirasi
+- Gunakan format yang mudah dibaca (poin-poin, emoji)
+""")
+
+submitted = st.form_submit_button("🚀 Publikasikan", use_container_width=True)
+
+if submitted:
+if post_title and post_content:
+user_id = user.get("id") if user else None
+post_saved = False
+
+# Try database first
+if DB_AVAILABLE and is_db_available() and user_id:
+try:
+result = db_create_post(user_id, post_title, post_category, post_content)
+if result.get("success"):
+st.success("✅ Postingan berhasil dipublikasikan!")
+st.balloons()
+post_saved = True
+# Refresh posts from database
+st.session_state.forum_posts = db_get_forum_posts()
+else:
+st.warning(f"Database error: {result.get('error')}")
+except Exception as e:
+st.warning(f"Database error, menyimpan secara lokal: {e}")
+
+# Fallback to session state if database fails
+if not post_saved:
+new_post = {
+"id": f"F{len(st.session_state.forum_posts) + 1:03d}",
+"author": user.get("name", "Anonymous"),
+"author_city": author_city,
+"avatar": "👤",
+"title": post_title,
+"category": post_category,
+"content": post_content,
+"likes": 0,
+"comments": [],
+"created_at": str(datetime.now().date()),
+"views": 0,
+}
+st.session_state.forum_posts.insert(0, new_post)
+st.success("✅ Postingan berhasil dipublikasikan!")
+st.balloons()
+else:
+st.error("❌ Mohon isi judul dan konten postingan.")
+
+# Guidelines
+st.markdown("---")
+st.markdown("### 📋 Panduan Komunitas")
+
+st.markdown("""
+<div style="background: #E8F5E9; border-radius: 15px; padding: 20px;">
+<h4 style="color: #2E7D32; margin-top: 0;">✅ Yang Boleh Diposting:</h4>
+<ul>
+<li>Pengalaman umrah mandiri (positif maupun tantangan)</li>
+<li>Tips & trik hemat biaya</li>
+<li>Panduan manasik dan doa-doa</li>
+<li>Rekomendasi hotel, transportasi, kuliner</li>
+<li>Pertanyaan seputar umrah mandiri</li>
+</ul>
+
+<h4 style="color: #C62828; margin-top: 20px;">❌ Yang Tidak Diperbolehkan:</h4>
+<ul>
+<li>Promosi travel agent atau jasa komersial</li>
+<li>Konten yang mengandung SARA</li>
+<li>Informasi yang menyesatkan</li>
+<li>Spam atau postingan berulang</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
     
     # Bottom Section
     st.markdown("---")
     st.markdown(f"""
-    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); border-radius: 15px;">
-        <div style="color: {COLORS['gold']}; font-size: 1.3rem; margin-bottom: 10px;">🕋 Siap Umrah Mandiri?</div>
-        <div style="color: white; margin-bottom: 15px;">Gunakan LABBAIK untuk planning umrah mandiri yang terencana dan hemat!</div>
-        <div style="color: {COLORS['sand']}; font-size: 0.9rem;">💰 Simulasi Biaya • 🤖 AI Assistant • 📊 Perbandingan Paket</div>
-    </div>
-    """, unsafe_allow_html=True)
+<div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); border-radius: 15px;">
+<div style="color: {COLORS['gold']}; font-size: 1.3rem; margin-bottom: 10px;">🕋 Siap Umrah Mandiri?</div>
+<div style="color: white; margin-bottom: 15px;">Gunakan LABBAIK untuk planning umrah mandiri yang terencana dan hemat!</div>
+<div style="color: {COLORS['sand']}; font-size: 0.9rem;">💰 Simulasi Biaya • 🤖 AI Assistant • 📊 Perbandingan Paket</div>
+</div>
+""", unsafe_allow_html=True)
     
     # DYOR Disclaimer for Umrah Mandiri
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border: 2px solid #1976D2; border-radius: 15px; padding: 25px; margin-top: 25px;">
-        <div style="text-align: center; margin-bottom: 15px;">
-            <span style="background: #1976D2; color: white; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
-                📋 DYOR - Do Your Own Research
-            </span>
-        </div>
-        
-        <div style="color: #0D47A1; font-size: 0.95rem; line-height: 1.8;">
-            <p style="text-align: center; font-weight: 600; margin-bottom: 15px;">
-                Informasi di halaman ini bersifat <strong>panduan umum</strong> dan <strong>estimasi</strong>.<br>
-                BUKAN pengganti riset pribadi Anda.
-            </p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
-                <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #4CAF50;">
-                    <div style="font-weight: 700; color: #2E7D32; margin-bottom: 8px;">✅ Verifikasi Sumber Resmi:</div>
-                    <ul style="margin: 0; padding-left: 18px; color: #333;">
-                        <li><strong>Arab Saudi:</strong> nusuk.sa</li>
-                        <li><strong>Indonesia:</strong> kemenag.go.id</li>
-                        <li><strong>KBRI Riyadh:</strong> +966-11-488-2800</li>
-                    </ul>
-                </div>
-                <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #FF9800;">
-                    <div style="font-weight: 700; color: #E65100; margin-bottom: 8px;">⚠️ Perlu Diingat:</div>
-                    <ul style="margin: 0; padding-left: 18px; color: #333;">
-                        <li>Harga dapat berubah sewaktu-waktu</li>
-                        <li>Regulasi visa dapat berubah</li>
-                        <li>Anda bertanggung jawab penuh</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <p style="text-align: center; color: #5D4037; font-style: italic; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #90CAF9;">
-                "Sebaik-baik persiapan adalah ilmu, sebaik-baik bekal adalah taqwa" 🤲
-            </p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""
+<div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border: 2px solid #1976D2; border-radius: 15px; padding: 25px; margin-top: 25px;">
+<div style="text-align: center; margin-bottom: 15px;">
+<span style="background: #1976D2; color: white; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">📋 DYOR - Do Your Own Research</span>
+</div>
+<div style="color: #0D47A1; font-size: 0.95rem; line-height: 1.8;">
+<p style="text-align: center; font-weight: 600; margin-bottom: 15px;">Informasi di halaman ini bersifat <strong>panduan umum</strong> dan <strong>estimasi</strong>.<br>BUKAN pengganti riset pribadi Anda.</p>
+</div>
+</div>
+""", unsafe_allow_html=True)
+    
+    # Use columns for the two info boxes
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+<div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #4CAF50; margin-bottom: 15px;">
+<div style="font-weight: 700; color: #2E7D32; margin-bottom: 8px;">✅ Verifikasi Sumber Resmi:</div>
+<ul style="margin: 0; padding-left: 18px; color: #333; font-size: 0.9rem;">
+<li><strong>Arab Saudi:</strong> nusuk.sa</li>
+<li><strong>Indonesia:</strong> kemenag.go.id</li>
+<li><strong>KBRI Riyadh:</strong> +966-11-488-2800</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+<div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #FF9800; margin-bottom: 15px;">
+<div style="font-weight: 700; color: #E65100; margin-bottom: 8px;">⚠️ Perlu Diingat:</div>
+<ul style="margin: 0; padding-left: 18px; color: #333; font-size: 0.9rem;">
+<li>Harga dapat berubah sewaktu-waktu</li>
+<li>Regulasi visa dapat berubah</li>
+<li>Anda bertanggung jawab penuh</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
+    
+    st.markdown("""
+<div style="text-align: center; color: #5D4037; font-style: italic; padding: 15px; background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border-radius: 10px; margin-top: 10px;">
+"Sebaik-baik persiapan adalah ilmu, sebaik-baik bekal adalah taqwa" 🤲
+</div>
+""", unsafe_allow_html=True)
 
 
 def render_settings():
@@ -2929,46 +2932,46 @@ def render_about():
         st.markdown("### 🗺️ Roadmap - Rencana Pengembangan")
         
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #2E7D32; margin-top: 0;">📱 Q1 2026 - Mobile App</h4>
-            <ul style="color: #333; line-height: 1.8;">
-                <li>🤖 <strong>Android App</strong> - Play Store release</li>
-                <li>🍎 <strong>iOS App</strong> - App Store release</li>
-                <li>🔔 <strong>Push Notifications</strong> - Reminder ibadah & updates</li>
-                <li>📴 <strong>Offline Mode</strong> - Akses tanpa internet</li>
-            </ul>
-        </div>
-        
-        <div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #1565C0; margin-top: 0;">💳 Q2 2026 - Payment & Partnership</h4>
-            <ul style="color: #333; line-height: 1.8;">
-                <li>💰 <strong>Payment Gateway</strong> - Bayar langsung via app</li>
-                <li>🤝 <strong>Travel Agent Portal</strong> - Partnership dashboard</li>
-                <li>📍 <strong>Live Tracking</strong> - Track perjalanan real-time</li>
-                <li>🎫 <strong>E-Ticket</strong> - Tiket digital terintegrasi</li>
-            </ul>
-        </div>
-        
-        <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: #E65100; margin-top: 0;">🌐 Q3 2026 - Global Expansion</h4>
-            <ul style="color: #333; line-height: 1.8;">
-                <li>🗣️ <strong>Multi-language</strong> - Arabic, English, Malay</li>
-                <li>🎤 <strong>Voice Assistant</strong> - Tanya dengan suara</li>
-                <li>📸 <strong>Photo Gallery</strong> - Share pengalaman visual</li>
-                <li>🌍 <strong>Regional Expansion</strong> - Malaysia, Singapore, Brunei</li>
-            </ul>
-        </div>
-        
-        <div style="background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); border-radius: 15px; padding: 20px;">
-            <h4 style="color: #7B1FA2; margin-top: 0;">🚀 Q4 2026 - Advanced Features</h4>
-            <ul style="color: #333; line-height: 1.8;">
-                <li>🧠 <strong>AI Travel Planner</strong> - Personalized itinerary</li>
-                <li>👥 <strong>Group Management</strong> - Kelola rombongan</li>
-                <li>📊 <strong>Analytics Dashboard</strong> - Insights perjalanan</li>
-                <li>🏆 <strong>Gamification</strong> - Badges & rewards</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+<h4 style="color: #2E7D32; margin-top: 0;">📱 Q1 2026 - Mobile App</h4>
+<ul style="color: #333; line-height: 1.8;">
+<li>🤖 <strong>Android App</strong> - Play Store release</li>
+<li>🍎 <strong>iOS App</strong> - App Store release</li>
+<li>🔔 <strong>Push Notifications</strong> - Reminder ibadah & updates</li>
+<li>📴 <strong>Offline Mode</strong> - Akses tanpa internet</li>
+</ul>
+</div>
+
+<div style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+<h4 style="color: #1565C0; margin-top: 0;">💳 Q2 2026 - Payment & Partnership</h4>
+<ul style="color: #333; line-height: 1.8;">
+<li>💰 <strong>Payment Gateway</strong> - Bayar langsung via app</li>
+<li>🤝 <strong>Travel Agent Portal</strong> - Partnership dashboard</li>
+<li>📍 <strong>Live Tracking</strong> - Track perjalanan real-time</li>
+<li>🎫 <strong>E-Ticket</strong> - Tiket digital terintegrasi</li>
+</ul>
+</div>
+
+<div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+<h4 style="color: #E65100; margin-top: 0;">🌐 Q3 2026 - Global Expansion</h4>
+<ul style="color: #333; line-height: 1.8;">
+<li>🗣️ <strong>Multi-language</strong> - Arabic, English, Malay</li>
+<li>🎤 <strong>Voice Assistant</strong> - Tanya dengan suara</li>
+<li>📸 <strong>Photo Gallery</strong> - Share pengalaman visual</li>
+<li>🌍 <strong>Regional Expansion</strong> - Malaysia, Singapore, Brunei</li>
+</ul>
+</div>
+
+<div style="background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); border-radius: 15px; padding: 20px;">
+<h4 style="color: #7B1FA2; margin-top: 0;">🚀 Q4 2026 - Advanced Features</h4>
+<ul style="color: #333; line-height: 1.8;">
+<li>🧠 <strong>AI Travel Planner</strong> - Personalized itinerary</li>
+<li>👥 <strong>Group Management</strong> - Kelola rombongan</li>
+<li>📊 <strong>Analytics Dashboard</strong> - Insights perjalanan</li>
+<li>🏆 <strong>Gamification</strong> - Badges & rewards</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
         
         st.info("💡 **Ingin fitur tertentu diprioritaskan?** Hubungi kami via WhatsApp atau email!")
     
@@ -2993,20 +2996,20 @@ def render_about():
         st.markdown("### ⚖️ Legal & Disclaimer")
         
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%); border: 2px solid #D32F2F; border-radius: 15px; padding: 25px; margin-bottom: 20px;">
-            <h4 style="color: #B71C1C; margin-top: 0;">⚠️ DISCLAIMER - HARAP DIBACA</h4>
-            <div style="color: #5D4037; line-height: 1.8;">
-                <p><strong>LABBAIK</strong> adalah platform berbasis AI untuk <strong>simulasi dan perencanaan</strong> umrah. 
-                Platform ini:</p>
-                <ul>
-                    <li>BUKAN travel agent dan tidak menjual paket umrah</li>
-                    <li>BUKAN pengganti konsultasi dengan travel agent resmi</li>
-                    <li>BUKAN sumber informasi resmi pemerintah</li>
-                    <li>Dikembangkan oleh MS Hadianto dengan bantuan AI</li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%); border: 2px solid #D32F2F; border-radius: 15px; padding: 25px; margin-bottom: 20px;">
+<h4 style="color: #B71C1C; margin-top: 0;">⚠️ DISCLAIMER - HARAP DIBACA</h4>
+<div style="color: #5D4037; line-height: 1.8;">
+<p><strong>LABBAIK</strong> adalah platform berbasis AI untuk <strong>simulasi dan perencanaan</strong> umrah.
+Platform ini:</p>
+<ul>
+<li>BUKAN travel agent dan tidak menjual paket umrah</li>
+<li>BUKAN pengganti konsultasi dengan travel agent resmi</li>
+<li>BUKAN sumber informasi resmi pemerintah</li>
+<li>Dikembangkan oleh MS Hadianto dengan bantuan AI</li>
+</ul>
+</div>
+</div>
+""", unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         
@@ -3041,41 +3044,41 @@ def render_about():
         st.markdown("---")
         
         st.markdown(f"""
-        <div style="background: #FFF8E1; border-radius: 15px; padding: 20px; margin-top: 10px;">
-            <h4 style="color: #F57F17; margin-top: 0;">📋 Sumber Informasi Resmi</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 10px;"><strong>🇸🇦 Arab Saudi</strong></td>
-                    <td style="padding: 10px;">nusuk.sa - Portal resmi visa & umrah</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 10px;"><strong>🇮🇩 Indonesia</strong></td>
-                    <td style="padding: 10px;">kemenag.go.id - Kementerian Agama RI</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #FFE082;">
-                    <td style="padding: 10px;"><strong>✅ Verifikasi Travel</strong></td>
-                    <td style="padding: 10px;">siskopatuh.kemenag.go.id</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px;"><strong>🏛️ KBRI Riyadh</strong></td>
-                    <td style="padding: 10px;">+966-11-488-2800</td>
-                </tr>
-            </table>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background: #FFF8E1; border-radius: 15px; padding: 20px; margin-top: 10px;">
+<h4 style="color: #F57F17; margin-top: 0;">📋 Sumber Informasi Resmi</h4>
+<table style="width: 100%; border-collapse: collapse;">
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 10px;"><strong>🇸🇦 Arab Saudi</strong></td>
+<td style="padding: 10px;">nusuk.sa - Portal resmi visa & umrah</td>
+</tr>
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 10px;"><strong>🇮🇩 Indonesia</strong></td>
+<td style="padding: 10px;">kemenag.go.id - Kementerian Agama RI</td>
+</tr>
+<tr style="border-bottom: 1px solid #FFE082;">
+<td style="padding: 10px;"><strong>✅ Verifikasi Travel</strong></td>
+<td style="padding: 10px;">siskopatuh.kemenag.go.id</td>
+</tr>
+<tr>
+<td style="padding: 10px;"><strong>🏛️ KBRI Riyadh</strong></td>
+<td style="padding: 10px;">+966-11-488-2800</td>
+</tr>
+</table>
+</div>
+""", unsafe_allow_html=True)
         
         st.markdown(f"""
-        <div style="background: #F3E5F5; border-radius: 15px; padding: 20px; margin-top: 20px; text-align: center;">
-            <h4 style="color: #7B1FA2; margin-top: 0;">🤖 Tentang Pengembangan</h4>
-            <p style="color: #4A148C; line-height: 1.8;">
-                Platform ini dikembangkan oleh <strong>MS Hadianto</strong> dengan memanfaatkan teknologi AI 
-                (<strong>Claude by Anthropic</strong> & <strong>Gemini by Google</strong>).<br><br>
-                Tujuannya adalah membantu calon jamaah dalam <strong>simulasi biaya</strong> dan 
-                <strong>perencanaan perjalanan umrah</strong>.<br><br>
-                <em>"Sebaik-baik persiapan adalah ilmu, sebaik-baik bekal adalah taqwa"</em> 🤲
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+<div style="background: #F3E5F5; border-radius: 15px; padding: 20px; margin-top: 20px; text-align: center;">
+<h4 style="color: #7B1FA2; margin-top: 0;">🤖 Tentang Pengembangan</h4>
+<p style="color: #4A148C; line-height: 1.8;">
+Platform ini dikembangkan oleh <strong>MS Hadianto</strong> dengan memanfaatkan teknologi AI
+(<strong>Claude by Anthropic</strong> & <strong>Gemini by Google</strong>).<br><br>
+Tujuannya adalah membantu calon jamaah dalam <strong>simulasi biaya</strong> dan
+<strong>perencanaan perjalanan umrah</strong>.<br><br>
+<em>"Sebaik-baik persiapan adalah ilmu, sebaik-baik bekal adalah taqwa"</em> 🤲
+</p>
+</div>
+""", unsafe_allow_html=True)
     
     with tab7:
         st.markdown("### 📱 Install LABBAIK sebagai Aplikasi")
