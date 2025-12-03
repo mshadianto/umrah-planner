@@ -114,14 +114,70 @@ except ImportError:
     POINTS_CONFIG = {}
 
 try:
-    from social_viral import render_share_buttons, render_invite_modal
+    from social_viral import render_share_buttons
     SOCIAL_AVAILABLE = True
 except ImportError:
     SOCIAL_AVAILABLE = False
     def render_share_buttons(*args, **kwargs): pass
-    def render_invite_modal(*args, **kwargs):
-        import streamlit as st
-        st.info("🎁 Referral system coming soon!")
+
+# ALWAYS use local render_invite_modal to ensure unsafe_allow_html works
+def render_invite_modal(referral_code):
+    """Render invite modal with proper HTML rendering"""
+    share_url = f"https://labbaik.streamlit.app?ref={referral_code}"
+    
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #1E3D2F 100%);
+                border-radius: 25px; padding: 30px; margin: 20px 0;
+                border: 2px solid #4CAF5040; text-align: center;">
+        
+        <div style="font-size: 3rem; margin-bottom: 15px;">🎁</div>
+        <div style="color: white; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">
+            Ajak Teman, Dapat Bonus!
+        </div>
+        <div style="color: #C9A86C; margin-bottom: 25px;">
+            Kamu dan temanmu masing-masing dapat <strong style="color: #D4AF37;">bonus LP!</strong>
+        </div>
+        
+        <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; flex-wrap: wrap;">
+            <div style="background: #1A1A1A; border-radius: 15px; padding: 15px 25px;">
+                <div style="color: #C9A86C; font-size: 0.8rem;">Kamu Dapat</div>
+                <div style="color: #D4AF37; font-size: 1.5rem; font-weight: 700;">+200 LP</div>
+            </div>
+            <div style="background: #1A1A1A; border-radius: 15px; padding: 15px 25px;">
+                <div style="color: #C9A86C; font-size: 0.8rem;">Teman Dapat</div>
+                <div style="color: #4CAF50; font-size: 1.5rem; font-weight: 700;">+75 LP</div>
+            </div>
+        </div>
+        
+        <div style="background: #1A1A1A; border: 2px dashed #D4AF3750;
+                    border-radius: 15px; padding: 15px; margin-bottom: 20px;">
+            <div style="color: #C9A86C; font-size: 0.8rem; margin-bottom: 5px;">Kode Referral</div>
+            <div style="color: #D4AF37; font-size: 2rem; font-weight: 800; letter-spacing: 4px;">
+                {referral_code}
+            </div>
+        </div>
+        
+        <div style="background: #2D2D2D; border-radius: 10px; padding: 12px;
+                    margin-bottom: 20px;">
+            <span style="color: #C9A86C; font-size: 0.85rem; word-break: break-all;">
+                {share_url}
+            </span>
+        </div>
+        
+        <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <a href="https://wa.me/?text=Yuk%20rencanakan%20umrah%20bareng%20LABBAIK!%20Pakai%20kode%20{referral_code}%20untuk%20bonus%20LP!%20{share_url}" 
+               target="_blank" style="background: #25D366; color: white; padding: 10px 20px; 
+               border-radius: 25px; text-decoration: none; font-weight: 600;">
+                📱 WhatsApp
+            </a>
+            <a href="https://t.me/share/url?url={share_url}&text=Yuk%20rencanakan%20umrah%20bareng%20LABBAIK!" 
+               target="_blank" style="background: #0088cc; color: white; padding: 10px 20px; 
+               border-radius: 25px; text-decoration: none; font-weight: 600;">
+                ✈️ Telegram
+            </a>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 try:
     from quiz_learning import render_quiz_page, init_quiz_state
