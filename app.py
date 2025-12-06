@@ -1241,7 +1241,7 @@ def render_about():
         ### 👨‍💻 Developer
         
         **MS Hadianto**  
-        Founder & Lead Developer - KIM Consulting
+        Founder & Lead Developer - MSH Consulting
         
         📧 sopian.hadianto@gmail.com  
         📱 +62 815 9658 833
