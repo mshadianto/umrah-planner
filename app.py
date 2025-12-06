@@ -24,11 +24,13 @@ st.set_page_config(
 # ═══════════════════════════════════════════════════════════════════
 # 📊 CONSTANTS
 # ═══════════════════════════════════════════════════════════════════
-VERSION = "3.8.1"
+VERSION = "3.8.2"
 BRAND = {"name": "LABBAIK", "arabic": "لَبَّيْكَ", "tagline": "Panggilan-Nya, Langkahmu"}
 COLORS = {"black": "#1A1A1A", "gold": "#D4AF37", "green": "#006B3C", "sand": "#C9A86C"}
 CONTACT = {"email": "sopian.hadianto@gmail.com", "wa": "+62 815 9658 833"}
-BASE_VISITORS = 966  # Historical base from production
+
+# 🔐 DEFAULT ADMIN (will be created if not exists)
+DEFAULT_ADMIN = {"email": "admin@labbaik.id", "password": "@Jakarta01", "name": "Admin LABBAIK"}
 
 # ═══════════════════════════════════════════════════════════════════
 # 🗄️ DATABASE FUNCTIONS (Matching Neon Schema)
@@ -106,31 +108,72 @@ def db_log_page_view(page_name, visitor_id):
     except: pass
 
 def db_get_visitor_stats():
-    """Get visitor stats from page_views table"""
+    """Get visitor stats from visitor_stats table (real data)"""
     conn = get_db()
-    base = {"total_visitors": BASE_VISITORS, "total_views": BASE_VISITORS * 5, "today_visitors": 0, "today_views": 0}
-    if not conn: return base
+    default = {"total_visitors": 975, "total_views": 1328, "today_visitors": 0, "today_views": 0}
+    if not conn: return default
     try:
-        # Total unique visitors from page_views
-        r = conn.query("SELECT COUNT(DISTINCT visitor_id) as c FROM page_views", ttl=60)
-        db_visitors = r.to_dict('records')[0]['c'] or 0
-        base["total_visitors"] = BASE_VISITORS + db_visitors
+        # Read from visitor_stats table
+        r = conn.query("SELECT stat_key, stat_value FROM visitor_stats", ttl=60)
+        stats = {row['stat_key']: row['stat_value'] for row in r.to_dict('records')}
         
-        # Total views
-        r = conn.query("SELECT COUNT(*) as c FROM page_views", ttl=60)
-        db_views = r.to_dict('records')[0]['c'] or 0
-        base["total_views"] = (BASE_VISITORS * 5) + db_views
+        base_visitors = stats.get('total_visitors', 975)
+        base_views = stats.get('total_views', 1328)
         
-        # Today's unique visitors
+        # Add today's stats from page_views
         r = conn.query("SELECT COUNT(DISTINCT visitor_id) as c FROM page_views WHERE DATE(viewed_at) = CURRENT_DATE", ttl=60)
-        base["today_visitors"] = r.to_dict('records')[0]['c'] or 0
+        today_visitors = r.to_dict('records')[0]['c'] or 0
         
-        # Today's views
         r = conn.query("SELECT COUNT(*) as c FROM page_views WHERE DATE(viewed_at) = CURRENT_DATE", ttl=60)
-        base["today_views"] = r.to_dict('records')[0]['c'] or 0
+        today_views = r.to_dict('records')[0]['c'] or 0
         
-        return base
-    except: return base
+        return {
+            "total_visitors": base_visitors + today_visitors,
+            "total_views": base_views + today_views,
+            "today_visitors": today_visitors,
+            "today_views": today_views
+        }
+    except: return default
+
+def db_update_visitor_stats():
+    """Update visitor_stats table with cumulative data"""
+    conn = get_db()
+    if not conn: return
+    try:
+        # Get current page_views count
+        r = conn.query("SELECT COUNT(DISTINCT visitor_id) as visitors, COUNT(*) as views FROM page_views", ttl=0)
+        data = r.to_dict('records')[0]
+        
+        with conn.session as s:
+            # Update total_visitors
+            s.execute("""
+                UPDATE visitor_stats SET stat_value = stat_value + :v, last_updated = CURRENT_TIMESTAMP 
+                WHERE stat_key = 'total_visitors'
+            """, {"v": data['visitors'] or 0})
+            # Update total_views
+            s.execute("""
+                UPDATE visitor_stats SET stat_value = stat_value + :v, last_updated = CURRENT_TIMESTAMP 
+                WHERE stat_key = 'total_views'
+            """, {"v": data['views'] or 0})
+            s.commit()
+    except: pass
+
+def db_ensure_admin():
+    """Ensure default admin account exists"""
+    conn = get_db()
+    if not conn: return
+    try:
+        # Check if admin exists
+        r = conn.query("SELECT id FROM users WHERE email = :e", params={"e": DEFAULT_ADMIN["email"]}, ttl=0)
+        if len(r) == 0:
+            # Create admin
+            with conn.session as s:
+                s.execute("""
+                    INSERT INTO users (email, password_hash, name, role, created_at)
+                    VALUES (:e, :p, :n, 'admin', CURRENT_TIMESTAMP)
+                """, {"e": DEFAULT_ADMIN["email"], "p": hash_pwd(DEFAULT_ADMIN["password"]), "n": DEFAULT_ADMIN["name"]})
+                s.commit()
+    except: pass
 
 def db_get_page_stats():
     """Get per-page statistics"""
@@ -343,6 +386,11 @@ def init_state():
     if "visitor_id" not in st.session_state:
         st.session_state.visitor_id = secrets.token_hex(8)
     
+    # Ensure admin account exists
+    if "admin_checked" not in st.session_state:
+        db_ensure_admin()
+        st.session_state.admin_checked = True
+    
     st.session_state.init = True
 
 def logged_in(): return st.session_state.auth.get("ok", False)
@@ -376,19 +424,19 @@ def track_page(page):
 # ═══════════════════════════════════════════════════════════════════
 @st.cache_data(ttl=86400)
 def hero_html():
-    return f'''<div style="text-align:center;padding:30px;background:linear-gradient(135deg,#1A1A1A,#2D2D2D);border-radius:20px;margin-bottom:20px">
+    return '''<div style="text-align:center;padding:30px;background:linear-gradient(135deg,#1A1A1A,#2D2D2D);border-radius:20px;margin-bottom:20px">
 <div style="font-size:1.8rem;color:#D4AF37">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
 <div style="font-size:2rem;font-weight:700;color:white;letter-spacing:.3em;margin:10px 0">LABBAIK</div>
 <div style="color:#C9A86C">Panggilan-Nya, Langkahmu</div>
-<span style="background:#D4AF37;color:#1A1A1A;padding:4px 12px;border-radius:12px;font-size:.75rem;font-weight:600">v{VERSION}</span>
+<span style="background:#D4AF37;color:#1A1A1A;padding:4px 12px;border-radius:12px;font-size:.75rem;font-weight:600">v3.8.2</span>
 </div>'''
 
 @st.cache_data(ttl=86400)
 def sidebar_html():
-    return f'''<div style="text-align:center;padding:15px;border-bottom:1px solid #333;margin-bottom:12px">
+    return '''<div style="text-align:center;padding:15px;border-bottom:1px solid #333;margin-bottom:12px">
 <div style="font-size:1.3rem;color:#D4AF37">لَبَّيْكَ</div>
 <div style="font-size:1rem;font-weight:700;color:white;letter-spacing:.2em">LABBAIK</div>
-<div style="font-size:.7rem;color:#C9A86C">v{VERSION}</div>
+<div style="font-size:.7rem;color:#C9A86C">v3.8.2</div>
 </div>'''
 
 def disclaimer_html():
@@ -412,7 +460,7 @@ def render_footer():
 <div style="color:#C9A86C;font-size:1.3rem;font-weight:700">{stats['total_views']:,}</div>
 </div>
 </div>
-<div style="color:#666;font-size:.65rem">© 2025 LABBAIK v{VERSION} • Made with ❤️ by MS Hadianto</div>
+<div style="color:#666;font-size:.65rem">© 2025 LABBAIK v3.8.2 • Made with ❤️ by MS Hadianto</div>
 </div>''', unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════
@@ -998,14 +1046,14 @@ def render_about():
 ### 👨‍💻 Developer
 **MS Hadianto** | 📧 {CONTACT['email']} | 💬 [WhatsApp](https://wa.me/6281596588833)
 
-### ✨ Fitur v{VERSION}
+### ✨ Fitur v3.8.2
 💰 Simulasi Biaya • 📋 Itinerary Builder • 🤝 Umrah Bareng • 🕋 Umrah Mandiri + Forum • 🤖 AI Chat Assistant • ✅ Checklist • 🗺️ Peta Interaktif • 💱 Kurs Converter • 🌤️ Info Cuaca • ⏰ Reminder • 📞 Emergency Contacts • 📊 Analytics • 💼 Business Hub
 
 ### 🔧 Tech Stack
 Streamlit • Neon PostgreSQL • Python • Claude AI
 
-### 🗄️ Database
-{f"✅ Connected to Neon PostgreSQL" if db_available() else "⚠️ Database offline - using fallback"}
+### 🗄️ Database Status
+{"✅ Connected to Neon PostgreSQL" if db_available() else "⚠️ Offline mode"}
     """)
     st.markdown(disclaimer_html(), unsafe_allow_html=True)
     render_footer()
