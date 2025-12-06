@@ -9,23 +9,25 @@ Copyright (c) 2025 MS Hadianto. All Rights Reserved.
 
 ================================================================================
 Platform: AI-Powered Umrah Planning Platform
-Version:  4.1.0
-Codename: Labbaik Ultimate+
+Version:  4.2.0
+Codename: Labbaik Community
 Author:   MS Hadianto
 Email:    sopian.hadianto@gmail.com
 Website:  labbaik.ai
 ================================================================================
 
-Version: 4.1.0
+Version: 4.2.0
 Updated: 2025-12-06
 Changes: 
-- Enhanced Engagement System (10 Levels, 18 Badges, Leaderboard, Umrah Readiness Score)
-- Added Daily Challenges & Rewards
-- Added Subscription Plans (Basic, Premium, VIP)
-- Added Sponsorship/Partnership Tiers (Bronze, Silver, Gold)
-- Added Visitor Stats Display
-- Enhanced Quiz with Perfect Score Badge
-- Optimized Level Progress System
+- Added comprehensive Umrah Bareng feature (like club booking app)
+  - Browse & filter open trips
+  - Create new trip as organizer
+  - Join existing trips
+  - My trips dashboard (organized & joined)
+  - WhatsApp group integration
+  - Tips & guidelines
+- Removed credential hints from login page
+- Enhanced security for admin access
 """
 
 import streamlit as st
@@ -47,7 +49,7 @@ except ImportError:
     @dataclass
     class AppConfig:
         name: str = "LABBAIK"
-        version: str = "4.1.0"
+        version: str = "4.2.0"
     
     @dataclass
     class LLMConfig:
@@ -96,7 +98,7 @@ BRAND = {
     "talbiyah": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ",
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
-    "version": "4.1.0",
+    "version": "4.2.0",
 }
 
 COLORS = {
@@ -895,8 +897,8 @@ def render_login_page():
     
     with tab1:
         with st.form("login_form"):
-            email = st.text_input("Email", placeholder="admin@labbaik.id")
-            password = st.text_input("Password", type="password", placeholder="@Jakarta01")
+            email = st.text_input("Email", placeholder="email@example.com")
+            password = st.text_input("Password", type="password", placeholder="********")
             submitted = st.form_submit_button("🔓 Login", use_container_width=True)
             
             if submitted:
@@ -907,8 +909,6 @@ def render_login_page():
                     st.rerun()
                 else:
                     st.error(msg)
-        
-        st.info("**Demo Admin:** admin@labbaik.id / @Jakarta01")
     
     with tab2:
         with st.form("register_form"):
@@ -1691,15 +1691,334 @@ def render_umrah_mandiri():
 
 def render_umrah_bareng():
     st.header("🤝 Umrah Bareng")
-    st.info("🚧 Fitur ini sedang dalam pengembangan. Stay tuned!")
+    st.markdown("Cari teman perjalanan, buat open trip, dan hemat biaya bersama!")
     
-    st.markdown("""
-    **Fitur yang akan hadir:**
-    - 🔍 Cari teman perjalanan umrah
-    - ➕ Buat open trip sendiri
-    - 💬 Grup WhatsApp koordinasi
-    - 💰 Share cost untuk lebih hemat
-    """)
+    # Initialize umrah bareng state
+    if "umrah_trips" not in st.session_state:
+        st.session_state.umrah_trips = [
+            {
+                "id": 1,
+                "title": "Umrah Ekonomis Maret 2025",
+                "organizer": "Ahmad Fauzi",
+                "organizer_id": 101,
+                "departure_city": "Jakarta",
+                "departure_date": "2025-03-15",
+                "return_date": "2025-03-24",
+                "duration": 9,
+                "package": "ekonomis",
+                "budget_range": "Rp 22-25 Juta",
+                "slots_total": 10,
+                "slots_filled": 6,
+                "members": ["Ahmad F.", "Budi S.", "Citra D.", "Diana R.", "Eko P.", "Fatimah Z."],
+                "whatsapp": "https://chat.whatsapp.com/abc123",
+                "description": "Trip hemat untuk jamaah pemula. Berangkat dari Jakarta, hotel bintang 3, dekat Haram.",
+                "status": "open",
+                "created_at": "2025-01-15"
+            },
+            {
+                "id": 2,
+                "title": "Umrah Premium Ramadhan",
+                "organizer": "Siti Aisyah",
+                "organizer_id": 102,
+                "departure_city": "Surabaya",
+                "departure_date": "2025-03-25",
+                "return_date": "2025-04-05",
+                "duration": 12,
+                "package": "premium",
+                "budget_range": "Rp 45-55 Juta",
+                "slots_total": 8,
+                "slots_filled": 3,
+                "members": ["Siti A.", "Hana M.", "Irfan K."],
+                "whatsapp": "https://chat.whatsapp.com/def456",
+                "description": "Umrah Ramadhan di hotel bintang 5, view Ka'bah. Termasuk city tour.",
+                "status": "open",
+                "created_at": "2025-01-20"
+            },
+            {
+                "id": 3,
+                "title": "Umrah Keluarga April",
+                "organizer": "Muhammad Rizki",
+                "organizer_id": 103,
+                "departure_city": "Bandung",
+                "departure_date": "2025-04-10",
+                "return_date": "2025-04-19",
+                "duration": 9,
+                "package": "standard",
+                "budget_range": "Rp 30-35 Juta",
+                "slots_total": 15,
+                "slots_filled": 8,
+                "members": ["M. Rizki", "Keluarga A", "Keluarga B", "Keluarga C", "Dewi S.", "Fajar H.", "Gita P.", "Hendra W."],
+                "whatsapp": "https://chat.whatsapp.com/ghi789",
+                "description": "Trip ramah keluarga dengan anak-anak. Hotel dekat Haram, ada pendamping anak.",
+                "status": "open",
+                "created_at": "2025-01-25"
+            },
+        ]
+    
+    if "my_joined_trips" not in st.session_state:
+        st.session_state.my_joined_trips = []
+    
+    user = get_current_user()
+    
+    # Tabs
+    tab1, tab2, tab3, tab4 = st.tabs(["🔍 Cari Trip", "➕ Buat Trip", "📋 Trip Saya", "💡 Tips"])
+    
+    with tab1:
+        st.subheader("🔍 Open Trip Tersedia")
+        
+        # Filters
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            filter_city = st.selectbox("Kota Keberangkatan", ["Semua", "Jakarta", "Surabaya", "Bandung", "Medan", "Makassar"])
+        with col2:
+            filter_package = st.selectbox("Tipe Paket", ["Semua", "ekonomis", "standard", "premium", "vip"])
+        with col3:
+            filter_month = st.selectbox("Bulan", ["Semua", "Januari", "Februari", "Maret", "April", "Mei", "Juni"])
+        
+        st.markdown("---")
+        
+        # Trip cards
+        for trip in st.session_state.umrah_trips:
+            if trip["status"] != "open":
+                continue
+            if filter_city != "Semua" and trip["departure_city"] != filter_city:
+                continue
+            if filter_package != "Semua" and trip["package"] != filter_package:
+                continue
+            
+            slots_available = trip["slots_total"] - trip["slots_filled"]
+            progress = trip["slots_filled"] / trip["slots_total"]
+            
+            # Package color
+            package_colors = {
+                "ekonomis": "#4CAF50",
+                "standard": "#2196F3", 
+                "premium": "#9C27B0",
+                "vip": "#D4AF37"
+            }
+            pkg_color = package_colors.get(trip["package"], "#666")
+            
+            st.markdown(f"""
+            <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; 
+                        border: 1px solid #E0E0E0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                    <div>
+                        <span style="background: {pkg_color}; color: white; padding: 3px 10px; border-radius: 12px; 
+                                     font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">{trip['package']}</span>
+                        <h3 style="margin: 10px 0 5px 0; color: #1A1A1A;">{trip['title']}</h3>
+                        <p style="color: #666; font-size: 0.9rem; margin: 0;">👤 {trip['organizer']} • 📍 {trip['departure_city']}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #D4AF37; font-size: 1.2rem; font-weight: 700;">{trip['budget_range']}</div>
+                        <div style="color: #666; font-size: 0.8rem;">{trip['duration']} hari</div>
+                    </div>
+                </div>
+                
+                <p style="color: #555; font-size: 0.9rem; margin-bottom: 15px;">{trip['description']}</p>
+                
+                <div style="display: flex; gap: 20px; margin-bottom: 15px; font-size: 0.85rem; color: #666;">
+                    <span>📅 {trip['departure_date']}</span>
+                    <span>➡️ {trip['return_date']}</span>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-size: 0.85rem; color: #666;">👥 {trip['slots_filled']}/{trip['slots_total']} peserta</span>
+                        <span style="font-size: 0.85rem; color: {'#4CAF50' if slots_available > 3 else '#FF9800' if slots_available > 0 else '#F44336'};">
+                            {slots_available} slot tersisa
+                        </span>
+                    </div>
+                    <div style="background: #E0E0E0; border-radius: 5px; height: 8px; overflow: hidden;">
+                        <div style="background: {pkg_color}; height: 100%; width: {progress * 100}%;"></div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Action buttons
+            col1, col2, col3 = st.columns([2, 1, 1])
+            with col1:
+                if slots_available > 0:
+                    if st.button(f"🙋 Gabung Trip", key=f"join_{trip['id']}", use_container_width=True):
+                        if trip['id'] not in st.session_state.my_joined_trips:
+                            st.session_state.my_joined_trips.append(trip['id'])
+                            trip['slots_filled'] += 1
+                            trip['members'].append(user.get('name', 'User') if user else 'Guest')
+                            st.success(f"✅ Berhasil gabung trip: {trip['title']}")
+                            award_points(50, "Gabung Umrah Bareng")
+                            st.rerun()
+                        else:
+                            st.warning("Anda sudah terdaftar di trip ini")
+                else:
+                    st.button("❌ Slot Penuh", key=f"full_{trip['id']}", disabled=True, use_container_width=True)
+            with col2:
+                if st.button(f"💬 WhatsApp", key=f"wa_{trip['id']}", use_container_width=True):
+                    st.markdown(f"[Buka Grup WhatsApp]({trip['whatsapp']})")
+            with col3:
+                with st.expander("👥 Peserta"):
+                    for member in trip['members']:
+                        st.write(f"• {member}")
+            
+            st.markdown("---")
+    
+    with tab2:
+        st.subheader("➕ Buat Open Trip Baru")
+        st.markdown("Ajak jamaah lain untuk umrah bersama dan hemat biaya!")
+        
+        with st.form("create_trip_form"):
+            trip_title = st.text_input("📝 Judul Trip", placeholder="contoh: Umrah Ekonomis Mei 2025")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                departure_city = st.selectbox("📍 Kota Keberangkatan", ["Jakarta", "Surabaya", "Bandung", "Medan", "Makassar", "Semarang", "Yogyakarta"])
+                departure_date = st.date_input("📅 Tanggal Berangkat", min_value=datetime.now().date() + timedelta(days=30))
+                package_type = st.selectbox("📦 Tipe Paket", ["ekonomis", "standard", "premium", "vip"])
+            with col2:
+                slots_total = st.number_input("👥 Jumlah Slot", min_value=2, max_value=50, value=10)
+                duration = st.slider("⏱️ Durasi (hari)", 7, 21, 9)
+                budget_min = st.number_input("💰 Budget Min (Juta)", min_value=15, max_value=100, value=25)
+            
+            budget_max = st.number_input("💰 Budget Max (Juta)", min_value=budget_min, max_value=150, value=budget_min + 5)
+            description = st.text_area("📝 Deskripsi Trip", placeholder="Jelaskan tentang trip ini, hotel, fasilitas, dll...")
+            whatsapp_link = st.text_input("💬 Link Grup WhatsApp", placeholder="https://chat.whatsapp.com/...")
+            
+            agree = st.checkbox("Saya setuju menjadi organizer dan bertanggung jawab atas koordinasi trip ini")
+            
+            submitted = st.form_submit_button("🚀 Buat Trip", use_container_width=True, type="primary")
+            
+            if submitted:
+                if not trip_title or not description:
+                    st.error("Mohon isi judul dan deskripsi trip")
+                elif not agree:
+                    st.error("Mohon setujui syarat sebagai organizer")
+                else:
+                    new_trip = {
+                        "id": len(st.session_state.umrah_trips) + 1,
+                        "title": trip_title,
+                        "organizer": user.get('name', 'User') if user else 'Guest',
+                        "organizer_id": user.get('id', 0) if user else 0,
+                        "departure_city": departure_city,
+                        "departure_date": departure_date.strftime("%Y-%m-%d"),
+                        "return_date": (departure_date + timedelta(days=duration)).strftime("%Y-%m-%d"),
+                        "duration": duration,
+                        "package": package_type,
+                        "budget_range": f"Rp {budget_min}-{budget_max} Juta",
+                        "slots_total": slots_total,
+                        "slots_filled": 1,
+                        "members": [user.get('name', 'User') if user else 'Guest'],
+                        "whatsapp": whatsapp_link or "#",
+                        "description": description,
+                        "status": "open",
+                        "created_at": datetime.now().strftime("%Y-%m-%d")
+                    }
+                    st.session_state.umrah_trips.append(new_trip)
+                    award_points(100, "Buat Open Trip")
+                    st.success("✅ Trip berhasil dibuat! Anda dapat 100 LP")
+                    st.balloons()
+    
+    with tab3:
+        st.subheader("📋 Trip Saya")
+        
+        # My organized trips
+        st.markdown("#### 👑 Trip yang Saya Buat")
+        my_organized = [t for t in st.session_state.umrah_trips if t.get('organizer_id') == (user.get('id', 0) if user else 0)]
+        
+        if my_organized:
+            for trip in my_organized:
+                slots_available = trip["slots_total"] - trip["slots_filled"]
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #D4AF3720 0%, #C9A86C20 100%); 
+                            border-radius: 12px; padding: 15px; margin-bottom: 10px;
+                            border-left: 4px solid #D4AF37;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>{trip['title']}</strong>
+                            <div style="color: #666; font-size: 0.85rem;">📅 {trip['departure_date']} • 👥 {trip['slots_filled']}/{trip['slots_total']}</div>
+                        </div>
+                        <span style="background: {'#4CAF50' if trip['status'] == 'open' else '#666'}; color: white; 
+                                     padding: 3px 10px; border-radius: 12px; font-size: 0.75rem;">
+                            {trip['status'].upper()}
+                        </span>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    if trip['status'] == 'open':
+                        if st.button(f"🔒 Tutup Pendaftaran", key=f"close_{trip['id']}"):
+                            trip['status'] = 'closed'
+                            st.success("Trip ditutup")
+                            st.rerun()
+                with col2:
+                    with st.expander("👥 Lihat Peserta"):
+                        for i, member in enumerate(trip['members'], 1):
+                            st.write(f"{i}. {member}")
+        else:
+            st.info("Anda belum membuat trip. Buat trip pertama Anda di tab 'Buat Trip'!")
+        
+        st.markdown("---")
+        
+        # My joined trips
+        st.markdown("#### 🎒 Trip yang Saya Ikuti")
+        my_joined = [t for t in st.session_state.umrah_trips if t['id'] in st.session_state.my_joined_trips]
+        
+        if my_joined:
+            for trip in my_joined:
+                st.markdown(f"""
+                <div style="background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px;
+                            border: 1px solid #E0E0E0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>{trip['title']}</strong>
+                            <div style="color: #666; font-size: 0.85rem;">
+                                👤 {trip['organizer']} • 📅 {trip['departure_date']} • 📍 {trip['departure_city']}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #D4AF37; font-weight: 600;">{trip['budget_range']}</div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                if st.button(f"💬 Grup WhatsApp", key=f"mywa_{trip['id']}"):
+                    st.markdown(f"[Buka Grup]({trip['whatsapp']})")
+        else:
+            st.info("Anda belum bergabung trip manapun. Cari trip di tab 'Cari Trip'!")
+    
+    with tab4:
+        st.subheader("💡 Tips Umrah Bareng")
+        
+        tips = [
+            ("🤝", "Pilih Partner Tepat", "Cari teman dengan budget dan preferensi serupa untuk pengalaman lebih nyaman."),
+            ("📋", "Buat Kesepakatan", "Diskusikan pembagian biaya, jadwal, dan aturan grup sebelum berangkat."),
+            ("💬", "Komunikasi Aktif", "Gunakan grup WhatsApp untuk koordinasi. Responsif terhadap pesan organizer."),
+            ("💰", "Transparansi Biaya", "Minta rincian biaya dari organizer. Pastikan tidak ada biaya tersembunyi."),
+            ("📄", "Cek Legalitas", "Pastikan travel agent yang digunakan terdaftar di Kemenag (siskopatuh.kemenag.go.id)."),
+            ("🛡️", "Asuransi Perjalanan", "Pastikan semua peserta memiliki asuransi perjalanan yang memadai."),
+        ]
+        
+        for icon, title, desc in tips:
+            st.markdown(f"""
+            <div style="background: #F5F5F5; border-radius: 12px; padding: 15px; margin-bottom: 10px;
+                        display: flex; align-items: flex-start; gap: 15px;">
+                <div style="font-size: 1.5rem;">{icon}</div>
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 5px;">{title}</div>
+                    <div style="color: #666; font-size: 0.9rem;">{desc}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.warning("""
+        ⚠️ **Disclaimer Umrah Bareng:**
+        - LABBAIK hanya memfasilitasi pertemuan antar jamaah
+        - LABBAIK bukan travel agent dan tidak bertanggung jawab atas transaksi
+        - Selalu verifikasi travel agent di **siskopatuh.kemenag.go.id**
+        - Lakukan DYOR (Do Your Own Research) sebelum bergabung trip
+        """)
 
 def render_profile():
     st.header("👤 Profil Saya")
