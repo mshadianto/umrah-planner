@@ -296,13 +296,15 @@ def get_visitor_count():
 
 def track_page_view(page_name: str):
     """Track individual page views in session"""
-    if "page_views" not in st.session_state:
-        st.session_state.page_views = {}
+    # Ensure page_views is a dictionary
+    if "page_views" not in st.session_state or not isinstance(st.session_state.page_views, dict):
+        st.session_state.page_views = {"_total": 3500}
     
     if page_name not in st.session_state.page_views:
         st.session_state.page_views[page_name] = 0
     
     st.session_state.page_views[page_name] += 1
+    st.session_state.page_views["_total"] = st.session_state.page_views.get("_total", 3500) + 1
 
 # Video Tutorials - Ustadz Adi Hidayat Featured
 VIDEO_TUTORIALS = [
@@ -610,7 +612,7 @@ def init_session_state():
         "savings_data": {"target": 35000000, "current": 5000000},
         "departure_date": None,
         "visitor_count": 1250,
-        "page_views": 3500,
+        "page_views": {"_total": 3500},  # Dictionary with base count
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -2551,7 +2553,8 @@ def render_about():
     
     # Visitor Stats Bar
     visitor_count = st.session_state.get("visitor_count", 1250)
-    page_views = st.session_state.get("page_views", 3500)
+    page_views_dict = st.session_state.get("page_views", {"_total": 3500})
+    page_views = page_views_dict.get("_total", 3500) if isinstance(page_views_dict, dict) else 3500
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
