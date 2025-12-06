@@ -1,6 +1,6 @@
 # quiz_learning.py - LABBAIK Interactive Quiz & Learning Gamification
-# Version: 1.0.0
-# Updated: 2025-12-03
+# Version: 1.0.1 - FIXED HTML RENDERING
+# Updated: 2025-12-06
 # Author: MS Hadianto
 
 """
@@ -379,11 +379,8 @@ def render_quiz_hub():
             
             st.markdown(f"""
             <div style="background: linear-gradient(135deg, {COLORS['dark']} 0%, {COLORS['dark_light']} 100%);
-                        border-radius: 15px; padding: 20px; margin-bottom: 15px; cursor: pointer;
-                        border: 1px solid {COLORS['gold'] if completed else COLORS['dark_light']};
-                        transition: transform 0.2s, box-shadow 0.2s;"
-                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.3)';"
-                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        border-radius: 15px; padding: 20px; margin-bottom: 15px;
+                        border: 1px solid {COLORS['gold'] if completed else COLORS['dark_light']};">
                 <div style="font-size: 2.5rem; text-align: center; margin-bottom: 10px;">{quiz['icon']}</div>
                 <div style="color: white; font-weight: 700; text-align: center; margin-bottom: 5px;">
                     {quiz['title']} {'✅' if completed else ''}
@@ -463,7 +460,6 @@ def render_active_quiz():
     
     st.markdown(f"""
     <div style="background: {COLORS['dark']}; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
-        <!-- Progress -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="color: white; font-weight: 600;">
                 {quiz['icon']} {quiz['title']}
