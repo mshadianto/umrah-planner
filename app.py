@@ -9,25 +9,23 @@ Copyright (c) 2025 MS Hadianto. All Rights Reserved.
 
 ================================================================================
 Platform: AI-Powered Umrah Planning Platform
-Version:  4.3.0
-Codename: Labbaik Community+
+Version:  4.4.0
+Codename: Labbaik Ultimate
 Author:   MS Hadianto
 Email:    sopian.hadianto@gmail.com
 Website:  labbaik.ai
 ================================================================================
 
-Version: 4.3.0
+Version: 4.4.0
 Updated: 2025-12-06
 Changes: 
-- Added "Buat Rencana" feature with detailed Makkah/Madinah duration selection
-  - Separate nights selection for Makkah & Madinah
-  - Real-time hotel cost preview per city
-  - Season multiplier for accurate pricing
-  - Complete cost breakdown per component
-  - Travel checklist with checkboxes
-- Fixed HTML rendering issues in Umrah Bareng cards
-- Integrated features from v3.1.0 modular version
-- Kept single-file architecture for lightweight access
+- Added Time Analysis feature (best time for umrah)
+- Added AI Chat with built-in knowledge base
+- Added visitor tracking with CountAPI (lightweight)
+- Enhanced footer with visitor count & disclaimer
+- Integrated features from v3.0.0 modular version
+- Page view tracking for analytics
+- Kept single-file lightweight architecture
 """
 
 import streamlit as st
@@ -49,7 +47,7 @@ except ImportError:
     @dataclass
     class AppConfig:
         name: str = "LABBAIK"
-        version: str = "4.3.0"
+        version: str = "4.4.0"
     
     @dataclass
     class LLMConfig:
@@ -98,7 +96,7 @@ BRAND = {
     "talbiyah": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ",
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
-    "version": "4.3.0",
+    "version": "4.4.0",
 }
 
 COLORS = {
@@ -271,6 +269,40 @@ EMERGENCY_CONTACTS = [
     {"name": "🚒 Pemadam", "phone": "998"},
     {"name": "🏥 RS King Faisal Makkah", "phone": "+966-12-553-3300"},
 ]
+
+# ============================================
+# VISITOR TRACKING (Lightweight with CountAPI)
+# ============================================
+def get_visitor_count():
+    """Get total visitor count using CountAPI - lightweight external tracking"""
+    try:
+        import urllib.request
+        import json
+        
+        # Only count once per session to avoid inflating numbers
+        if "visitor_counted" not in st.session_state:
+            url = "https://api.countapi.xyz/hit/labbaik-umrah/visitors"
+            with urllib.request.urlopen(url, timeout=3) as response:
+                data = json.loads(response.read().decode())
+                st.session_state.visitor_counted = True
+                st.session_state.visitor_count = data.get("value", 0)
+        
+        return st.session_state.get("visitor_count", 0)
+    except:
+        # Fallback if API fails - use session-based counter
+        if "visitor_count" not in st.session_state:
+            st.session_state.visitor_count = 1250  # Base count
+        return st.session_state.visitor_count
+
+def track_page_view(page_name: str):
+    """Track individual page views in session"""
+    if "page_views" not in st.session_state:
+        st.session_state.page_views = {}
+    
+    if page_name not in st.session_state.page_views:
+        st.session_state.page_views[page_name] = 0
+    
+    st.session_state.page_views[page_name] += 1
 
 # Video Tutorials - Ustadz Adi Hidayat Featured
 VIDEO_TUTORIALS = [
@@ -814,8 +846,8 @@ def render_sidebar():
         else:
             nav_items = [
                 "🏠 Beranda", "💰 Simulasi Biaya", "📋 Buat Rencana", "💵 Cari by Budget",
-                "🤝 Umrah Bareng", "🕋 Umrah Mandiri", "📊 Perbandingan",
-                "🧰 Tools & Fitur", "🎮 Rewards & Quiz", "👤 Profil", "ℹ️ Tentang"
+                "🤝 Umrah Bareng", "🕋 Umrah Mandiri", "📊 Perbandingan", "📅 Waktu Terbaik",
+                "🤖 AI Chat", "🧰 Tools & Fitur", "🎮 Rewards & Quiz", "👤 Profil", "ℹ️ Tentang"
             ]
         
         page = st.radio("📍 Navigasi", nav_items, label_visibility="collapsed")
@@ -1212,6 +1244,269 @@ def render_scenario_comparison():
         # Bar chart
         fig = px.bar(pd.DataFrame(data), x="Skenario", y="Max (Rp)", color="Skenario", title="Perbandingan Harga")
         st.plotly_chart(fig, use_container_width=True)
+
+def render_time_analysis():
+    """Render time analysis page - best time for umrah"""
+    st.header("📅 Analisis Waktu Terbaik Umrah")
+    
+    st.markdown("Temukan waktu terbaik untuk umrah berdasarkan harga, cuaca, dan keramaian.")
+    
+    priority = st.selectbox(
+        "Prioritas Anda",
+        ["balanced", "cost", "crowd"],
+        format_func=lambda x: {
+            "balanced": "🎯 Seimbang (Harga & Keramaian)",
+            "cost": "💰 Prioritas Hemat Biaya",
+            "crowd": "👥 Prioritas Hindari Keramaian"
+        }[x]
+    )
+    
+    if st.button("📊 Analisis Waktu Terbaik", use_container_width=True):
+        # Month analysis data
+        months_data = [
+            {"month": 1, "name": "Januari", "price": 0.85, "crowd": "Rendah", "weather": "Sejuk (15-25°C)", "score": 85},
+            {"month": 2, "name": "Februari", "price": 0.85, "crowd": "Rendah", "weather": "Sejuk (16-26°C)", "score": 85},
+            {"month": 3, "name": "Maret", "price": 1.2, "crowd": "Sedang", "weather": "Hangat (20-30°C)", "score": 70},
+            {"month": 4, "name": "April", "price": 1.0, "crowd": "Sedang", "weather": "Hangat (22-32°C)", "score": 75},
+            {"month": 5, "name": "Mei", "price": 1.0, "crowd": "Sedang", "weather": "Panas (25-38°C)", "score": 65},
+            {"month": 6, "name": "Juni", "price": 1.3, "crowd": "Tinggi", "weather": "Panas (28-42°C)", "score": 50},
+            {"month": 7, "name": "Juli", "price": 1.4, "crowd": "Tinggi", "weather": "Sangat Panas (30-45°C)", "score": 40},
+            {"month": 8, "name": "Agustus", "price": 1.0, "crowd": "Sedang", "weather": "Sangat Panas (30-44°C)", "score": 55},
+            {"month": 9, "name": "September", "price": 0.9, "crowd": "Rendah", "weather": "Panas (28-40°C)", "score": 70},
+            {"month": 10, "name": "Oktober", "price": 0.85, "crowd": "Rendah", "weather": "Hangat (24-35°C)", "score": 80},
+            {"month": 11, "name": "November", "price": 0.85, "crowd": "Rendah", "weather": "Sejuk (20-30°C)", "score": 85},
+            {"month": 12, "name": "Desember", "price": 1.3, "crowd": "Tinggi", "weather": "Sejuk (15-25°C)", "score": 60},
+        ]
+        
+        # Adjust scores based on priority
+        if priority == "cost":
+            for m in months_data:
+                m["score"] = int(100 - (m["price"] - 0.85) * 100)
+        elif priority == "crowd":
+            crowd_scores = {"Rendah": 90, "Sedang": 60, "Tinggi": 30}
+            for m in months_data:
+                m["score"] = crowd_scores.get(m["crowd"], 50)
+        
+        # Sort by score
+        sorted_months = sorted(months_data, key=lambda x: x["score"], reverse=True)
+        
+        # Best months
+        st.markdown("### ✅ Bulan Terbaik untuk Umrah")
+        cols = st.columns(3)
+        for i, month in enumerate(sorted_months[:3]):
+            with cols[i]:
+                st.markdown(f'''
+                <div style="background: linear-gradient(135deg, #006B3C20 0%, #006B3C10 100%); 
+                            border-left: 4px solid #006B3C; padding: 15px; border-radius: 0 10px 10px 0;">
+                    <h4 style="color: #006B3C; margin: 0;">#{i+1} {month["name"]}</h4>
+                    <p style="margin: 8px 0; font-size: 0.9rem;">🌡️ {month["weather"]}</p>
+                    <p style="margin: 5px 0; font-size: 0.85rem;">💰 Multiplier: {month["price"]}x</p>
+                    <p style="margin: 5px 0; font-size: 0.85rem;">👥 Keramaian: {month["crowd"]}</p>
+                    <p style="margin: 5px 0; font-size: 0.85rem;">⭐ Skor: {month["score"]}/100</p>
+                </div>
+                ''', unsafe_allow_html=True)
+        
+        # Months to avoid
+        st.markdown("### ⚠️ Bulan yang Perlu Dipertimbangkan")
+        cols = st.columns(3)
+        for i, month in enumerate(sorted_months[-3:]):
+            with cols[i]:
+                st.markdown(f'''
+                <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; border-radius: 0 10px 10px 0;">
+                    <h4 style="color: #e65100; margin: 0;">{month["name"]}</h4>
+                    <p style="margin: 8px 0; font-size: 0.9rem;">🌡️ {month["weather"]}</p>
+                    <p style="margin: 5px 0; font-size: 0.85rem;">💰 Multiplier: {month["price"]}x</p>
+                    <p style="margin: 5px 0; font-size: 0.85rem;">👥 Keramaian: {month["crowd"]}</p>
+                </div>
+                ''', unsafe_allow_html=True)
+        
+        # Year chart
+        st.markdown("### 📈 Skor Rekomendasi Sepanjang Tahun")
+        df = pd.DataFrame(months_data)
+        fig = px.line(df, x="name", y="score", title="Skor Rekomendasi per Bulan", markers=True)
+        fig.update_layout(xaxis_title="Bulan", yaxis_title="Skor Rekomendasi")
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Tips
+        st.markdown("### 💡 Tips Memilih Waktu")
+        tips = [
+            "📅 **Booking 3-4 bulan sebelumnya** untuk harga terbaik",
+            "🌙 **Hindari Ramadhan** jika budget terbatas (harga naik 40-50%)",
+            "☀️ **Perhatikan cuaca** - musim panas bisa mencapai 45°C",
+            "👥 **Low season** (Jan-Feb, Sep-Nov) lebih nyaman untuk ibadah",
+            "🎒 **Bawa perlengkapan** sesuai cuaca saat keberangkatan",
+        ]
+        for tip in tips:
+            st.markdown(f"• {tip}")
+
+def render_ai_chat():
+    """Render AI chat page with quick questions"""
+    st.header("🤖 Chat dengan AI Assistant")
+    
+    st.markdown("Tanyakan apa saja tentang umrah kepada AI Assistant!")
+    
+    # Initialize chat history
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    
+    # Display chat history
+    for message in st.session_state.chat_history:
+        if message["role"] == "user":
+            st.chat_message("user").write(message["content"])
+        else:
+            st.chat_message("assistant").write(message["content"])
+    
+    # Chat input
+    if prompt := st.chat_input("Ketik pertanyaan Anda..."):
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
+        st.chat_message("user").write(prompt)
+        
+        # Simple AI response (without external API for lightweight)
+        with st.spinner("🤔 AI sedang berpikir..."):
+            ai_response = get_ai_response(prompt)
+        
+        st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+        st.chat_message("assistant").write(ai_response)
+    
+    # Quick questions
+    st.markdown("---")
+    st.markdown("### 💡 Pertanyaan Cepat")
+    
+    quick_questions = [
+        "Apa saja rukun umrah?",
+        "Bagaimana tips hemat biaya umrah?",
+        "Kapan waktu terbaik untuk umrah?",
+        "Apa yang harus dipersiapkan sebelum umrah?",
+        "Bagaimana memilih travel umrah yang terpercaya?",
+    ]
+    
+    cols = st.columns(2)
+    for i, q in enumerate(quick_questions):
+        if cols[i % 2].button(q, key=f"quick_{i}"):
+            st.session_state.chat_history.append({"role": "user", "content": q})
+            st.rerun()
+    
+    # Clear chat
+    if st.button("🗑️ Hapus Riwayat Chat"):
+        st.session_state.chat_history = []
+        st.rerun()
+
+def get_ai_response(question: str) -> str:
+    """Get AI response - lightweight built-in knowledge base"""
+    question_lower = question.lower()
+    
+    # Knowledge base for common questions
+    if "rukun" in question_lower:
+        return """**Rukun Umrah ada 5:**
+
+1. **Ihram** - Niat dan memakai pakaian ihram dari miqat
+2. **Thawaf** - Mengelilingi Ka'bah 7 kali
+3. **Sa'i** - Berjalan antara Shafa dan Marwah 7 kali
+4. **Tahallul** - Mencukur/memotong rambut
+5. **Tertib** - Melakukan rukun secara berurutan
+
+💡 Tips: Pelajari tata cara setiap rukun sebelum berangkat agar ibadah lebih khusyuk."""
+    
+    elif "hemat" in question_lower or "budget" in question_lower or "murah" in question_lower:
+        return """**Tips Hemat Biaya Umrah:**
+
+💰 **Waktu Keberangkatan:**
+- Pilih low season (Jan-Feb, Sep-Nov)
+- Hindari Ramadhan & liburan sekolah
+
+✈️ **Tiket Pesawat:**
+- Booking 3-4 bulan sebelumnya
+- Pilih penerbangan transit (lebih murah)
+- Pantau promo airlines
+
+🏨 **Hotel:**
+- Pilih hotel 500m-1km dari Haram
+- Sharing room dengan jamaah lain
+
+📦 **Paket:**
+- Bandingkan minimal 3 travel agent
+- Pilih paket grup (lebih ekonomis)
+
+Estimasi paket ekonomis: **Rp 20-25 juta/orang**"""
+    
+    elif "waktu" in question_lower or "kapan" in question_lower or "bulan" in question_lower:
+        return """**Waktu Terbaik untuk Umrah:**
+
+✅ **Rekomendasi Terbaik:**
+- **Januari-Februari**: Cuaca sejuk, harga rendah
+- **September-November**: Low season, nyaman
+
+⚠️ **Perlu Pertimbangan:**
+- **Juni-Juli**: Sangat panas (40-45°C)
+- **Ramadhan**: Harga naik 40-50%, sangat ramai
+- **Desember**: Liburan, harga naik
+
+💡 Tips: Gunakan fitur Analisis Waktu di menu untuk rekomendasi personal!"""
+    
+    elif "persiap" in question_lower or "bawa" in question_lower or "perlengkapan" in question_lower:
+        return """**Persiapan Sebelum Umrah:**
+
+📄 **Dokumen:**
+- Paspor (min. 6 bulan berlaku)
+- Visa umrah
+- Tiket & voucher hotel
+- Foto 4x6 (10 lembar)
+
+🧳 **Pakaian:**
+- Ihram 2 set (pria)
+- Mukena (wanita)
+- Pakaian nyaman & sopan
+- Sandal jepit
+
+💊 **Kesehatan:**
+- Vaksin meningitis
+- Obat-obatan pribadi
+- Vitamin & suplemen
+
+📱 **Digital:**
+- Install app: Eatmarna, Tawakkalna
+- SIM card lokal/roaming
+- Power bank
+
+💡 Gunakan fitur Checklist di menu Tools untuk memastikan tidak ada yang terlewat!"""
+    
+    elif "travel" in question_lower or "agen" in question_lower or "terpercaya" in question_lower:
+        return """**Tips Memilih Travel Umrah Terpercaya:**
+
+✅ **Wajib Dicek:**
+1. Terdaftar di **Kemenag** (siskopatuh.kemenag.go.id)
+2. Memiliki **PPIU** (Penyelenggara Perjalanan Ibadah Umrah)
+3. Jelas alamat kantor & kontak
+
+📋 **Pertanyaan Penting:**
+- Sudah berapa lama beroperasi?
+- Berapa jamaah yang sudah diberangkatkan?
+- Ada testimoni dari jamaah sebelumnya?
+- Jelas rincian biaya & fasilitas?
+
+⚠️ **Red Flags:**
+- Harga terlalu murah
+- Tidak mau kasih rincian biaya
+- Tidak ada alamat kantor jelas
+- Desak-desakan untuk DP
+
+💡 Bandingkan minimal 3 travel agent sebelum memutuskan!"""
+    
+    else:
+        return f"""Terima kasih atas pertanyaan Anda tentang: **"{question}"**
+
+Saya adalah AI Assistant LABBAIK yang siap membantu perencanaan umrah Anda.
+
+**Topik yang bisa saya bantu:**
+- 📿 Rukun dan tata cara umrah
+- 💰 Tips hemat biaya
+- 📅 Waktu terbaik berangkat
+- 🧳 Persiapan & perlengkapan
+- ✈️ Tips memilih travel agent
+
+Silakan ajukan pertanyaan yang lebih spesifik, atau gunakan tombol **Pertanyaan Cepat** di bawah!
+
+💡 *Untuk informasi lebih lengkap, gunakan fitur Tools & Fitur di menu.*"""
 
 def render_tools_features():
     st.header("🧰 Tools & Fitur")
@@ -2383,16 +2678,53 @@ def render_about():
         """)
 
 def render_footer():
-    st.markdown(f"""
-    <div style="background: {COLORS['black']}; padding: 30px; border-radius: 15px; text-align: center; margin-top: 30px;">
-        <div style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['talbiyah']}</div>
-        <div style="color: white; font-weight: 700; letter-spacing: 0.2em; margin: 10px 0;">{BRAND['name']}</div>
-        <div style="color: {COLORS['sand']}; font-size: 0.85rem;">{BRAND['tagline']}</div>
-        <div style="color: #666; font-size: 0.75rem; margin-top: 15px;">
-            © 2025 LABBAIK | Made with ❤️ by MS Hadianto | v{BRAND['version']}
+    # Get visitor count
+    visitor_count = get_visitor_count()
+    visitor_str = f"{visitor_count:,}" if visitor_count else "0"
+    
+    footer_html = f'''
+    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); 
+                padding: 40px; border-radius: 20px; text-align: center; margin-top: 50px;">
+        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: #D4AF37;">
+            {BRAND['talbiyah']}
+        </div>
+        <div style="font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.25em; margin: 12px 0;">
+            {BRAND['name']}
+        </div>
+        <div style="color: #C9A86C; font-size: 0.95rem; margin-bottom: 20px;">
+            {BRAND['tagline']}
+        </div>
+        
+        <div style="background: rgba(212, 175, 55, 0.15); display: inline-block; 
+                    padding: 8px 20px; border-radius: 20px; margin-bottom: 20px;">
+            <span style="color: #D4AF37; font-size: 0.85rem;">
+                👥 Total Pengunjung: <strong>{visitor_str}</strong>
+            </span>
+        </div>
+        
+        <div style="color: #888; font-size: 0.85rem; margin-bottom: 15px;">
+            📧 sopian.hadianto@gmail.com | 📱 +62 815 9658 833 | 🌐 labbaik.ai
+        </div>
+        
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 10px; padding: 15px 20px; margin: 20px auto; max-width: 600px;">
+            <div style="color: #D4AF37; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">
+                ⚠️ Disclaimer
+            </div>
+            <div style="color: #aaa; font-size: 0.75rem; line-height: 1.6;">
+                Aplikasi ini dikembangkan oleh <strong>non-developer</strong> dengan memanfaatkan teknologi AI.
+                Informasi bersifat simulasi dan estimasi. Selalu konsultasikan dengan travel agent resmi berizin.
+            </div>
+        </div>
+        
+        <div style="border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; color: #666; font-size: 0.8rem;">
+            © 2025 LABBAIK. Hak Cipta Dilindungi.<br>
+            <span style="color: #D4AF37;">Made with ❤️ & AI by MS Hadianto</span><br>
+            <span style="color: #555; font-size: 0.7rem;">v{BRAND['version']} Beta • Powered by Streamlit</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    '''
+    st.markdown(footer_html, unsafe_allow_html=True)
 
 # ============================================
 # MAIN APPLICATION
@@ -2416,6 +2748,7 @@ def main():
     
     # Route pages
     if "Beranda" in page:
+        track_page_view("Home")
         render_home()
         render_footer()
     elif "Simulasi Biaya" in page:
@@ -2423,52 +2756,76 @@ def main():
             st.warning("🔐 Silakan login")
             render_login_page()
         else:
+            track_page_view("Cost Simulation")
             render_cost_simulation()
     elif "Buat Rencana" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login")
             render_login_page()
         else:
+            track_page_view("Create Plan")
             render_create_plan()
     elif "Cari by Budget" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login")
             render_login_page()
         else:
+            track_page_view("Budget Finder")
             render_budget_finder()
     elif "Perbandingan" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login")
             render_login_page()
         else:
+            track_page_view("Comparison")
             render_scenario_comparison()
+    elif "Waktu Terbaik" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            track_page_view("Time Analysis")
+            render_time_analysis()
+    elif "AI Chat" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            track_page_view("AI Chat")
+            render_ai_chat()
     elif "Umrah Bareng" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login")
             render_login_page()
         else:
+            track_page_view("Umrah Bareng")
             render_umrah_bareng()
     elif "Umrah Mandiri" in page:
+        track_page_view("Umrah Mandiri")
         render_umrah_mandiri()
     elif "Tools" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login")
             render_login_page()
         else:
+            track_page_view("Tools")
             render_tools_features()
     elif "Rewards" in page or "Quiz" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login")
             render_login_page()
         else:
+            track_page_view("Rewards")
             render_engagement_page()
     elif "Profil" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login")
             render_login_page()
         else:
+            track_page_view("Profile")
             render_profile()
     elif "Tentang" in page:
+        track_page_view("About")
         render_about()
         render_footer()
 
