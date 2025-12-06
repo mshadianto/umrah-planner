@@ -416,10 +416,7 @@ def init_state():
         "plans": [], "checks": {}, "reminders": [], "open_trips": [],
         "forum_posts": [], "show_login": False,
         "auth": {"ok": False, "user": None},
-        "users_db": {
-            "demo@labbaik.id": {"id": "d1", "name": "Demo User", "role": "user", "pwd": hash_password("demo123")},
-            "admin@labbaik.id": {"id": "a1", "name": "Admin", "role": "admin", "pwd": hash_password("admin123")},
-        },
+        "users_db": {},  # Empty - users register themselves
         "stats": {"views": 0, "calcs": 0, "plans": 0},
         "engagement": {"pts": 0, "streak": 0, "claimed": False}
     }
@@ -451,24 +448,75 @@ def is_admin():
     return u and u.get("role") == "admin"
 
 def login(email, pwd):
+    """Login with proper error handling"""
+    if not email or not pwd:
+        return False, "Email dan password harus diisi"
+    
+    email = email.strip().lower()
     hashed = hash_password(pwd)
-    if email in st.session_state.users_db:
-        user = st.session_state.users_db[email]
-        if user["pwd"] == hashed:
-            st.session_state.auth = {"ok": True, "user": {**user, "email": email}}
-            return True
-    return False
+    
+    # Check if user exists in database
+    if email not in st.session_state.users_db:
+        return False, "Email tidak terdaftar"
+    
+    user = st.session_state.users_db[email]
+    
+    # Validate user has required fields
+    if not isinstance(user, dict):
+        return False, "Data user tidak valid"
+    
+    if "pwd" not in user:
+        return False, "Data user tidak lengkap"
+    
+    # Check password
+    if user["pwd"] != hashed:
+        return False, "Password salah"
+    
+    # Login successful
+    st.session_state.auth = {
+        "ok": True, 
+        "user": {
+            "id": user.get("id", email),
+            "name": user.get("name", "User"),
+            "email": email,
+            "role": user.get("role", "user")
+        }
+    }
+    return True, "Login berhasil!"
 
 def register(email, name, pwd):
+    """Register new user with validation"""
+    if not email or not name or not pwd:
+        return False, "Semua field harus diisi"
+    
+    email = email.strip().lower()
+    name = name.strip()
+    
+    # Validate email format
+    if "@" not in email or "." not in email:
+        return False, "Format email tidak valid"
+    
+    # Check if already registered
     if email in st.session_state.users_db:
         return False, "Email sudah terdaftar"
+    
+    # Determine role - admin if email contains 'admin'
+    role = "admin" if "admin" in email.lower() else "user"
+    
+    # Create user
+    user_id = f"u{len(st.session_state.users_db)+1}"
     st.session_state.users_db[email] = {
-        "id": f"u{len(st.session_state.users_db)+1}",
-        "name": name, "role": "user", "pwd": hash_password(pwd)
+        "id": user_id,
+        "name": name,
+        "role": role,
+        "pwd": hash_password(pwd),
+        "created": datetime.now().isoformat()
     }
-    return True, "Registrasi berhasil!"
+    
+    return True, f"Registrasi berhasil! Role: {role.upper()}"
 
-def logout(): st.session_state.auth = {"ok": False, "user": None}
+def logout(): 
+    st.session_state.auth = {"ok": False, "user": None}
 
 # ═══════════════════════════════════════════════════════════════════
 # 📦 SAMPLE DATA FOR UMRAH BARENG & FORUM
@@ -602,6 +650,7 @@ def render_sidebar():
             ]
             if is_admin():
                 menu.append("📊 Analytics")
+                menu.append("💼 Business Hub")
             menu.append("ℹ️ Tentang")
         
         page = st.radio("Menu", menu, label_visibility="collapsed")
@@ -637,39 +686,38 @@ def render_login():
         
         with tab1:
             with st.form("login_form"):
-                email = st.text_input("Email")
+                email = st.text_input("Email", placeholder="email@example.com")
                 pwd = st.text_input("Password", type="password")
                 if st.form_submit_button("🚀 Masuk", use_container_width=True):
-                    if login(email, pwd):
-                        st.success("✅ Login berhasil!")
+                    success, msg = login(email, pwd)
+                    if success:
+                        st.success(f"✅ {msg}")
                         st.session_state.show_login = False
                         st.rerun()
                     else:
-                        st.error("❌ Email/password salah")
+                        st.error(f"❌ {msg}")
         
         with tab2:
             with st.form("register_form"):
-                new_email = st.text_input("Email", key="reg_email")
-                new_name = st.text_input("Nama Lengkap")
+                new_email = st.text_input("Email", key="reg_email", placeholder="email@example.com")
+                new_name = st.text_input("Nama Lengkap", placeholder="Nama Anda")
                 new_pwd = st.text_input("Password", type="password", key="reg_pwd")
                 new_pwd2 = st.text_input("Konfirmasi Password", type="password")
+                
+                st.caption("💡 Gunakan email dengan kata 'admin' untuk akses Admin (misal: admin@company.com)")
                 
                 if st.form_submit_button("📝 Daftar", use_container_width=True):
                     if new_pwd != new_pwd2:
                         st.error("❌ Password tidak cocok")
                     elif len(new_pwd) < 6:
                         st.error("❌ Password minimal 6 karakter")
-                    elif not new_email or not new_name:
-                        st.error("❌ Lengkapi semua field")
                     else:
                         success, msg = register(new_email, new_name, new_pwd)
                         if success:
-                            st.success(f"✅ {msg} Silakan login.")
+                            st.success(f"✅ {msg}")
+                            st.info("Silakan login dengan email dan password Anda")
                         else:
                             st.error(f"❌ {msg}")
-        
-        with st.expander("Demo Credentials"):
-            st.code("demo@labbaik.id / demo123\nadmin@labbaik.id / admin123")
         
         if st.button("← Kembali ke Beranda"):
             st.session_state.show_login = False
@@ -1325,6 +1373,137 @@ def render_analytics():
         b64 = base64.b64encode(json_str.encode()).decode()
         st.markdown(f'<a href="data:application/json;base64,{b64}" download="labbaik_analytics.json" style="display:inline-block;padding:8px 16px;background:#D4AF37;color:#1A1A1A;text-decoration:none;border-radius:5px;font-weight:bold;">📥 Download Analytics JSON</a>', unsafe_allow_html=True)
 
+def render_business_hub():
+    """Business Hub - Admin Only"""
+    st.header("💼 Business Hub")
+    
+    if not is_admin():
+        st.error("⛔ Akses ditolak - Halaman ini hanya untuk Admin")
+        st.info("💡 Untuk menjadi Admin, daftar dengan email yang mengandung kata 'admin' (contoh: admin@yourcompany.com)")
+        return
+    
+    track_page_view("Business Hub")
+    
+    st.markdown("""
+    <div style="background:linear-gradient(135deg,#1A1A1A,#2D2D2D);padding:20px;border-radius:15px;margin-bottom:20px">
+    <div style="color:#D4AF37;font-size:1.2rem;font-weight:700">🚀 Selamat Datang di Business Hub!</div>
+    <div style="color:#C9A86C;margin-top:8px">Kelola bisnis umrah Anda dengan tools lengkap</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    tabs = st.tabs(["💰 Revenue", "🤝 Partners", "📈 Growth", "⚙️ Settings"])
+    
+    with tabs[0]:  # Revenue
+        st.subheader("💰 Revenue Dashboard")
+        
+        # Revenue metrics
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("💵 Revenue MTD", "Rp 0", delta="Setup required")
+        c2.metric("📊 Transactions", "0", delta="0 today")
+        c3.metric("👥 Customers", "0", delta="0 new")
+        c4.metric("📈 Conversion", "0%", delta="N/A")
+        
+        st.info("💡 **Coming Soon:** Integrasi payment gateway untuk tracking revenue otomatis")
+        
+        # Revenue breakdown
+        st.markdown("#### 📊 Revenue Streams (Planned)")
+        revenue_streams = [
+            {"Stream": "🎫 Booking Commission", "Status": "🔜 Coming", "Est. Revenue": "5-10% per booking"},
+            {"Stream": "📢 Featured Listing", "Status": "🔜 Coming", "Est. Revenue": "Rp 500K/month"},
+            {"Stream": "🤝 Partner Referral", "Status": "🔜 Coming", "Est. Revenue": "Rp 100K/referral"},
+            {"Stream": "📊 Premium Analytics", "Status": "🔜 Coming", "Est. Revenue": "Rp 200K/month"},
+        ]
+        st.dataframe(pd.DataFrame(revenue_streams), use_container_width=True, hide_index=True)
+    
+    with tabs[1]:  # Partners
+        st.subheader("🤝 Partner Management")
+        
+        st.markdown("#### 🏢 Travel Agent Partners")
+        partners = [
+            {"Name": "Partner Travel A", "Status": "🟡 Pending", "Commission": "5%", "Joined": "-"},
+            {"Name": "Partner Travel B", "Status": "🟡 Pending", "Commission": "5%", "Joined": "-"},
+        ]
+        st.dataframe(pd.DataFrame(partners), use_container_width=True, hide_index=True)
+        
+        with st.expander("➕ Tambah Partner Baru"):
+            with st.form("add_partner"):
+                p_name = st.text_input("Nama Travel Agent")
+                p_email = st.text_input("Email Kontak")
+                p_phone = st.text_input("No. Telepon")
+                p_commission = st.slider("Komisi (%)", 1, 15, 5)
+                
+                if st.form_submit_button("📤 Kirim Undangan"):
+                    if p_name and p_email:
+                        st.success(f"✅ Undangan terkirim ke {p_email}")
+                    else:
+                        st.error("❌ Lengkapi data partner")
+        
+        st.info("💡 Partner travel agent dapat listing paket mereka di LABBAIK dan mendapat leads")
+    
+    with tabs[2]:  # Growth
+        st.subheader("📈 Growth Metrics")
+        
+        stats = get_visitor_stats()
+        
+        # Growth indicators
+        c1, c2, c3 = st.columns(3)
+        c1.metric("📈 User Growth", f"+{stats['today_visitors']}", "today")
+        c2.metric("👁️ Engagement", f"{stats['total_views']}", "total views")
+        c3.metric("🎯 Retention", "N/A", "coming soon")
+        
+        st.markdown("#### 🎯 Growth Strategies")
+        strategies = [
+            {"Strategy": "🔍 SEO Optimization", "Status": "🟢 Active", "Impact": "High"},
+            {"Strategy": "📱 Social Media", "Status": "🟡 Planned", "Impact": "Medium"},
+            {"Strategy": "🤝 Referral Program", "Status": "🔜 Coming", "Impact": "High"},
+            {"Strategy": "📧 Email Marketing", "Status": "🔜 Coming", "Impact": "Medium"},
+            {"Strategy": "📢 Paid Ads", "Status": "⚪ Future", "Impact": "High"},
+        ]
+        st.dataframe(pd.DataFrame(strategies), use_container_width=True, hide_index=True)
+        
+        st.markdown("#### 📊 Milestone Tracker")
+        milestones = [
+            ("🎯 1,000 Users", stats['total_visitors'], 1000),
+            ("🎯 10,000 Views", stats['total_views'], 10000),
+            ("🎯 100 Plans Created", st.session_state.stats['plans'], 100),
+            ("🎯 50 Open Trips", len(st.session_state.open_trips), 50),
+        ]
+        for label, current, target in milestones:
+            progress = min(current / target, 1.0)
+            st.markdown(f"**{label}**: {current:,} / {target:,}")
+            st.progress(progress)
+    
+    with tabs[3]:  # Settings
+        st.subheader("⚙️ Business Settings")
+        
+        st.markdown("#### 🏢 Company Profile")
+        with st.form("company_profile"):
+            company_name = st.text_input("Nama Perusahaan", value="LABBAIK")
+            company_email = st.text_input("Email Bisnis", value=CONTACT['email'])
+            company_phone = st.text_input("Telepon", value=CONTACT['wa'])
+            company_website = st.text_input("Website", value="labbaik.ai")
+            
+            if st.form_submit_button("💾 Simpan"):
+                st.success("✅ Profile disimpan")
+        
+        st.markdown("#### 🔔 Notification Settings")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.checkbox("📧 Email notifications", value=True)
+            st.checkbox("📱 WhatsApp notifications", value=False)
+        with c2:
+            st.checkbox("📊 Weekly reports", value=True)
+            st.checkbox("🚨 Alert on new bookings", value=True)
+        
+        st.markdown("#### 🔗 Integrations")
+        integrations = [
+            {"Service": "💳 Payment Gateway", "Status": "🔜 Coming Soon"},
+            {"Service": "📧 Email Service", "Status": "🔜 Coming Soon"},
+            {"Service": "📱 WhatsApp API", "Status": "🔜 Coming Soon"},
+            {"Service": "📊 Google Analytics", "Status": "🔜 Coming Soon"},
+        ]
+        st.dataframe(pd.DataFrame(integrations), use_container_width=True, hide_index=True)
+
 def render_guide():
     st.header("🕋 Panduan Umrah")
     
@@ -1453,12 +1632,13 @@ def main():
         "Peta": render_map, "Kurs": render_currency,
         "Cuaca": render_weather, "Tersimpan": render_saved,
         "Reminder": render_reminder, "Emergency": render_emergency,
-        "Analytics": render_analytics, "Tentang": render_about,
+        "Analytics": render_analytics, "Business": render_business_hub,
+        "Tentang": render_about,
     }
     
     # Protected routes
     protected = ["Simulasi", "Budget", "Rencana", "Bareng", "Mandiri", "Chat", 
-                 "Waktu", "Checklist", "Peta", "Tersimpan", "Reminder", "Analytics"]
+                 "Waktu", "Checklist", "Peta", "Tersimpan", "Reminder", "Analytics", "Business"]
     
     for key, func in routes.items():
         if key in page:
