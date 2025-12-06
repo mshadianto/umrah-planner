@@ -393,25 +393,13 @@ def render_login_page():
             
             st.markdown("---")
             
-            # Demo credentials info
+            # Demo credentials info - HANYA DEMO USER
             with st.expander("🔑 Demo Login Credentials", expanded=False):
                 st.markdown("""
                 <div style="background: #1A1A1A; padding: 15px; border-radius: 10px; font-size: 0.85rem;">
                     <div style="margin-bottom: 10px;">
                         <strong style="color: #4CAF50;">👤 Demo User:</strong><br>
                         <code>demo@labbaik.id</code> / <code>demo123</code>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <strong style="color: #2196F3;">💎 Premium:</strong><br>
-                        <code>premium@labbaik.id</code> / <code>premium123</code>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <strong style="color: #D4AF37;">👑 Admin:</strong><br>
-                        <code>admin@labbaik.id</code> / <code>admin123</code>
-                    </div>
-                    <div>
-                        <strong style="color: #9C27B0;">🔮 Super Admin:</strong><br>
-                        <code>superadmin@labbaik.id</code> / <code>super123</code>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
