@@ -1486,6 +1486,17 @@ def render_cost_simulation():
     """Render cost simulation page"""
     st.header("💰 Simulasi Biaya Umrah")
     
+    # Session State Initialization - FIXED v3.5.3
+    if 'duration_days' not in st.session_state:
+        st.session_state.duration_days = 14
+    if 'num_jamaah' not in st.session_state:
+        st.session_state.num_jamaah = 2
+    if 'scenario_paket' not in st.session_state:
+        st.session_state.scenario_paket = "standar"
+    if 'departure_city_sim' not in st.session_state:
+        st.session_state.departure_city_sim = "Jakarta"
+
+    
     with st.form("cost_form"):
         col1, col2 = st.columns(2)
         
@@ -3590,7 +3601,7 @@ def render_settings():
     with col2:
         if st.session_state.orchestrator:
             stats = st.session_state.orchestrator.get_agent_status()
-            st.metric("Dokumen Knowledge Base", stats["rag_retriever"]["total_documents"])
+            st.metric("Dokumen Knowledge Base", stats.get("rag_retriever", {}).get("num_docs", "N/A")["total_documents"])
     
     if st.button("🔄 Reinisialisasi Sistem"):
         st.session_state.orchestrator = None
