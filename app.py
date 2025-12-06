@@ -159,21 +159,33 @@ def db_update_visitor_stats():
     except: pass
 
 def db_ensure_admin():
-    """Ensure default admin account exists"""
+    """Ensure default admin account exists with correct password"""
     conn = get_db()
     if not conn: return
     try:
         # Check if admin exists
-        r = conn.query("SELECT id FROM users WHERE email = :e", params={"e": DEFAULT_ADMIN["email"]}, ttl=0)
+        r = conn.query("SELECT id, password_hash FROM users WHERE email = :e", 
+                      params={"e": DEFAULT_ADMIN["email"]}, ttl=0)
+        
+        pwd_hash = hash_pwd(DEFAULT_ADMIN["password"])
+        
         if len(r) == 0:
-            # Create admin
+            # Create new admin
             with conn.session as s:
                 s.execute("""
                     INSERT INTO users (email, password_hash, name, role, created_at)
                     VALUES (:e, :p, :n, 'admin', CURRENT_TIMESTAMP)
-                """, {"e": DEFAULT_ADMIN["email"], "p": hash_pwd(DEFAULT_ADMIN["password"]), "n": DEFAULT_ADMIN["name"]})
+                """, {"e": DEFAULT_ADMIN["email"], "p": pwd_hash, "n": DEFAULT_ADMIN["name"]})
                 s.commit()
-    except: pass
+        else:
+            # Update existing admin password to ensure it matches
+            with conn.session as s:
+                s.execute("""
+                    UPDATE users SET password_hash = :p, role = 'admin' WHERE email = :e
+                """, {"e": DEFAULT_ADMIN["email"], "p": pwd_hash})
+                s.commit()
+    except Exception as e:
+        pass  # Silently fail, user can still register manually
 
 def db_get_page_stats():
     """Get per-page statistics"""
@@ -386,10 +398,8 @@ def init_state():
     if "visitor_id" not in st.session_state:
         st.session_state.visitor_id = secrets.token_hex(8)
     
-    # Ensure admin account exists
-    if "admin_checked" not in st.session_state:
-        db_ensure_admin()
-        st.session_state.admin_checked = True
+    # Ensure admin account exists (check every session)
+    db_ensure_admin()
     
     st.session_state.init = True
 
