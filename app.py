@@ -1,1264 +1,1363 @@
 """
-╔══════════════════════════════════════════════════════════════════════════════╗
-║  لَبَّيْكَ LABBAIK v3.8.1 - DATABASE INTEGRATED                              ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║  🚀 NEON POSTGRESQL • ⚡ LIGHTWEIGHT • 📱 MOBILE-READY                       ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+================================================================================
+لَبَّيْكَ LABBAIK - Main Application
+================================================================================
+
+Labbaik Allahumma Labbaik - Aku Datang Memenuhi Panggilan-Mu
+
 Copyright (c) 2025 MS Hadianto. All Rights Reserved.
+
+================================================================================
+Platform: AI-Powered Umrah Planning Platform
+Version:  4.0.0
+Codename: Labbaik Ultimate
+Author:   MS Hadianto
+Email:    sopian.hadianto@gmail.com
+Website:  labbaik.ai
+================================================================================
+
+Version: 4.0.0
+Updated: 2025-12-06
+Changes: 
+- Merged v3.5.0 Engagement System + v3.9.0 Enhanced Features
+- Removed PWA for lightweight access
+- Added: Savings Calculator, Countdown, Doa & Manasik, Enhanced Checklist
+- Added: Points, Levels, Badges, Streaks, Quiz, Referral System
+- Optimized imports and performance
 """
 
 import streamlit as st
+import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-import json, base64, random, hashlib, secrets
+import hashlib
 
-# ═══════════════════════════════════════════════════════════════════
-# 🔧 PAGE CONFIG
-# ═══════════════════════════════════════════════════════════════════
+# ============================================
+# CONFIGURATION & FALLBACKS
+# ============================================
+try:
+    from config import app_config, llm_config, SCENARIO_TEMPLATES, DEPARTURE_CITIES, SEASONS
+except ImportError:
+    from dataclasses import dataclass
+    import os
+    
+    @dataclass
+    class AppConfig:
+        name: str = "LABBAIK"
+        version: str = "4.0.0"
+    
+    @dataclass
+    class LLMConfig:
+        provider: str = "groq"
+        groq_api_key: str = ""
+        openai_api_key: str = ""
+        model: str = "llama-3.3-70b-versatile"
+        groq_model: str = "llama-3.3-70b-versatile"
+        openai_model: str = "gpt-4o-mini"
+        temperature: float = 0.7
+        max_tokens: int = 2000
+        
+        def __post_init__(self):
+            self.groq_api_key = os.getenv("GROQ_API_KEY", "")
+            self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+    
+    app_config = AppConfig()
+    llm_config = LLMConfig()
+    
+    SCENARIO_TEMPLATES = {
+        "ekonomis": {"name": "Ekonomis", "multiplier": 1.0, "duration_days": 9},
+        "standard": {"name": "Standard", "multiplier": 1.3, "duration_days": 9},
+        "premium": {"name": "Premium", "multiplier": 1.8, "duration_days": 12},
+        "vip": {"name": "VIP", "multiplier": 2.5, "duration_days": 14}
+    }
+    
+    DEPARTURE_CITIES = {
+        "Jakarta": {"code": "CGK", "multiplier": 1.0},
+        "Surabaya": {"code": "SUB", "multiplier": 1.05},
+        "Medan": {"code": "KNO", "multiplier": 1.1},
+        "Bandung": {"code": "BDO", "multiplier": 1.08}
+    }
+    
+    SEASONS = {
+        "low": {"name": "Low Season", "multiplier": 0.85, "months": [1, 2, 9, 10, 11]},
+        "regular": {"name": "Regular", "multiplier": 1.0, "months": [4, 5, 8]},
+        "high": {"name": "High Season", "multiplier": 1.4, "months": [3, 6, 7, 12]}
+    }
+
+# ============================================
+# LABBAIK BRAND CONSTANTS
+# ============================================
+BRAND = {
+    "name": "LABBAIK",
+    "arabic": "لَبَّيْكَ",
+    "talbiyah": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ",
+    "tagline": "Panggilan-Nya, Langkahmu",
+    "description": "Platform AI Perencanaan Umrah #1 Indonesia",
+    "version": "4.0.0",
+}
+
+COLORS = {
+    "black": "#1A1A1A",
+    "gold": "#D4AF37",
+    "gold_light": "#F5E6C8",
+    "green": "#006B3C",
+    "white": "#FFFFFF",
+    "sand": "#C9A86C",
+}
+
+CONTACT = {
+    "email": "sopian.hadianto@gmail.com",
+    "whatsapp": "+62 815 9658 833",
+}
+
+# ============================================
+# DEFAULT ADMIN CREDENTIALS (Offline Fallback)
+# ============================================
+DEFAULT_ADMIN = {
+    "email": "admin@labbaik.id",
+    "password": "@Jakarta01",
+    "name": "Admin LABBAIK",
+    "role": "admin"
+}
+
+# ============================================
+# HOTEL PRICES CONFIGURATION
+# ============================================
+HOTEL_PRICES = {
+    "ekonomis": {
+        "makkah": {"name": "Hotel Bintang 2-3 (1-2 km dari Haram)", "price": 800000},
+        "madinah": {"name": "Hotel Bintang 2-3 (500m-1 km dari Nabawi)", "price": 600000}
+    },
+    "standard": {
+        "makkah": {"name": "Hotel Bintang 3-4 (500m-1 km dari Haram)", "price": 1500000},
+        "madinah": {"name": "Hotel Bintang 3-4 (300-500m dari Nabawi)", "price": 1000000}
+    },
+    "premium": {
+        "makkah": {"name": "Hotel Bintang 4-5 (200-500m dari Haram)", "price": 2500000},
+        "madinah": {"name": "Hotel Bintang 4-5 (100-300m dari Nabawi)", "price": 1800000}
+    },
+    "vip": {
+        "makkah": {"name": "Hotel Bintang 5 (View Ka'bah, <200m)", "price": 5000000},
+        "madinah": {"name": "Hotel Bintang 5 (View Masjid Nabawi, <100m)", "price": 3500000}
+    }
+}
+
+ADDITIONAL_COSTS = {
+    "ekonomis": {"flight": 8000000, "visa": 500000, "transport": 500000, "meals": 300000},
+    "standard": {"flight": 12000000, "visa": 500000, "transport": 800000, "meals": 500000},
+    "premium": {"flight": 18000000, "visa": 500000, "transport": 1200000, "meals": 800000},
+    "vip": {"flight": 30000000, "visa": 500000, "transport": 2000000, "meals": 1500000}
+}
+
+# ============================================
+# ENHANCED FEATURES DATA (v3.9.0)
+# ============================================
+CHECKLIST_DATA = {
+    "dokumen": {
+        "title": "📄 Dokumen",
+        "items": [
+            ("Paspor (valid >6 bln)", True),
+            ("Fotokopi paspor 5 lbr", True),
+            ("Foto 4x6 bg putih 10 lbr", True),
+            ("Buku vaksin meningitis", True),
+            ("Visa umrah (dari travel)", True),
+            ("KTP asli + fotokopi", False),
+            ("Kartu keluarga fotokopi", False),
+            ("Surat nikah (jika berpasangan)", False),
+        ]
+    },
+    "pakaian": {
+        "title": "👔 Pakaian",
+        "items": [
+            ("Kain ihram 2 set (pria)", True),
+            ("Mukena 2 set (wanita)", True),
+            ("Pakaian harian 5-7 stel", True),
+            ("Sandal nyaman untuk jalan", True),
+            ("Jaket tipis (AC/malam)", True),
+            ("Kaos kaki (untuk masjid)", False),
+            ("Sarung 2 buah", False),
+            ("Pakaian dalam secukupnya", True),
+        ]
+    },
+    "kesehatan": {
+        "title": "💊 Kesehatan",
+        "items": [
+            ("Obat pribadi rutin", True),
+            ("Obat flu & batuk", True),
+            ("Paracetamol/pereda nyeri", True),
+            ("Minyak angin/balsem", True),
+            ("Masker medis", True),
+            ("Hand sanitizer", True),
+            ("Vitamin C & multivitamin", False),
+            ("P3K mini (plester, betadine)", False),
+        ]
+    },
+    "elektronik": {
+        "title": "🔌 Elektronik",
+        "items": [
+            ("HP + charger", True),
+            ("Power bank (min 10000mAh)", True),
+            ("Adaptor colokan (tipe G)", True),
+            ("Kabel data cadangan", False),
+            ("Earphone", False),
+        ]
+    },
+    "lainnya": {
+        "title": "🎒 Lainnya",
+        "items": [
+            ("Tas kecil untuk di Haram", True),
+            ("Buku doa & dzikir", True),
+            ("Sajadah travel", False),
+            ("Tasbih", False),
+            ("Gunting kuku kecil", True),
+            ("Sisir", False),
+            ("Payung lipat", False),
+            ("Uang SAR secukupnya", True),
+            ("Kunci gembok koper", False),
+            ("Label nama di koper", True),
+        ]
+    }
+}
+
+DOA_MANASIK = {
+    "niat": {
+        "title": "1️⃣ Niat Ihram",
+        "arab": "لَبَّيْكَ اللَّهُمَّ عُمْرَةً",
+        "latin": "Labbaika Allāhumma 'Umratan",
+        "arti": "Aku penuhi panggilan-Mu ya Allah untuk umrah"
+    },
+    "talbiyah": {
+        "title": "2️⃣ Talbiyah",
+        "arab": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لاَ شَرِيْكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لاَ شَرِيْكَ لَكَ",
+        "latin": "Labbaika Allāhumma labbaik, labbaika lā syarīka laka labbaik, innal ḥamda wan ni'mata laka wal mulk, lā syarīka lak",
+        "arti": "Aku datang memenuhi panggilan-Mu ya Allah, Engkau tidak punya sekutu, segala puji dan nikmat adalah milik-Mu, demikian pula kerajaan, tiada sekutu bagi-Mu"
+    },
+    "kabah": {
+        "title": "3️⃣ Melihat Ka'bah",
+        "arab": "اللَّهُمَّ زِدْ هَذَا الْبَيْتَ تَشْرِيفًا وَتَعْظِيمًا وَتَكْرِيمًا وَمَهَابَةً",
+        "latin": "Allāhumma zid hādhal baita tasyrīfan wa ta'ẓīman wa takrīman wa mahābah",
+        "arti": "Ya Allah, tambahkanlah kemuliaan, keagungan, kehormatan dan kewibawaan pada rumah ini (Ka'bah)"
+    },
+    "thawaf": {
+        "title": "4️⃣ Mulai Thawaf",
+        "arab": "بِسْمِ اللَّهِ وَاللَّهُ أَكْبَرُ، اللَّهُمَّ إِيمَانًا بِكَ وَتَصْدِيقًا بِكِتَابِكَ وَوَفَاءً بِعَهْدِكَ وَاتِّبَاعًا لِسُنَّةِ نَبِيِّكَ مُحَمَّدٍ ﷺ",
+        "latin": "Bismillāhi wallāhu akbar, Allāhumma īmānan bika wa taṣdīqan bikitābika wa wafā'an bi'ahdika wattibā'an lisunnati nabiyyika Muḥammadin ṣallallāhu 'alaihi wasallam",
+        "arti": "Dengan nama Allah, Allah Maha Besar. Ya Allah, dengan iman kepada-Mu, membenarkan kitab-Mu, memenuhi janji-Mu, dan mengikuti sunnah Nabi-Mu Muhammad SAW"
+    },
+    "rukun": {
+        "title": "5️⃣ Rukun Yamani-Hajar Aswad",
+        "arab": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+        "latin": "Rabbanā ātinā fid dunyā ḥasanatan wa fil ākhirati ḥasanatan wa qinā 'adzāban nār",
+        "arti": "Ya Tuhan kami, berilah kami kebaikan di dunia dan kebaikan di akhirat, dan lindungilah kami dari siksa neraka"
+    },
+    "sai": {
+        "title": "6️⃣ Mulai Sa'i (Shafa)",
+        "arab": "إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللَّهِ",
+        "latin": "Innash shafā wal marwata min sya'ā'irillāh",
+        "arti": "Sesungguhnya Shafa dan Marwah adalah sebagian dari syiar Allah"
+    }
+}
+
+EMERGENCY_CONTACTS = [
+    {"name": "🏛️ KBRI Riyadh", "phone": "+966-11-488-2800"},
+    {"name": "🏛️ KJRI Jeddah", "phone": "+966-12-667-6270"},
+    {"name": "🚔 Polisi Saudi", "phone": "999"},
+    {"name": "🚑 Ambulans", "phone": "997"},
+    {"name": "🚒 Pemadam", "phone": "998"},
+    {"name": "🏥 RS King Faisal Makkah", "phone": "+966-12-553-3300"},
+]
+
+# ============================================
+# ENGAGEMENT SYSTEM (v3.5.0)
+# ============================================
+POINTS_CONFIG = {
+    "daily_login": 10,
+    "complete_simulation": 25,
+    "share_social": 50,
+    "referral_signup": 200,
+    "referral_bonus": 75,
+    "quiz_correct": 15,
+    "read_guide": 10,
+}
+
+BADGES = {
+    "newcomer": {"name": "Pendatang Baru", "icon": "🌟", "points": 0},
+    "explorer": {"name": "Penjelajah", "icon": "🔍", "points": 100},
+    "planner": {"name": "Perencana Handal", "icon": "📋", "points": 500},
+    "expert": {"name": "Ahli Umrah", "icon": "🎓", "points": 1000},
+    "ambassador": {"name": "Duta LABBAIK", "icon": "👑", "points": 2500},
+}
+
+QUIZ_QUESTIONS = [
+    {
+        "question": "Apa rukun pertama dalam umrah?",
+        "options": ["Thawaf", "Ihram", "Sa'i", "Tahallul"],
+        "correct": 1,
+        "explanation": "Ihram adalah rukun pertama. Dimulai dari miqat dengan niat dan memakai pakaian ihram."
+    },
+    {
+        "question": "Berapa kali putaran thawaf?",
+        "options": ["5 kali", "6 kali", "7 kali", "8 kali"],
+        "correct": 2,
+        "explanation": "Thawaf dilakukan 7 kali putaran mengelilingi Ka'bah, dimulai dari Hajar Aswad."
+    },
+    {
+        "question": "Sa'i dilakukan antara bukit apa?",
+        "options": ["Arafah-Muzdalifah", "Shafa-Marwah", "Mina-Arafah", "Jabal Nur-Tsur"],
+        "correct": 1,
+        "explanation": "Sa'i dilakukan 7 kali perjalanan antara bukit Shafa dan Marwah."
+    },
+    {
+        "question": "Apa arti 'Labbaik'?",
+        "options": ["Terima kasih", "Aku datang memenuhi panggilan-Mu", "Selamat datang", "Semoga berkah"],
+        "correct": 1,
+        "explanation": "'Labbaik' artinya 'Aku datang memenuhi panggilan-Mu', diucapkan saat talbiyah."
+    },
+    {
+        "question": "Kapan waktu terbaik untuk umrah dari segi biaya?",
+        "options": ["Ramadhan", "Musim haji", "Januari-Februari", "Juni-Juli"],
+        "correct": 2,
+        "explanation": "Januari-Februari adalah low season dengan harga lebih terjangkau."
+    },
+]
+
+# ============================================
+# PAGE CONFIGURATION
+# ============================================
 st.set_page_config(
-    page_title="LABBAIK - Platform Umrah AI #1 Indonesia",
-    page_icon="🕋", layout="wide", initial_sidebar_state="expanded"
+    page_title=f"{BRAND['name']} - {BRAND['description']}",
+    page_icon="🕋",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ═══════════════════════════════════════════════════════════════════
-# 📊 CONSTANTS
-# ═══════════════════════════════════════════════════════════════════
-VERSION = "3.9.0"
-BRAND = {"name": "LABBAIK", "arabic": "لَبَّيْكَ", "tagline": "Panggilan-Nya, Langkahmu"}
-COLORS = {"black": "#1A1A1A", "gold": "#D4AF37", "green": "#006B3C", "sand": "#C9A86C"}
-CONTACT = {"email": "sopian.hadianto@gmail.com", "wa": "+62 815 9658 833"}
-
-# 🔐 DEFAULT ADMIN (will be created if not exists)
-DEFAULT_ADMIN = {"email": "admin@labbaik.id", "password": "@Jakarta01", "name": "Admin LABBAIK"}
-
-# ═══════════════════════════════════════════════════════════════════
-# 🗄️ DATABASE FUNCTIONS (Matching Neon Schema)
-# ═══════════════════════════════════════════════════════════════════
-def get_db():
-    """Get database connection"""
-    try: return st.connection("neon", type="sql")
-    except: return None
-
-def db_available(): return get_db() is not None
-
-def hash_pwd(pwd):
-    salt = secrets.token_hex(16)
-    return f"{salt}:{hashlib.sha256((pwd + salt).encode()).hexdigest()}"
-
-def verify_pwd(pwd, stored):
-    try:
-        if ':' in stored:
-            salt, h = stored.split(':')
-            return hashlib.sha256((pwd + salt).encode()).hexdigest() == h
-        return hashlib.sha256(pwd.encode()).hexdigest() == stored
-    except: return False
-
-# ─────────────────────────────────────────────────────────────────
-# 👤 USER MANAGEMENT
-# ─────────────────────────────────────────────────────────────────
-def db_register(email, pwd, name):
-    """Register user to database"""
-    conn = get_db()
-    if not conn: return False, "Database tidak tersedia"
-    try:
-        existing = conn.query("SELECT id FROM users WHERE email = :e", params={"e": email.lower()}, ttl=0)
-        if len(existing) > 0: return False, "Email sudah terdaftar"
-        
-        role = "admin" if "admin" in email.lower() else "user"
-        with conn.session as s:
-            s.execute("""INSERT INTO users (email, password_hash, name, role, created_at) 
-                        VALUES (:e, :p, :n, :r, CURRENT_TIMESTAMP)""",
-                     {"e": email.lower(), "p": hash_pwd(pwd), "n": name, "r": role})
-            s.commit()
-        return True, f"✅ Registrasi berhasil! Role: {role.upper()}"
-    except Exception as e: return False, str(e)
-
-def db_login(email, pwd):
-    """Login from database"""
-    conn = get_db()
-    if not conn: return None
-    try:
-        result = conn.query("SELECT * FROM users WHERE email = :e", params={"e": email.lower()}, ttl=0)
-        if len(result) == 0: return None
-        user = result.to_dict('records')[0]
-        if verify_pwd(pwd, user.get('password_hash', '')):
-            try:
-                with conn.session as s:
-                    s.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = :id", {"id": user['id']})
-                    s.commit()
-            except: pass
-            return {"id": user['id'], "email": user['email'], "name": user['name'], 
-                    "role": user.get('role', 'user'), "avatar": user.get('avatar', '👤')}
-        return None
-    except: return None
-
-# ─────────────────────────────────────────────────────────────────
-# 📊 PAGE VIEWS (Matching: page_views table)
-# ─────────────────────────────────────────────────────────────────
-def db_log_page_view(page_name, visitor_id):
-    """Log page view - matches page_views table schema"""
-    conn = get_db()
-    if not conn: return
-    try:
-        with conn.session as s:
-            s.execute("""INSERT INTO page_views (page_name, visitor_id, viewed_at) 
-                        VALUES (:p, :v, CURRENT_TIMESTAMP)""", {"p": page_name, "v": visitor_id})
-            s.commit()
-    except: pass
-
-def db_get_visitor_stats():
-    """Get visitor stats from visitor_stats table (real data)"""
-    conn = get_db()
-    default = {"total_visitors": 975, "total_views": 1328, "today_visitors": 0, "today_views": 0}
-    if not conn: return default
-    try:
-        # Read from visitor_stats table
-        r = conn.query("SELECT stat_key, stat_value FROM visitor_stats", ttl=60)
-        stats = {row['stat_key']: row['stat_value'] for row in r.to_dict('records')}
-        
-        base_visitors = stats.get('total_visitors', 975)
-        base_views = stats.get('total_views', 1328)
-        
-        # Add today's stats from page_views
-        r = conn.query("SELECT COUNT(DISTINCT visitor_id) as c FROM page_views WHERE DATE(viewed_at) = CURRENT_DATE", ttl=60)
-        today_visitors = r.to_dict('records')[0]['c'] or 0
-        
-        r = conn.query("SELECT COUNT(*) as c FROM page_views WHERE DATE(viewed_at) = CURRENT_DATE", ttl=60)
-        today_views = r.to_dict('records')[0]['c'] or 0
-        
-        return {
-            "total_visitors": base_visitors + today_visitors,
-            "total_views": base_views + today_views,
-            "today_visitors": today_visitors,
-            "today_views": today_views
-        }
-    except: return default
-
-def db_update_visitor_stats():
-    """Update visitor_stats table with cumulative data"""
-    conn = get_db()
-    if not conn: return
-    try:
-        # Get current page_views count
-        r = conn.query("SELECT COUNT(DISTINCT visitor_id) as visitors, COUNT(*) as views FROM page_views", ttl=0)
-        data = r.to_dict('records')[0]
-        
-        with conn.session as s:
-            # Update total_visitors
-            s.execute("""
-                UPDATE visitor_stats SET stat_value = stat_value + :v, last_updated = CURRENT_TIMESTAMP 
-                WHERE stat_key = 'total_visitors'
-            """, {"v": data['visitors'] or 0})
-            # Update total_views
-            s.execute("""
-                UPDATE visitor_stats SET stat_value = stat_value + :v, last_updated = CURRENT_TIMESTAMP 
-                WHERE stat_key = 'total_views'
-            """, {"v": data['views'] or 0})
-            s.commit()
-    except: pass
-
-def db_ensure_admin():
-    """Ensure default admin account exists with correct password"""
-    conn = get_db()
-    if not conn: return
-    try:
-        # Check if admin exists
-        r = conn.query("SELECT id, password_hash FROM users WHERE email = :e", 
-                      params={"e": DEFAULT_ADMIN["email"]}, ttl=0)
-        
-        pwd_hash = hash_pwd(DEFAULT_ADMIN["password"])
-        
-        if len(r) == 0:
-            # Create new admin
-            with conn.session as s:
-                s.execute("""
-                    INSERT INTO users (email, password_hash, name, role, created_at)
-                    VALUES (:e, :p, :n, 'admin', CURRENT_TIMESTAMP)
-                """, {"e": DEFAULT_ADMIN["email"], "p": pwd_hash, "n": DEFAULT_ADMIN["name"]})
-                s.commit()
-        else:
-            # Update existing admin password to ensure it matches
-            with conn.session as s:
-                s.execute("""
-                    UPDATE users SET password_hash = :p, role = 'admin' WHERE email = :e
-                """, {"e": DEFAULT_ADMIN["email"], "p": pwd_hash})
-                s.commit()
-    except Exception as e:
-        pass  # Silently fail, user can still register manually
-
-def db_get_page_stats():
-    """Get per-page statistics"""
-    conn = get_db()
-    if not conn: return {}
-    try:
-        r = conn.query("SELECT page_name, COUNT(*) as views FROM page_views GROUP BY page_name ORDER BY views DESC", ttl=60)
-        return {row['page_name']: row['views'] for row in r.to_dict('records')}
-    except: return {}
-
-# ─────────────────────────────────────────────────────────────────
-# 🤝 OPEN TRIPS
-# ─────────────────────────────────────────────────────────────────
-def db_get_open_trips():
-    """Get open trips from database"""
-    conn = get_db()
-    if not conn: return []
-    try:
-        r = conn.query("""SELECT t.*, u.name as creator_name FROM open_trips t 
-                         LEFT JOIN users u ON t.creator_id = u.id 
-                         WHERE t.status = 'open' ORDER BY t.created_at DESC LIMIT 50""", ttl=30)
-        trips = r.to_dict('records')
-        for t in trips:
-            t['amenities'] = t.get('amenities', '').split(',') if t.get('amenities') else []
-        return trips
-    except: return []
-
-def db_create_trip(creator_id, trip_data):
-    """Create open trip"""
-    conn = get_db()
-    if not conn: return {"success": False, "error": "Database tidak tersedia"}
-    try:
-        code = f"OT{secrets.token_hex(4).upper()}"
-        with conn.session as s:
-            s.execute("""INSERT INTO open_trips (creator_id, trip_code, title, departure_date, departure_city,
-                        package_type, budget_per_person, duration_days, max_members, status, created_at)
-                        VALUES (:cid, :code, :title, :date, :city, :pkg, :budget, :days, :max, 'open', CURRENT_TIMESTAMP)""",
-                     {"cid": creator_id, "code": code, "title": trip_data.get("title", ""),
-                      "date": trip_data.get("departure_date"), "city": trip_data.get("departure_city", ""),
-                      "pkg": trip_data.get("package_type", "standard"), "budget": trip_data.get("budget_per_person", 0),
-                      "days": trip_data.get("duration_days", 9), "max": trip_data.get("max_members", 10)})
-            s.commit()
-        return {"success": True, "trip_code": code}
-    except Exception as e: return {"success": False, "error": str(e)}
-
-# ─────────────────────────────────────────────────────────────────
-# 💬 FORUM POSTS
-# ─────────────────────────────────────────────────────────────────
-def db_get_forum_posts():
-    """Get forum posts"""
-    conn = get_db()
-    if not conn: return []
-    try:
-        r = conn.query("""SELECT p.*, u.name as author_name, u.avatar as author_avatar 
-                         FROM forum_posts p LEFT JOIN users u ON p.author_id = u.id 
-                         ORDER BY p.created_at DESC LIMIT 50""", ttl=30)
-        return r.to_dict('records')
-    except: return []
-
-def db_create_post(author_id, title, category, content):
-    """Create forum post"""
-    conn = get_db()
-    if not conn: return {"success": False}
-    try:
-        with conn.session as s:
-            s.execute("""INSERT INTO forum_posts (author_id, title, category, content, likes, views, created_at)
-                        VALUES (:aid, :t, :c, :ct, 0, 0, CURRENT_TIMESTAMP)""",
-                     {"aid": author_id, "t": title, "c": category, "ct": content})
-            s.commit()
-        return {"success": True}
-    except: return {"success": False}
-
-# ═══════════════════════════════════════════════════════════════════
-# 💾 CACHED DATA
-# ═══════════════════════════════════════════════════════════════════
-@st.cache_data(ttl=86400, show_spinner=False)
-def load_all_data():
-    return {
-        "scenarios": {
-            "ekonomis": {"name": "Ekonomis", "emoji": "💚", "star": 3, "mult": 1.0},
-            "standard": {"name": "Standard", "emoji": "💙", "star": 4, "mult": 1.3},
-            "premium": {"name": "Premium", "emoji": "🧡", "star": 5, "mult": 1.8},
-            "vip": {"name": "VIP", "emoji": "💛", "star": 5, "mult": 2.5},
-        },
-        "cities": ["Jakarta (CGK)", "Surabaya (SUB)", "Medan (KNO)", "Makassar (UPG)", 
-                   "Bandung (BDO)", "Semarang (SRG)", "Yogyakarta (JOG)", "Denpasar (DPS)",
-                   "Palembang (PLM)", "Balikpapan (BPN)", "Pekanbaru (PKU)", "Padang (PDG)"],
-        "hotels": {
-            "ekonomis": {"makkah": {"name": "Hotel ⭐⭐⭐ (1-2km)", "price": 800000}, "madinah": {"name": "Hotel ⭐⭐⭐ (500m)", "price": 600000}},
-            "standard": {"makkah": {"name": "Hotel ⭐⭐⭐⭐ (500m)", "price": 1500000}, "madinah": {"name": "Hotel ⭐⭐⭐⭐ (300m)", "price": 1000000}},
-            "premium": {"makkah": {"name": "Hotel ⭐⭐⭐⭐⭐ (200m)", "price": 2500000}, "madinah": {"name": "Hotel ⭐⭐⭐⭐⭐ (100m)", "price": 1800000}},
-            "vip": {"makkah": {"name": "Hotel ⭐⭐⭐⭐⭐ View Ka'bah", "price": 5000000}, "madinah": {"name": "Hotel ⭐⭐⭐⭐⭐ View Nabawi", "price": 3500000}}
-        },
-        "costs": {
-            "ekonomis": {"flight": 8000000, "visa": 500000, "transport": 500000, "meals": 300000},
-            "standard": {"flight": 12000000, "visa": 500000, "transport": 800000, "meals": 500000},
-            "premium": {"flight": 18000000, "visa": 500000, "transport": 1200000, "meals": 800000},
-            "vip": {"flight": 30000000, "visa": 500000, "transport": 2000000, "meals": 1500000}
-        },
-        "weather": {m: {"temp": [24,25,28,32,36,38,39,38,37,33,29,25][m-1], "cond": ["Sejuk","Sejuk","Hangat","Panas","Sangat Panas","Ekstrem","Ekstrem","Ekstrem","Panas","Hangat","Sejuk","Sejuk"][m-1]} for m in range(1,13)},
-        "checklist": {
-            "dokumen": {"title": "📄 Dokumen", "items": [
-                ("Paspor (valid >6 bln)", True), ("Fotokopi paspor 5 lbr", True), ("Foto 4x6 bg putih 10 lbr", True),
-                ("KK + KTP asli & copy", True), ("Buku Nikah (jika menikah)", True), ("Kartu Vaksin Meningitis", True),
-                ("Sertifikat Vaksin COVID", True), ("Tiket & Voucher Hotel", True), ("Asuransi Perjalanan", True)]},
-            "pakaian": {"title": "👕 Pakaian", "items": [
-                ("Kain Ihram 2 set (pria)", True), ("Mukena putih 3 set (wanita)", True), ("Baju muslim 5 set", True),
-                ("Sandal jepit thawaf", True), ("Sepatu nyaman", True), ("Jaket tipis (AC)", True)]},
-            "kesehatan": {"title": "💊 Kesehatan", "items": [
-                ("Obat pribadi", True), ("Obat sakit kepala/demam", True), ("Obat maag/pencernaan", True),
-                ("Vitamin & suplemen", True), ("Masker banyak", True), ("Hand sanitizer", True),
-                ("Sunblock SPF 50+", True), ("Minyak angin/balsem", True)]},
-            "elektronik": {"title": "📱 Elektronik", "items": [
-                ("HP + charger", True), ("Power bank", True), ("Adapter universal Type G", True)]},
-            "lainnya": {"title": "🎒 Lainnya", "items": [
-                ("Koper + tas kecil", True), ("Tas pinggang uang", True), ("Payung lipat", True),
-                ("Botol minum", True), ("Uang SAR & IDR", True), ("Buku Doa Umrah", True)]}
-        },
-        "doa_manasik": {
-            "niat": {"title": "1️⃣ Niat Ihram", "arab": "لَبَّيْكَ اللَّهُمَّ عُمْرَةً", "latin": "Labbaika Allahumma 'Umratan", "arti": "Aku memenuhi panggilan-Mu ya Allah untuk umrah"},
-            "talbiyah": {"title": "2️⃣ Talbiyah", "arab": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ", "latin": "Labbaika Allahumma labbaik, labbaika laa syariika laka labbaik...", "arti": "Aku memenuhi panggilan-Mu ya Allah..."},
-            "kabah": {"title": "3️⃣ Melihat Ka'bah", "arab": "اللَّهُمَّ زِدْ هَذَا الْبَيْتَ تَشْرِيفًا وَتَعْظِيمًا وَتَكْرِيمًا وَمَهَابَةً", "latin": "Allahumma zid hadhal baita tasyrifan wa ta'zhiman...", "arti": "Ya Allah, tambahkanlah kemuliaan rumah ini..."},
-            "thawaf": {"title": "4️⃣ Mulai Thawaf", "arab": "بِسْمِ اللهِ وَاللهُ أَكْبَرُ", "latin": "Bismillahi wallahu akbar", "arti": "Dengan nama Allah, Allah Maha Besar"},
-            "rukun": {"title": "5️⃣ Rukun Yamani-Hajar Aswad", "arab": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ", "latin": "Rabbana atina fid-dunya hasanah wa fil-akhirati hasanah wa qina 'adzaban-nar", "arti": "Ya Tuhan kami, berilah kami kebaikan di dunia dan akhirat..."},
-            "sai": {"title": "6️⃣ Mulai Sa'i (Shafa)", "arab": "إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللهِ", "latin": "Innash-shafa wal-marwata min sya'a'irillah", "arti": "Sesungguhnya Shafa dan Marwah adalah syi'ar Allah"},
-        },
-        "locations": {
-            "kabah": {"name": "Ka'bah & Masjidil Haram", "lat": 21.4225, "lon": 39.8262},
-            "safa_marwa": {"name": "Bukit Safa & Marwa", "lat": 21.4234, "lon": 39.8277},
-            "masjid_nabawi": {"name": "Masjid Nabawi", "lat": 24.4672, "lon": 39.6112},
-            "raudhah": {"name": "Raudhah", "lat": 24.4674, "lon": 39.6110},
-            "masjid_quba": {"name": "Masjid Quba", "lat": 24.4397, "lon": 39.6169},
-        },
-        "emergency": [
-            {"name": "🏛️ KBRI Riyadh", "phone": "+966-11-488-2800"},
-            {"name": "🏛️ KJRI Jeddah", "phone": "+966-12-667-6270"},
-            {"name": "🚔 Polisi Saudi", "phone": "999"},
-            {"name": "🚑 Ambulans", "phone": "997"},
-            {"name": "🚒 Pemadam", "phone": "998"},
-            {"name": "🏥 RS King Faisal Makkah", "phone": "+966-12-553-3300"},
-        ],
-    }
-
-@st.cache_data(ttl=3600)
-def get_exchange_rate(): return 4250
-
-def get_season(month):
-    if month == 12: return {"name": "High", "mult": 1.4, "icon": "🔴"}
-    if month in [3, 4]: return {"name": "Ramadan", "mult": 1.6, "icon": "🟣"}
-    if month in [1, 2, 6, 7]: return {"name": "Low", "mult": 0.85, "icon": "🟢"}
-    return {"name": "Regular", "mult": 1.0, "icon": "🔵"}
-
-def fmt(amount, prefix="Rp"): return f"{prefix} {amount:,.0f}".replace(",", ".")
-def fmt_sar(idr): return f"SAR {idr/get_exchange_rate():,.0f}"
-def get_month_name(m): return ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"][m-1]
-def get_month_full(m): return ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"][m-1]
-
-# ═══════════════════════════════════════════════════════════════════
-# 🧮 PLANNER CLASS
-# ═══════════════════════════════════════════════════════════════════
-class UmrahPlanner:
-    def __init__(self): self.data = load_all_data()
+# ============================================
+# OPTIMIZED CSS (Lightweight)
+# ============================================
+st.markdown(f"""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Naskh+Arabic:wght@500;700&display=swap');
     
-    def calculate(self, scenario, num, makkah_nights, madinah_nights, month):
-        d = self.data
-        hotel, cost = d["hotels"][scenario], d["costs"][scenario]
-        season = get_season(month)
-        total_days = makkah_nights + madinah_nights + 2
-        
-        breakdown = {
-            "flight": cost["flight"], "hotel_makkah": hotel["makkah"]["price"] * makkah_nights,
-            "hotel_madinah": hotel["madinah"]["price"] * madinah_nights, "visa": cost["visa"],
-            "transport": cost["transport"], "meals": cost["meals"] * total_days
-        }
-        subtotal = sum(breakdown.values())
-        total_pp = subtotal * season["mult"]
-        
-        return {"scenario": scenario, "num_people": num, "nights_makkah": makkah_nights,
-                "nights_madinah": madinah_nights, "total_days": total_days, "breakdown": breakdown,
-                "total_per_person": total_pp, "grand_total": total_pp * num, "season": season,
-                "hotel_makkah": hotel["makkah"], "hotel_madinah": hotel["madinah"]}
+    [data-testid="stSidebar"] {{
+        background: linear-gradient(180deg, {COLORS['black']} 0%, #2D2D2D 100%);
+    }}
+    [data-testid="stSidebar"] * {{ color: white !important; }}
     
-    def find_by_budget(self, budget, num=1):
-        budget_pp = budget / num
-        available = []
-        for key, tmpl in self.data["scenarios"].items():
-            hotel, cost = self.data["hotels"][key], self.data["costs"][key]
-            min_cost = cost["flight"] + cost["visa"] + cost["transport"] + hotel["makkah"]["price"]*4 + hotel["madinah"]["price"]*3 + cost["meals"]*9
-            if budget_pp >= min_cost:
-                available.append({"key": key, "name": tmpl["name"], "emoji": tmpl["emoji"], "min": min_cost, "star": tmpl["star"]})
-        return sorted(available, key=lambda x: x["min"])
+    .stButton > button {{
+        background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%);
+        color: {COLORS['black']};
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }}
+    .stButton > button:hover {{
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        transform: translateY(-2px);
+    }}
+    
+    [data-testid="stMetricValue"] {{
+        color: {COLORS['gold']} !important;
+        font-weight: 700;
+    }}
+    
+    .labbaik-hero {{
+        background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%);
+        padding: 30px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }}
+    .labbaik-arabic {{
+        font-family: 'Noto Naskh Arabic', serif;
+        font-size: 2.5rem;
+        color: {COLORS['gold']};
+    }}
+    .feature-card {{
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        border: 2px solid #E0E0E0;
+        transition: all 0.3s ease;
+        height: 100%;
+    }}
+    .feature-card:hover {{
+        border-color: {COLORS['gold']};
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.15);
+    }}
+</style>
+""", unsafe_allow_html=True)
 
-# ═══════════════════════════════════════════════════════════════════
-# 🤖 AI CHAT
-# ═══════════════════════════════════════════════════════════════════
-class AIChat:
-    def __init__(self):
-        self.kb = {
-            "rukun": "**5 Rukun Umrah:**\n1️⃣ Ihram - Niat dari miqat\n2️⃣ Thawaf - 7x keliling Ka'bah\n3️⃣ Sa'i - 7x Safa-Marwa\n4️⃣ Tahallul - Potong rambut\n5️⃣ Tertib - Berurutan",
-            "biaya": "**Estimasi 2025:**\n- 💚 Ekonomis: Rp 20-28jt\n- 💙 Standard: Rp 28-40jt\n- 🧡 Premium: Rp 40-60jt\n- 💛 VIP: Rp 60-150jt",
-            "waktu": "**Waktu Terbaik:** Jan-Feb (sejuk+murah), Sep-Okt\n**Hindari:** Jun-Jul (panas 40°C+), Des (mahal)",
-            "persiapan": "**Wajib Bawa:** Paspor >6bln, Foto 4x6, Vaksin Meningitis, Ihram, Sandal nyaman, Obat pribadi, Adaptor Type G",
-            "doa": "**Talbiyah:**\n> لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ",
-        }
-    def chat(self, msg):
-        m = msg.lower()
-        if any(w in m for w in ["rukun", "cara", "langkah"]): return self.kb["rukun"]
-        if any(w in m for w in ["biaya", "harga", "budget", "berapa"]): return self.kb["biaya"]
-        if any(w in m for w in ["waktu", "kapan", "bulan"]): return self.kb["waktu"]
-        if any(w in m for w in ["persiapan", "bawa", "siap"]): return self.kb["persiapan"]
-        if any(w in m for w in ["doa", "talbiyah", "dzikir"]): return self.kb["doa"]
-        if any(w in m for w in ["halo", "hai", "assalam", "hi"]): return "**Waalaikumsalam!** 👋 Saya AI LABBAIK, siap bantu perencanaan umrah Anda."
-        return "Silakan tanya tentang: **rukun umrah, biaya, waktu terbaik, persiapan, doa-doa** 😊"
+# ============================================
+# UTILITY FUNCTIONS
+# ============================================
+def format_currency(amount, currency="Rp"):
+    return f"{currency} {amount:,.0f}".replace(",", ".")
 
-# ═══════════════════════════════════════════════════════════════════
-# 💾 SESSION STATE
-# ═══════════════════════════════════════════════════════════════════
-def init_state():
+def generate_referral_code(user_id):
+    hash_str = hashlib.md5(str(user_id).encode()).hexdigest()[:8].upper()
+    return f"LBK{hash_str}"
+
+# ============================================
+# SESSION STATE INITIALIZATION
+# ============================================
+def init_session_state():
     defaults = {
-        "init": False, "planner": None, "ai": None, "chat_hist": [],
-        "plans": [], "checks": {}, "reminders": [], "show_login": False,
-        "auth": {"ok": False, "user": None}, "stats": {"calcs": 0, "plans": 0}
+        "initialized": False,
+        "chat_history": [],
+        "current_scenario": None,
+        "auth": {"ok": False, "user": None},
+        "users_db": {},
+        "engagement": {
+            "points": 0,
+            "level": 1,
+            "streak": 0,
+            "badges": ["newcomer"],
+            "daily_claimed": False,
+            "referral_count": 0,
+            "quiz_completed": []
+        },
+        "checklist_state": {},
+        "savings_data": {"target": 35000000, "current": 5000000},
+        "departure_date": None,
+        "visitor_count": 1250,
+        "page_views": 3500,
     }
-    for k, v in defaults.items():
-        if k not in st.session_state: st.session_state[k] = v
-    
-    if not st.session_state.planner: st.session_state.planner = UmrahPlanner()
-    if not st.session_state.ai: st.session_state.ai = AIChat()
-    
-    # Generate visitor ID (persistent per session)
-    if "visitor_id" not in st.session_state:
-        st.session_state.visitor_id = secrets.token_hex(8)
-    
-    # Ensure admin account exists (check every session)
-    db_ensure_admin()
-    
-    st.session_state.init = True
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
-def logged_in(): return st.session_state.auth.get("ok", False)
-def get_user(): return st.session_state.auth.get("user")
-def is_admin(): 
-    u = get_user()
-    return u and u.get("role") == "admin"
+def init_engagement():
+    if "engagement" not in st.session_state:
+        st.session_state.engagement = {
+            "points": 0, "level": 1, "streak": 0,
+            "badges": ["newcomer"], "daily_claimed": False,
+            "referral_count": 0, "quiz_completed": []
+        }
 
-def login(email, pwd):
-    if not email or not pwd: return False, "Email dan password harus diisi"
-    
-    # Try database first
-    user = db_login(email.strip().lower(), pwd)
-    if user:
-        st.session_state.auth = {"ok": True, "user": user}
+def award_points(amount, reason=""):
+    init_engagement()
+    st.session_state.engagement["points"] += amount
+    # Check level up
+    points = st.session_state.engagement["points"]
+    new_level = 1 + (points // 500)
+    if new_level > st.session_state.engagement["level"]:
+        st.session_state.engagement["level"] = new_level
+        st.toast(f"🎉 Level Up! Sekarang Level {new_level}")
+    # Check badges
+    for badge_id, badge in BADGES.items():
+        if points >= badge["points"] and badge_id not in st.session_state.engagement["badges"]:
+            st.session_state.engagement["badges"].append(badge_id)
+            st.toast(f"🏅 Badge Baru: {badge['icon']} {badge['name']}")
+
+# ============================================
+# AUTHENTICATION SYSTEM (with Offline Fallback)
+# ============================================
+def is_logged_in():
+    return st.session_state.get("auth", {}).get("ok", False)
+
+def get_current_user():
+    return st.session_state.get("auth", {}).get("user")
+
+def login(email, password):
+    # Check default admin first
+    if email == DEFAULT_ADMIN["email"] and password == DEFAULT_ADMIN["password"]:
+        st.session_state.auth = {
+            "ok": True,
+            "user": {
+                "id": 1,
+                "email": DEFAULT_ADMIN["email"],
+                "name": DEFAULT_ADMIN["name"],
+                "role": DEFAULT_ADMIN["role"],
+            }
+        }
         return True, "Login berhasil!"
     
-    # Fallback: Check default admin credentials
-    if email.strip().lower() == DEFAULT_ADMIN["email"] and pwd == DEFAULT_ADMIN["password"]:
-        st.session_state.auth = {"ok": True, "user": {
-            "id": 1, "email": DEFAULT_ADMIN["email"], 
-            "name": DEFAULT_ADMIN["name"], "role": "admin", "avatar": "👑"
-        }}
-        return True, "Login berhasil! (Offline Mode)"
+    # Check session-based users
+    if email in st.session_state.users_db:
+        user = st.session_state.users_db[email]
+        if user["password"] == password:
+            st.session_state.auth = {"ok": True, "user": user}
+            return True, "Login berhasil!"
     
-    # Fallback: Check session state users
-    if "users_db" in st.session_state:
-        user_data = st.session_state.users_db.get(email.strip().lower())
-        if user_data and verify_pwd(pwd, user_data.get("pwd", "")):
-            st.session_state.auth = {"ok": True, "user": {
-                "id": hash(email), "email": user_data["email"],
-                "name": user_data["name"], "role": user_data.get("role", "user"), "avatar": "👤"
-            }}
-            return True, "Login berhasil! (Offline Mode)"
-    
-    return False, "Email/password salah atau belum terdaftar"
+    return False, "Email/password salah"
 
-def register(email, name, pwd):
-    if not email or not name or not pwd: return False, "Semua field harus diisi"
-    if "@" not in email: return False, "Format email tidak valid"
-    if len(pwd) < 6: return False, "Password minimal 6 karakter"
-    
-    # Try database first
-    ok, msg = db_register(email.strip(), pwd, name.strip())
-    if ok: return True, msg
-    
-    # Fallback: Use session state
-    if "users_db" not in st.session_state:
-        st.session_state.users_db = {}
-    
-    email_lower = email.strip().lower()
-    if email_lower in st.session_state.users_db:
+def register(email, password, name):
+    if email in st.session_state.users_db:
         return False, "Email sudah terdaftar"
     
-    role = "admin" if "admin" in email_lower else "user"
-    st.session_state.users_db[email_lower] = {
-        "email": email_lower, "pwd": hash_pwd(pwd), "name": name.strip(), "role": role
+    user = {
+        "id": len(st.session_state.users_db) + 2,
+        "email": email,
+        "password": password,
+        "name": name,
+        "role": "admin" if "admin" in email else "user",
     }
-    return True, f"✅ Registrasi berhasil! Role: {role.upper()} (Offline Mode)"
+    st.session_state.users_db[email] = user
+    st.session_state.auth = {"ok": True, "user": user}
+    return True, "Registrasi berhasil!"
 
-def logout(): st.session_state.auth = {"ok": False, "user": None}
+def logout():
+    st.session_state.auth = {"ok": False, "user": None}
 
-def track_page(page):
-    """Track page view to database"""
-    db_log_page_view(page, st.session_state.get("visitor_id", "unknown"))
+def get_role_info(role):
+    roles = {
+        "admin": {"name": "Admin", "icon": "👑", "color": "#D4AF37", "badge": "👑"},
+        "user": {"name": "Member", "icon": "👤", "color": "#4CAF50", "badge": "🌟"},
+    }
+    return roles.get(role, roles["user"])
 
-# ═══════════════════════════════════════════════════════════════════
-# 🎨 CACHED UI COMPONENTS
-# ═══════════════════════════════════════════════════════════════════
-@st.cache_data(ttl=86400)
-def hero_html():
-    return '''<div style="text-align:center;padding:30px;background:linear-gradient(135deg,#1A1A1A,#2D2D2D);border-radius:20px;margin-bottom:20px">
-<div style="font-size:1.8rem;color:#D4AF37">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
-<div style="font-size:2rem;font-weight:700;color:white;letter-spacing:.3em;margin:10px 0">LABBAIK</div>
-<div style="color:#C9A86C">Panggilan-Nya, Langkahmu</div>
-<span style="background:#D4AF37;color:#1A1A1A;padding:4px 12px;border-radius:12px;font-size:.75rem;font-weight:600">v3.9.0</span>
-</div>'''
+# ============================================
+# SCENARIO PLANNER
+# ============================================
+class ScenarioPlanner:
+    BASE_PRICES = {
+        "flight": 8000000, "visa": 1500000,
+        "hotel_3star": 800000, "hotel_4star": 1500000, "hotel_5star": 3000000,
+        "transport": 500000, "meals": 300000,
+    }
+    
+    SCENARIO_CONFIGS = {
+        "ekonomis": {"multiplier": 1.0, "hotel_star": 3, "features": [
+            "Hotel bintang 3 (±500m dari Haram)", "Penerbangan ekonomi (transit)",
+            "Bus transportasi bersama", "Makan 3x sehari (catering)"
+        ]},
+        "standard": {"multiplier": 1.3, "hotel_star": 4, "features": [
+            "Hotel bintang 4 (±300m dari Haram)", "Penerbangan ekonomi (direct)",
+            "Bus AC eksklusif", "Makan 3x sehari (prasmanan)"
+        ]},
+        "premium": {"multiplier": 1.8, "hotel_star": 5, "features": [
+            "Hotel bintang 5 (±100m dari Haram)", "Penerbangan bisnis class",
+            "Private car per keluarga", "Makan 3x sehari (fine dining)"
+        ]},
+        "vip": {"multiplier": 2.5, "hotel_star": 5, "features": [
+            "Hotel bintang 5 (view Ka'bah)", "Penerbangan first class",
+            "Limousine service", "Makan premium + room service"
+        ]}
+    }
+    
+    def create_scenario(self, scenario_type="standard", num_people=1, duration_days=9, departure_month=None):
+        config = self.SCENARIO_CONFIGS.get(scenario_type, self.SCENARIO_CONFIGS["standard"])
+        multiplier = config["multiplier"]
+        
+        flight = self.BASE_PRICES["flight"] * multiplier
+        visa = self.BASE_PRICES["visa"]
+        hotel = self.BASE_PRICES[f"hotel_{config['hotel_star']}star"] * duration_days
+        transport = self.BASE_PRICES["transport"] * duration_days
+        meals = self.BASE_PRICES["meals"] * duration_days * multiplier
+        
+        per_person = flight + visa + hotel + transport + meals
+        total = per_person * num_people
+        
+        # Season adjustment
+        season_mult = 1.0
+        if departure_month in [3, 6, 7, 12]:
+            season_mult = 1.3
+        elif departure_month in [1, 2, 9, 10]:
+            season_mult = 0.9
+        
+        total *= season_mult
+        
+        return type('Scenario', (), {
+            'name': SCENARIO_TEMPLATES[scenario_type]["name"],
+            'scenario_type': scenario_type,
+            'num_people': num_people,
+            'duration_days': duration_days,
+            'total': total,
+            'per_person': total / num_people,
+            'estimated_min': total * 0.9,
+            'estimated_max': total * 1.1,
+            'features': config["features"],
+            'hotel_star': config["hotel_star"],
+        })()
+    
+    def compare_scenarios(self, num_people=1, duration_days=9):
+        return [self.create_scenario(s, num_people, duration_days) for s in ["ekonomis", "standard", "premium", "vip"]]
 
-@st.cache_data(ttl=86400)
-def sidebar_html():
-    return '''<div style="text-align:center;padding:15px;border-bottom:1px solid #333;margin-bottom:12px">
-<div style="font-size:1.3rem;color:#D4AF37">لَبَّيْكَ</div>
-<div style="font-size:1rem;font-weight:700;color:white;letter-spacing:.2em">LABBAIK</div>
-<div style="font-size:.7rem;color:#C9A86C">v3.9.0</div>
-</div>'''
-
-def disclaimer_html():
-    return '''<div style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border-left:4px solid #FF9800;border-radius:10px;padding:15px;margin-top:20px">
-<div style="color:#E65100;font-weight:700;margin-bottom:8px">⚠️ Disclaimer</div>
-<div style="color:#5D4037;font-size:.85rem">LABBAIK adalah platform simulasi, BUKAN travel agent resmi. Selalu verifikasi travel agent di <b>siskopatuh.kemenag.go.id</b></div>
-</div>'''
-
-def render_footer():
-    stats = db_get_visitor_stats()
-    st.markdown(f'''<div style="background:linear-gradient(135deg,#1A1A1A,#2D2D2D);padding:25px;border-radius:15px;text-align:center;margin-top:30px">
-<div style="font-size:1.2rem;color:#D4AF37">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
-<div style="font-size:1rem;font-weight:700;color:white;letter-spacing:.2em;margin:8px 0">LABBAIK</div>
-<div style="display:flex;justify-content:center;gap:20px;margin:15px 0">
-<div style="background:rgba(212,175,55,0.15);padding:10px 20px;border-radius:15px">
-<div style="color:#D4AF37;font-size:.7rem">Pengunjung</div>
-<div style="color:#D4AF37;font-size:1.3rem;font-weight:700">{stats['total_visitors']:,}</div>
-</div>
-<div style="background:rgba(0,107,60,0.15);padding:10px 20px;border-radius:15px">
-<div style="color:#C9A86C;font-size:.7rem">Views</div>
-<div style="color:#C9A86C;font-size:1.3rem;font-weight:700">{stats['total_views']:,}</div>
-</div>
-</div>
-<div style="color:#666;font-size:.65rem">© 2025 LABBAIK v3.9.0 • Made with ❤️ by MS Hadianto</div>
-</div>''', unsafe_allow_html=True)
-
-# ═══════════════════════════════════════════════════════════════════
-# 📱 RENDER FUNCTIONS
-# ═══════════════════════════════════════════════════════════════════
+# ============================================
+# RENDER FUNCTIONS - SIDEBAR
+# ============================================
 def render_sidebar():
     with st.sidebar:
-        st.markdown(sidebar_html(), unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style="text-align: center; padding: 20px 10px; border-bottom: 1px solid #333;">
+            <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.8rem; color: {COLORS['gold']};">{BRAND['arabic']}</div>
+            <div style="font-size: 1.2rem; font-weight: 700; letter-spacing: 0.2em; margin-top: 5px;">{BRAND['name']}</div>
+            <div style="font-size: 0.75rem; color: {COLORS['sand']}; margin-top: 5px;">{BRAND['tagline']}</div>
+            <span style="background: {COLORS['gold']}; color: {COLORS['black']}; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">v{BRAND['version']}</span>
+        </div>
+        """, unsafe_allow_html=True)
         
-        u = get_user()
-        if u:
-            badge = "👑" if u.get("role") == "admin" else "👤"
-            st.success(f"{badge} {u['name']}")
+        # User badge
+        user = get_current_user()
+        if user:
+            role_info = get_role_info(user.get("role", "user"))
+            st.markdown(f"""
+            <div style="background: {role_info['color']}30; border: 2px solid {role_info['color']}; border-radius: 10px; padding: 15px; text-align: center; margin: 10px 0;">
+                <div style="font-size: 2rem;">{role_info['badge']}</div>
+                <div style="font-weight: 700;">{user['name']}</div>
+                <div style="color: {role_info['color']}; font-size: 0.8rem;">{role_info['name']}</div>
+            </div>
+            """, unsafe_allow_html=True)
             if st.button("🚪 Logout", use_container_width=True):
                 logout()
                 st.rerun()
         else:
+            st.markdown("""
+            <div style="background: #333; border: 2px solid #D4AF37; border-radius: 10px; padding: 15px; text-align: center; margin: 10px 0;">
+                <div style="font-size: 2rem;">👤</div>
+                <div>Guest User</div>
+            </div>
+            """, unsafe_allow_html=True)
             if st.button("🔑 Login / Register", type="primary", use_container_width=True):
                 st.session_state.show_login = True
                 st.rerun()
         
-        st.divider()
+        st.markdown("---")
         
-        if not logged_in():
-            menu = ["🏠 Beranda", "🕋 Panduan Umrah", "ℹ️ Tentang"]
+        # Navigation
+        if not is_logged_in():
+            nav_items = ["🏠 Beranda", "🕋 Umrah Mandiri", "ℹ️ Tentang"]
         else:
-            menu = ["🏠 Beranda", "💰 Simulasi Biaya", "💵 Cari by Budget", "📋 Buat Rencana",
-                    "🤝 Umrah Bareng", "🕋 Umrah Mandiri", "🤖 Chat AI", "📅 Analisis Waktu",
-                    "✅ Checklist", "💰 Tabungan", "⏰ Countdown", "📿 Doa & Manasik",
-                    "🗺️ Peta Lokasi", "💱 Kurs", "🌤️ Cuaca",
-                    "📦 Tersimpan", "📞 Emergency"]
-            if is_admin():
-                menu.extend(["📊 Analytics", "💼 Business Hub"])
-            menu.append("ℹ️ Tentang")
+            nav_items = [
+                "🏠 Beranda", "💰 Simulasi Biaya", "💵 Cari by Budget",
+                "🤝 Umrah Bareng", "🕋 Umrah Mandiri", "📊 Perbandingan",
+                "🧰 Tools & Fitur", "🎮 Rewards & Quiz", "👤 Profil", "ℹ️ Tentang"
+            ]
         
-        page = st.radio("Menu", menu, label_visibility="collapsed")
+        page = st.radio("📍 Navigasi", nav_items, label_visibility="collapsed")
         
-        st.divider()
+        st.markdown("---")
+        st.markdown(f"""
+        <div style="text-align: center; padding: 10px; font-size: 0.7rem; color: #666;">
+            © 2025 {BRAND['name']}<br>Made with ❤️ by MS Hadianto
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Admin stats widget
-        if is_admin():
-            stats = db_get_visitor_stats()
-            st.markdown(f'''<div style="background:rgba(0,107,60,0.1);padding:10px;border-radius:8px;font-size:.75rem">
-📊 <b>{stats['total_visitors']:,}</b> visitors<br>
-📅 Today: <b>{stats['today_visitors']}</b> | Views: <b>{stats['today_views']}</b>
-</div>''', unsafe_allow_html=True)
-        
-        tips = ["Book 3-4 bulan sebelumnya", "Hindari Ramadhan jika budget terbatas", "Tukar uang ke SAR sebelum berangkat"]
-        st.caption(f"💡 _{random.choice(tips)}_")
         return page
 
-def render_login():
-    c1, c2, c3 = st.columns([1, 2, 1])
-    with c2:
-        st.markdown("## 🔐 Login / Register")
-        tab1, tab2 = st.tabs(["🔑 Login", "📝 Register"])
+# ============================================
+# RENDER FUNCTIONS - MAIN PAGES
+# ============================================
+def render_home():
+    st.markdown(f"""
+    <div class="labbaik-hero">
+        <div class="labbaik-arabic">{BRAND['talbiyah']}</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: white; letter-spacing: 0.3em; margin: 10px 0;">{BRAND['name']}</div>
+        <div style="color: {COLORS['sand']};">{BRAND['tagline']}</div>
+        <p style="color: {COLORS['sand']}; margin-top: 10px;">{BRAND['description']}</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Stats bar
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("🤖 AI Assistant", "24/7")
+    with col2:
+        st.metric("🏙️ Kota", "10+")
+    with col3:
+        st.metric("📊 Skenario", "5+")
+    with col4:
+        st.metric("🆓 Akses", "GRATIS")
+    
+    if not is_logged_in():
+        st.markdown(f"""
+        <div style="background: {COLORS['gold']}20; border: 2px solid {COLORS['gold']}; border-radius: 15px; padding: 25px; text-align: center; margin: 20px 0;">
+            <h3 style="color: {COLORS['black']};">🔐 Login untuk Akses Penuh</h3>
+            <p>Daftar GRATIS untuk semua fitur perencanaan umrah</p>
+        </div>
+        """, unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🔑 Login / Register Sekarang", type="primary", use_container_width=True):
+                st.session_state.show_login = True
+                st.rerun()
+    else:
+        user = get_current_user()
+        st.success(f"Assalamualaikum, **{user.get('name', 'User')}**! Selamat merencanakan umrah.")
+    
+    # Features grid
+    st.markdown("### ✨ Fitur Utama")
+    features = [
+        ("🤖", "AI Assistant", "Tanya apapun tentang umrah"),
+        ("💰", "Simulasi Biaya", "Hitung estimasi biaya"),
+        ("📊", "Perbandingan", "Bandingkan paket"),
+        ("🤝", "Umrah Bareng", "Cari teman perjalanan"),
+        ("📿", "Doa & Manasik", "Panduan lengkap ibadah"),
+        ("✅", "Checklist", "Persiapan perjalanan"),
+    ]
+    cols = st.columns(3)
+    for i, (icon, title, desc) in enumerate(features):
+        with cols[i % 3]:
+            st.markdown(f"""
+            <div class="feature-card">
+                <div style="font-size: 2rem;">{icon}</div>
+                <div style="font-weight: 700; margin: 5px 0;">{title}</div>
+                <div style="font-size: 0.85rem; color: #666;">{desc}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+def render_login_page():
+    st.header("🔑 Login / Register")
+    
+    tab1, tab2 = st.tabs(["Login", "Register"])
+    
+    with tab1:
+        with st.form("login_form"):
+            email = st.text_input("Email", placeholder="admin@labbaik.id")
+            password = st.text_input("Password", type="password", placeholder="@Jakarta01")
+            submitted = st.form_submit_button("🔓 Login", use_container_width=True)
+            
+            if submitted:
+                success, msg = login(email, password)
+                if success:
+                    st.success(msg)
+                    st.session_state.show_login = False
+                    st.rerun()
+                else:
+                    st.error(msg)
         
-        with tab1:
-            with st.form("login_form"):
-                email = st.text_input("Email", placeholder="email@example.com")
-                pwd = st.text_input("Password", type="password")
-                if st.form_submit_button("🚀 Masuk", use_container_width=True):
-                    ok, msg = login(email, pwd)
-                    if ok:
-                        st.success(f"✅ {msg}")
-                        st.session_state.show_login = False
-                        st.rerun()
-                    else: st.error(f"❌ {msg}")
+        st.info("**Demo Admin:** admin@labbaik.id / @Jakarta01")
+    
+    with tab2:
+        with st.form("register_form"):
+            name = st.text_input("Nama Lengkap")
+            email = st.text_input("Email", key="reg_email")
+            password = st.text_input("Password", type="password", key="reg_pass")
+            submitted = st.form_submit_button("📝 Register", use_container_width=True)
+            
+            if submitted and name and email and password:
+                success, msg = register(email, password, name)
+                if success:
+                    st.success(msg)
+                    st.session_state.show_login = False
+                    st.rerun()
+                else:
+                    st.error(msg)
+
+def render_cost_simulation():
+    st.header("💰 Simulasi Biaya Umrah")
+    
+    with st.form("cost_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            scenario = st.selectbox("Skenario Paket", list(SCENARIO_TEMPLATES.keys()), format_func=lambda x: SCENARIO_TEMPLATES[x]["name"])
+            num_people = st.number_input("Jumlah Jamaah", 1, 50, 2)
+            duration = st.slider("Durasi (hari)", 7, 21, 9)
+        with col2:
+            departure_city = st.selectbox("Kota Keberangkatan", list(DEPARTURE_CITIES.keys()))
+            departure_month = st.selectbox("Bulan", range(1, 13), format_func=lambda x: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"][x-1])
         
-        with tab2:
-            with st.form("register_form"):
-                new_email = st.text_input("Email", key="reg_email", placeholder="email@example.com")
-                new_name = st.text_input("Nama Lengkap", placeholder="Nama Anda")
-                new_pwd = st.text_input("Password", type="password", key="reg_pwd")
-                new_pwd2 = st.text_input("Konfirmasi Password", type="password")
-                st.caption("💡 Email dengan kata 'admin' otomatis dapat akses Admin")
-                
-                if st.form_submit_button("📝 Daftar", use_container_width=True):
-                    if new_pwd != new_pwd2: st.error("❌ Password tidak cocok")
-                    else:
-                        ok, msg = register(new_email, new_name, new_pwd)
-                        if ok: st.success(f"{msg}")
-                        else: st.error(f"❌ {msg}")
+        submitted = st.form_submit_button("🔍 Hitung Biaya", use_container_width=True)
+    
+    if submitted:
+        planner = ScenarioPlanner()
+        result = planner.create_scenario(scenario, num_people, duration, departure_month)
         
+        award_points(POINTS_CONFIG["complete_simulation"], "Simulasi biaya")
+        
+        st.markdown("### 📊 Hasil Simulasi")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Minimum", format_currency(result.estimated_min))
+        with col2:
+            st.metric("Total Maksimum", format_currency(result.estimated_max))
+        with col3:
+            st.metric("Per Orang", format_currency(result.per_person))
+        
+        # Chart
+        components = [
+            {"Komponen": "Tiket Pesawat", "Estimasi": result.total * 0.25},
+            {"Komponen": "Hotel", "Estimasi": result.total * 0.35},
+            {"Komponen": "Makan", "Estimasi": result.total * 0.15},
+            {"Komponen": "Transportasi", "Estimasi": result.total * 0.10},
+            {"Komponen": "Visa & Lainnya", "Estimasi": result.total * 0.15},
+        ]
+        fig = px.pie(pd.DataFrame(components), values="Estimasi", names="Komponen", title="Distribusi Biaya")
+        st.plotly_chart(fig, use_container_width=True)
+        
+        st.markdown("### ✨ Fasilitas Termasuk")
+        for f in result.features:
+            st.markdown(f"✅ {f}")
+
+def render_budget_finder():
+    st.header("💵 Cari Paket Sesuai Budget")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        budget = st.number_input("💰 Budget Anda (Rp)", 10_000_000, 500_000_000, 35_000_000, step=1_000_000)
+    with col2:
+        num_people = st.number_input("👥 Jumlah Jamaah", 1, 50, 1)
+    
+    budget_per_person = budget / num_people
+    st.markdown(f"""
+    <div style="background: {COLORS['black']}; padding: 15px; border-radius: 10px; text-align: center; margin: 15px 0;">
+        <div style="color: {COLORS['sand']}; font-size: 0.85rem;">Budget Per Orang</div>
+        <div style="color: {COLORS['gold']}; font-size: 1.8rem; font-weight: 700;">Rp {budget_per_person:,.0f}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Find suitable packages
+    planner = ScenarioPlanner()
+    available = []
+    for scenario_type in ["ekonomis", "standard", "premium", "vip"]:
+        result = planner.create_scenario(scenario_type, 1, 9)
+        if result.per_person <= budget_per_person:
+            available.append(result)
+    
+    if available:
+        st.success(f"✅ **{len(available)} Paket Tersedia** untuk budget Anda!")
+        for pkg in available:
+            with st.expander(f"📦 {pkg.name} - Rp {pkg.per_person:,.0f}/orang"):
+                st.markdown(f"**Hotel:** ⭐ {pkg.hotel_star}")
+                st.markdown(f"**Durasi:** {pkg.duration_days} hari")
+                for f in pkg.features:
+                    st.markdown(f"✅ {f}")
+    else:
+        st.warning("⚠️ Budget belum mencukupi. Minimum Rp 20 juta per orang untuk Paket Ekonomis.")
+
+def render_scenario_comparison():
+    st.header("📊 Perbandingan Skenario")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        num_people = st.number_input("Jumlah Jamaah", 1, 50, 1)
+    with col2:
+        duration = st.slider("Durasi (hari)", 7, 21, 9)
+    
+    if st.button("🔍 Bandingkan Semua", use_container_width=True):
+        planner = ScenarioPlanner()
+        scenarios = planner.compare_scenarios(num_people, duration)
+        
+        data = []
+        for s in scenarios:
+            data.append({
+                "Skenario": s.name,
+                "Hotel": f"⭐ {s.hotel_star}",
+                "Min (Rp)": s.estimated_min,
+                "Max (Rp)": s.estimated_max,
+            })
+        
+        st.dataframe(pd.DataFrame(data).style.format({"Min (Rp)": "{:,.0f}", "Max (Rp)": "{:,.0f}"}), use_container_width=True)
+        
+        # Bar chart
+        fig = px.bar(pd.DataFrame(data), x="Skenario", y="Max (Rp)", color="Skenario", title="Perbandingan Harga")
+        st.plotly_chart(fig, use_container_width=True)
+
+def render_tools_features():
+    st.header("🧰 Tools & Fitur")
+    
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["💰 Tabungan", "⏰ Countdown", "📿 Doa & Manasik", "✅ Checklist", "📞 Darurat"])
+    
+    # Tab 1: Savings Calculator
+    with tab1:
+        st.subheader("💰 Kalkulator Tabungan")
+        col1, col2 = st.columns(2)
+        with col1:
+            target = st.number_input("🎯 Target Biaya Umrah", 10_000_000, 200_000_000, 35_000_000, step=1_000_000)
+            current = st.number_input("💵 Tabungan Saat Ini", 0, 200_000_000, 5_000_000, step=500_000)
+        with col2:
+            target_date = st.date_input("📅 Target Berangkat", datetime.now() + timedelta(days=365))
+        
+        remaining = target - current
+        days_left = (target_date - datetime.now().date()).days
+        
+        if days_left > 0 and remaining > 0:
+            daily = remaining / days_left
+            weekly = remaining / (days_left / 7)
+            monthly = remaining / (days_left / 30)
+            
+            progress = (current / target) * 100
+            st.progress(min(progress / 100, 1.0))
+            st.markdown(f"**Progress: {progress:.1f}%** - Kurang **Rp {remaining:,.0f}**")
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("📅 Per Hari", f"Rp {daily:,.0f}")
+            with col2:
+                st.metric("📆 Per Minggu", f"Rp {weekly:,.0f}")
+            with col3:
+                st.metric("🗓️ Per Bulan", f"Rp {monthly:,.0f}")
+            
+            if monthly > 5_000_000:
+                st.warning("⚠️ Target bulanan cukup tinggi. Pertimbangkan perpanjang waktu menabung.")
+        elif remaining <= 0:
+            st.success("🎉 Alhamdulillah! Target tabungan sudah tercapai!")
+            st.balloons()
+    
+    # Tab 2: Countdown
+    with tab2:
+        st.subheader("⏰ Countdown Keberangkatan")
+        dep_date = st.date_input("📅 Tanggal Berangkat", datetime.now() + timedelta(days=90), key="countdown_date")
+        
+        days_left = (dep_date - datetime.now().date()).days
+        
+        if days_left > 0:
+            weeks = days_left // 7
+            remaining_days = days_left % 7
+            
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%); padding: 30px; border-radius: 15px; text-align: center; margin: 20px 0;">
+                <div style="color: {COLORS['gold']}; font-size: 4rem; font-weight: 800;">{days_left}</div>
+                <div style="color: white; font-size: 1.2rem;">Hari Menuju Umrah</div>
+                <div style="color: {COLORS['sand']}; margin-top: 10px;">{weeks} minggu {remaining_days} hari</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Milestones
+            milestones = [
+                (90, "H-90: Booking tiket & hotel"),
+                (60, "H-60: Apply visa"),
+                (30, "H-30: Vaksin meningitis"),
+                (14, "H-14: Cek kelengkapan"),
+                (7, "H-7: Packing"),
+                (3, "H-3: Final check"),
+            ]
+            st.markdown("**📌 Milestone:**")
+            for m_days, m_text in milestones:
+                status = "✅" if days_left <= m_days else "⬜"
+                st.markdown(f"{status} {m_text}")
+        elif days_left == 0:
+            st.success("🕋 Hari ini berangkat! Labbaik Allahumma Labbaik!")
+            st.balloons()
+        else:
+            st.info("📅 Tanggal sudah lewat. Pilih tanggal keberangkatan baru.")
+    
+    # Tab 3: Doa & Manasik
+    with tab3:
+        st.subheader("📿 Doa & Manasik Umrah")
+        
+        doa_tab, tata_tab = st.tabs(["🤲 Doa-doa", "📖 Tata Cara"])
+        
+        with doa_tab:
+            for key, doa in DOA_MANASIK.items():
+                with st.expander(doa["title"]):
+                    st.markdown(f"""
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                        <div style="font-family: 'Noto Naskh Arabic', serif; font-size: 1.5rem; text-align: right; color: {COLORS['black']}; line-height: 2;">{doa['arab']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.markdown(f"**Latin:** *{doa['latin']}*")
+                    st.markdown(f"**Arti:** {doa['arti']}")
+        
+        with tata_tab:
+            steps = [
+                ("1️⃣", "Ihram", "Mandi sunnah, pakai pakaian ihram, niat dari miqat"),
+                ("2️⃣", "Talbiyah", "Membaca talbiyah dari miqat sampai thawaf"),
+                ("3️⃣", "Thawaf", "7 putaran mengelilingi Ka'bah"),
+                ("4️⃣", "Sholat 2 Rakaat", "Di belakang Maqam Ibrahim"),
+                ("5️⃣", "Minum Zamzam", "Di area zamzam sambil berdoa"),
+                ("6️⃣", "Sa'i", "7 kali antara Shafa dan Marwah"),
+                ("7️⃣", "Tahallul", "Potong/cukur rambut, umrah selesai"),
+            ]
+            for icon, title, desc in steps:
+                st.markdown(f"""
+                <div style="display: flex; align-items: flex-start; margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 10px; border-left: 4px solid {COLORS['gold']};">
+                    <div style="font-size: 1.5rem; margin-right: 15px;">{icon}</div>
+                    <div>
+                        <div style="font-weight: 700;">{title}</div>
+                        <div style="color: #666; font-size: 0.9rem;">{desc}</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    # Tab 4: Checklist
+    with tab4:
+        st.subheader("✅ Checklist Persiapan Umrah")
+        st.caption("🔴 = Wajib | ⚪ = Opsional")
+        
+        total_items = 0
+        checked_items = 0
+        
+        for cat_key, cat_data in CHECKLIST_DATA.items():
+            with st.expander(cat_data["title"], expanded=True):
+                for item, required in cat_data["items"]:
+                    key = f"check_{cat_key}_{item}"
+                    if key not in st.session_state.checklist_state:
+                        st.session_state.checklist_state[key] = False
+                    
+                    total_items += 1
+                    marker = "🔴" if required else "⚪"
+                    checked = st.checkbox(f"{marker} {item}", value=st.session_state.checklist_state[key], key=key)
+                    st.session_state.checklist_state[key] = checked
+                    if checked:
+                        checked_items += 1
+        
+        progress = (checked_items / total_items) * 100 if total_items > 0 else 0
+        st.progress(progress / 100)
+        st.markdown(f"**Progress: {progress:.0f}%** ({checked_items}/{total_items} items)")
+        
+        if progress == 100:
+            st.success("🎉 Alhamdulillah! Semua persiapan lengkap!")
+            st.balloons()
+    
+    # Tab 5: Emergency
+    with tab5:
+        st.subheader("📞 Kontak Darurat")
+        for contact in EMERGENCY_CONTACTS:
+            st.markdown(f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f9f9f9; border-radius: 10px; margin-bottom: 8px;">
+                <span style="font-weight: 600;">{contact['name']}</span>
+                <span style="color: {COLORS['gold']}; font-weight: 700;">{contact['phone']}</span>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.markdown("**📱 App Wajib di Saudi:**")
+        apps = ["Eatmarna - Booking sholat di Haram", "Tawakkalna - Health app resmi", "Nusuk - Layanan haji & umrah"]
+        for app in apps:
+            st.markdown(f"• {app}")
+
+def render_engagement_page():
+    st.header("🎮 Rewards & Quiz Center")
+    
+    init_engagement()
+    eng = st.session_state.engagement
+    points = eng["points"]
+    level = 1 + (points // 500)
+    
+    # Stats
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(f"""
+        <div style="background: {COLORS['black']}; padding: 20px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 2rem;">⭐</div>
+            <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800;">{points:,}</div>
+            <div style="color: {COLORS['sand']};">LABBAIK Points</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"""
+        <div style="background: {COLORS['black']}; padding: 20px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 2rem;">🏆</div>
+            <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800;">{level}</div>
+            <div style="color: {COLORS['sand']};">Level</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown(f"""
+        <div style="background: {COLORS['black']}; padding: 20px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 2rem;">🔥</div>
+            <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800;">{eng['streak']}</div>
+            <div style="color: {COLORS['sand']};">Streak</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Daily claim
+    if not eng["daily_claimed"]:
+        if st.button("🎁 Klaim Bonus Harian (+10 LP)", use_container_width=True):
+            award_points(10, "Daily login")
+            st.session_state.engagement["daily_claimed"] = True
+            st.session_state.engagement["streak"] += 1
+            st.success("✅ +10 LP diklaim!")
+            st.rerun()
+    else:
+        st.info("✅ Bonus harian sudah diklaim. Kembali besok!")
+    
+    st.markdown("---")
+    
+    # Badges
+    st.subheader("🏅 Badges")
+    badge_cols = st.columns(5)
+    for i, (badge_id, badge) in enumerate(BADGES.items()):
+        with badge_cols[i % 5]:
+            owned = badge_id in eng["badges"]
+            opacity = "1" if owned else "0.3"
+            st.markdown(f"""
+            <div style="text-align: center; opacity: {opacity}; padding: 10px;">
+                <div style="font-size: 2rem;">{badge['icon']}</div>
+                <div style="font-size: 0.75rem;">{badge['name']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Quiz
+    st.subheader("🧠 Quiz Umrah")
+    
+    if "quiz_index" not in st.session_state:
+        st.session_state.quiz_index = 0
+        st.session_state.quiz_score = 0
+    
+    if st.session_state.quiz_index < len(QUIZ_QUESTIONS):
+        q = QUIZ_QUESTIONS[st.session_state.quiz_index]
+        st.markdown(f"**Soal {st.session_state.quiz_index + 1}/{len(QUIZ_QUESTIONS)}:** {q['question']}")
+        
+        answer = st.radio("Pilih jawaban:", q["options"], key=f"quiz_{st.session_state.quiz_index}")
+        
+        if st.button("Submit Jawaban"):
+            if q["options"].index(answer) == q["correct"]:
+                st.success("✅ Benar!")
+                st.session_state.quiz_score += 1
+                award_points(POINTS_CONFIG["quiz_correct"], "Quiz benar")
+            else:
+                st.error(f"❌ Salah. Jawaban: {q['options'][q['correct']]}")
+            st.info(f"💡 {q['explanation']}")
+            st.session_state.quiz_index += 1
+            st.rerun()
+    else:
+        score = st.session_state.quiz_score
+        total = len(QUIZ_QUESTIONS)
+        st.success(f"🎉 Quiz Selesai! Skor: {score}/{total}")
+        if score == total:
+            st.balloons()
+        if st.button("🔄 Ulangi Quiz"):
+            st.session_state.quiz_index = 0
+            st.session_state.quiz_score = 0
+            st.rerun()
+    
+    st.markdown("---")
+    
+    # Referral
+    st.subheader("🎁 Ajak Teman")
+    user = get_current_user()
+    user_id = user.get("id", "guest") if user else "guest"
+    ref_code = generate_referral_code(str(user_id))
+    
+    st.markdown(f"""
+    <div style="background: {COLORS['black']}; padding: 20px; border-radius: 15px; text-align: center;">
+        <div style="color: {COLORS['sand']};">Kode Referral Anda:</div>
+        <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800; letter-spacing: 4px;">{ref_code}</div>
+        <div style="color: #888; font-size: 0.85rem; margin-top: 10px;">Dapat +200 LP setiap teman mendaftar!</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def render_umrah_mandiri():
+    st.header("🕋 Umrah Mandiri")
+    st.markdown("Panduan lengkap umrah mandiri & forum sharing!")
+    
+    tab1, tab2 = st.tabs(["📖 Panduan", "💬 FAQ"])
+    
+    with tab1:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%); padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+            <h3 style="color: white; margin: 0;">✅ Umrah Mandiri itu LEGAL!</h3>
+            <p style="color: #E8F5E9; margin: 10px 0 0 0;">Sejak 2019, Saudi membuka e-visa umrah untuk solo traveler</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("### 📝 Langkah Umrah Mandiri")
+        steps = [
+            "1️⃣ **Persiapan Dokumen** - Paspor valid >6 bulan",
+            "2️⃣ **Booking Tiket** - Langsung ke website maskapai",
+            "3️⃣ **Booking Hotel** - Via Booking.com/Agoda",
+            "4️⃣ **Apply Visa** - Via nusuk.sa atau agen visa",
+            "5️⃣ **Beli Asuransi** - Wajib! Cover medical",
+            "6️⃣ **Pelajari Manasik** - Lihat tab Doa & Manasik",
+            "7️⃣ **Siapkan Perlengkapan** - Gunakan Checklist",
+            "8️⃣ **Berangkat** - Bismillah! 🕋",
+        ]
+        for step in steps:
+            st.markdown(step)
+        
+        st.markdown("### 💰 Estimasi Biaya (9 hari)")
+        costs = [
+            ("✈️ Tiket PP", "Rp 7-12 juta"),
+            ("📄 Visa", "Rp 500rb-1.5 juta"),
+            ("🏨 Hotel Makkah (4 malam)", "Rp 2-5 juta"),
+            ("🏨 Hotel Madinah (3 malam)", "Rp 1.5-4 juta"),
+            ("🚗 Transport", "Rp 1-2 juta"),
+            ("🍽️ Makan & lainnya", "Rp 1.5-3 juta"),
+        ]
+        for item, price in costs:
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.markdown(item)
+            with col2:
+                st.markdown(f"**{price}**")
+        st.markdown(f"**TOTAL: Rp 15-25 juta**")
+    
+    with tab2:
+        faqs = [
+            ("Wanita boleh umrah mandiri sendiri?", "Ya! Sejak 2021, wanita 18+ tidak perlu mahram."),
+            ("Bagaimana dapat visa tanpa travel?", "Via nusuk.sa (self-apply) atau agen visa online."),
+            ("Perlu vaksin apa?", "Meningitis wajib. COVID-19 tidak wajib (per 2024)."),
+            ("Tidak bisa bahasa Arab?", "Tidak masalah! Banyak yang bisa Inggris. Gunakan Google Translate."),
+        ]
+        for q, a in faqs:
+            with st.expander(q):
+                st.markdown(a)
+
+def render_umrah_bareng():
+    st.header("🤝 Umrah Bareng")
+    st.info("🚧 Fitur ini sedang dalam pengembangan. Stay tuned!")
+    
+    st.markdown("""
+    **Fitur yang akan hadir:**
+    - 🔍 Cari teman perjalanan umrah
+    - ➕ Buat open trip sendiri
+    - 💬 Grup WhatsApp koordinasi
+    - 💰 Share cost untuk lebih hemat
+    """)
+
+def render_profile():
+    st.header("👤 Profil Saya")
+    
+    user = get_current_user()
+    if not user:
+        st.warning("🔐 Silakan login")
+        return
+    
+    role_info = get_role_info(user.get("role", "user"))
+    
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st.markdown(f"""
+        <div style="background: {role_info['color']}40; border: 3px solid {role_info['color']}; border-radius: 15px; padding: 25px; text-align: center;">
+            <div style="font-size: 4rem;">{role_info['badge']}</div>
+            <h2 style="margin: 10px 0;">{user.get('name', 'User')}</h2>
+            <p style="color: {role_info['color']}; font-weight: bold;">{role_info['name']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("### 📋 Informasi Akun")
+        st.markdown(f"**Email:** {user.get('email', '-')}")
+        st.markdown(f"**Role:** {role_info['name']}")
+        
+        # Engagement stats
+        init_engagement()
+        eng = st.session_state.engagement
+        st.markdown(f"**Points:** {eng['points']:,} LP")
+        st.markdown(f"**Level:** {1 + eng['points'] // 500}")
+        st.markdown(f"**Badges:** {len(eng['badges'])}")
+
+def render_about():
+    st.markdown(f"""
+    <div class="labbaik-hero">
+        <div class="labbaik-arabic">{BRAND['talbiyah']}</div>
+        <div style="font-size: 1.8rem; font-weight: 700; color: white; letter-spacing: 0.3em; margin: 15px 0;">{BRAND['name']}</div>
+        <div style="color: {COLORS['sand']}; font-size: 1rem;">{BRAND['tagline']}</div>
+        <div style="color: {COLORS['sand']}; margin-top: 10px;">{BRAND['description']}</div>
+        <span style="background: {COLORS['gold']}; color: {COLORS['black']}; padding: 5px 15px; border-radius: 15px; font-weight: 700; margin-top: 15px; display: inline-block;">v{BRAND['version']}</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    tab1, tab2 = st.tabs(["👨‍💻 Developer", "⚖️ Disclaimer"])
+    
+    with tab1:
+        st.markdown("""
+        ### 👨‍💻 Developer
+        
+        **MS Hadianto**  
+        Founder & Lead Developer - KIM Consulting
+        
+        📧 sopian.hadianto@gmail.com  
+        📱 +62 815 9658 833
+        
+        ---
+        
+        ### 🔧 Tech Stack
+        - **Frontend:** Streamlit
+        - **AI:** Groq (Llama 3.3), OpenAI
+        - **Database:** Neon PostgreSQL
+        - **Hosting:** Streamlit Cloud
+        """)
+    
+    with tab2:
+        st.markdown(f"""
+        <div style="background: #FFEBEE; border: 2px solid #D32F2F; border-radius: 15px; padding: 20px;">
+            <h4 style="color: #B71C1C;">⚠️ DISCLAIMER</h4>
+            <p><strong>LABBAIK</strong> adalah platform simulasi & perencanaan umrah.</p>
+            <ul>
+                <li>BUKAN travel agent</li>
+                <li>BUKAN pengganti konsultasi dengan travel resmi</li>
+                <li>Verifikasi travel agent di: <strong>siskopatuh.kemenag.go.id</strong></li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        ### 📋 Sumber Resmi
+        - **Arab Saudi:** nusuk.sa
+        - **Indonesia:** kemenag.go.id
+        - **KBRI Riyadh:** +966-11-488-2800
+        """)
+
+def render_footer():
+    st.markdown(f"""
+    <div style="background: {COLORS['black']}; padding: 30px; border-radius: 15px; text-align: center; margin-top: 30px;">
+        <div style="font-family: 'Noto Naskh Arabic', serif; color: {COLORS['gold']}; font-size: 1.5rem;">{BRAND['talbiyah']}</div>
+        <div style="color: white; font-weight: 700; letter-spacing: 0.2em; margin: 10px 0;">{BRAND['name']}</div>
+        <div style="color: {COLORS['sand']}; font-size: 0.85rem;">{BRAND['tagline']}</div>
+        <div style="color: #666; font-size: 0.75rem; margin-top: 15px;">
+            © 2025 LABBAIK | Made with ❤️ by MS Hadianto | v{BRAND['version']}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ============================================
+# MAIN APPLICATION
+# ============================================
+def main():
+    init_session_state()
+    init_engagement()
+    
+    # Check for login page redirect
+    if st.session_state.get("show_login") and not is_logged_in():
+        render_login_page()
         if st.button("← Kembali"):
             st.session_state.show_login = False
             st.rerun()
-
-def render_home():
-    track_page("Home")
-    st.markdown(hero_html(), unsafe_allow_html=True)
-    
-    stats = db_get_visitor_stats()
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("🤖 AI", "24/7")
-    c2.metric("🏙️ Kota", "12+")
-    c3.metric("👥 Users", f"{stats['total_visitors']:,}")
-    c4.metric("💰", "GRATIS")
-    
-    if not logged_in():
-        st.info("🔐 **Login untuk akses penuh** - Simulasi biaya, itinerary, dan fitur lainnya!")
-        c1, c2, c3 = st.columns(3)
-        c1.markdown("### 🤖 AI Assistant\nTanya apapun tentang umrah")
-        c2.markdown("### 💰 Simulasi Biaya\nHitung estimasi biaya")
-        c3.markdown("### 🤝 Umrah Bareng\nCari teman perjalanan")
-    else:
-        u = get_user()
-        st.success(f"👋 **Assalamualaikum, {u['name']}!**")
-        
-        st.subheader("🚀 Estimasi Cepat")
-        data = load_all_data()
-        c1, c2 = st.columns(2)
-        scn = c1.selectbox("Paket", list(data["scenarios"].keys()), format_func=lambda x: f"{data['scenarios'][x]['emoji']} {data['scenarios'][x]['name']}")
-        num = c2.number_input("Jamaah", 1, 50, 1)
-        
-        if st.button("🔍 Hitung", use_container_width=True):
-            r = st.session_state.planner.calculate(scn, num, 4, 3, 1)
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Per Orang", fmt(r["total_per_person"]))
-            c2.metric("Total", fmt(r["grand_total"]))
-            c3.metric("Durasi", f"{r['total_days']} hari")
-    
-    st.markdown(disclaimer_html(), unsafe_allow_html=True)
-    render_footer()
-
-def render_simulation():
-    track_page("Simulasi Biaya")
-    st.header("💰 Simulasi Biaya Umrah")
-    data = load_all_data()
-    
-    with st.form("sim"):
-        c1, c2 = st.columns(2)
-        scn = c1.selectbox("Paket", list(data["scenarios"].keys()), format_func=lambda x: f"{data['scenarios'][x]['emoji']} {data['scenarios'][x]['name']}")
-        num = c1.number_input("Jamaah", 1, 50, 2)
-        mak = c1.slider("Malam Makkah", 2, 10, 4)
-        month = c2.selectbox("Bulan", range(1, 13), format_func=get_month_full)
-        mad = c2.slider("Malam Madinah", 2, 10, 3)
-        calc = st.form_submit_button("🔍 Hitung Biaya", use_container_width=True, type="primary")
-    
-    if calc:
-        r = st.session_state.planner.calculate(scn, num, mak, mad, month)
-        st.session_state.stats["calcs"] += 1
-        
-        s = r["season"]
-        if s["mult"] > 1: st.warning(f"{s['icon']} **{s['name']} Season**: Harga +{int((s['mult']-1)*100)}%")
-        elif s["mult"] < 1: st.success(f"{s['icon']} **{s['name']} Season**: Hemat {int((1-s['mult'])*100)}%!")
-        
-        c1, c2, c3 = st.columns(3)
-        c1.metric("💵 Per Orang", fmt(r["total_per_person"]))
-        c2.metric("💰 Total", fmt(r["grand_total"]))
-        c3.metric("📅 Durasi", f"{r['total_days']} hari")
-        
-        st.subheader("📊 Rincian Biaya")
-        items = [("✈️ Tiket PP", r["breakdown"]["flight"]), ("🕋 Hotel Makkah", r["breakdown"]["hotel_makkah"]),
-                 ("🕌 Hotel Madinah", r["breakdown"]["hotel_madinah"]), ("📄 Visa", r["breakdown"]["visa"]),
-                 ("🚐 Transport", r["breakdown"]["transport"]), ("🍽️ Makan", r["breakdown"]["meals"])]
-        for name, cost in items:
-            st.markdown(f"- {name}: **{fmt(cost)}**")
-        
-        if st.button("💾 Simpan Rencana"):
-            st.session_state.plans.append({"date": datetime.now().isoformat(), "data": r})
-            st.session_state.stats["plans"] += 1
-            st.success("✅ Tersimpan!")
-
-def render_budget_finder():
-    track_page("Budget Finder")
-    st.header("💵 Cari Paket Sesuai Budget")
-    c1, c2 = st.columns(2)
-    budget = c1.number_input("Budget Total (Rp)", 10_000_000, 500_000_000, 35_000_000, step=1_000_000)
-    num = c2.number_input("Jumlah Jamaah", 1, 50, 1)
-    
-    st.metric("Budget per Orang", fmt(budget/num))
-    pkgs = st.session_state.planner.find_by_budget(budget, num)
-    
-    if pkgs:
-        st.success(f"✅ {len(pkgs)} paket tersedia untuk budget Anda!")
-        for p in pkgs:
-            with st.expander(f"{p['emoji']} {p['name']} - Mulai {fmt(p['min'])}"):
-                st.markdown(f"⭐ Bintang {p['star']} | Minimum: **{fmt(p['min'])}**/orang")
-    else:
-        st.warning("⚠️ Budget belum cukup untuk paket apapun. Minimum sekitar Rp 18 juta/orang.")
-
-def render_create_plan():
-    track_page("Buat Rencana")
-    st.header("📋 Buat Rencana Lengkap")
-    data = load_all_data()
-    
-    c1, c2 = st.columns(2)
-    scn = c1.selectbox("Paket", list(data["scenarios"].keys()), format_func=lambda x: f"{data['scenarios'][x]['emoji']} {data['scenarios'][x]['name']}")
-    num = c1.number_input("Jamaah", 1, 50, 2)
-    mak = c2.slider("Malam Makkah", 2, 10, 4)
-    mad = c2.slider("Malam Madinah", 2, 10, 3)
-    month = st.selectbox("Bulan Keberangkatan", range(1, 13), format_func=get_month_full)
-    
-    if st.button("🚀 Buat Rencana", type="primary", use_container_width=True):
-        r = st.session_state.planner.calculate(scn, num, mak, mad, month)
-        st.success("✅ Rencana berhasil dibuat!")
-        
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Per Orang", fmt(r["total_per_person"]))
-        c2.metric("Total", fmt(r["grand_total"]))
-        c3.metric("Durasi", f"{r['total_days']} hari")
-        
-        st.subheader("📅 Jadwal Perjalanan")
-        day = 1
-        st.markdown(f"**Hari {day}**: 🇮🇩→🇸🇦 Keberangkatan ke Jeddah")
-        day += 1
-        for i in range(mak):
-            activity = "🕋 **UMRAH** - Thawaf, Sa'i, Tahallul" if i==0 else f"🕋 Ibadah di Makkah (hari {i+1})"
-            st.markdown(f"**Hari {day}**: {activity}")
-            day += 1
-        st.markdown(f"**Hari {day}**: 🚐 Makkah → Madinah (±450km)")
-        day += 1
-        for i in range(mad):
-            activity = "🕌 Ziarah Masjid Nabawi & Raudhah" if i==0 else f"🕌 Ziarah Madinah (hari {i+1})"
-            st.markdown(f"**Hari {day}**: {activity}")
-            day += 1
-        st.markdown(f"**Hari {day}**: 🇸🇦→🇮🇩 Kepulangan")
-
-def render_umrah_bareng():
-    track_page("Umrah Bareng")
-    st.header("🤝 Umrah Bareng - Open Trip")
-    
-    trips = db_get_open_trips()
-    if not trips:  # Fallback data
-        trips = [
-            {"id": 1, "title": "Umrah Bareng Keluarga Muda", "creator_name": "Ahmad", "departure_date": "2025-03-15",
-             "package_type": "standard", "budget_per_person": 38000000, "duration_days": 12, "max_members": 10, "status": "open"},
-            {"id": 2, "title": "Umrah Khusus Ibu-Ibu", "creator_name": "Hj. Siti", "departure_date": "2025-04-10",
-             "package_type": "premium", "budget_per_person": 55000000, "duration_days": 14, "max_members": 15, "status": "open"},
-        ]
-    
-    c1, c2 = st.columns(2)
-    c1.metric("📋 Total Trip", len(trips))
-    c2.metric("👥 Slot Open", len([t for t in trips if t.get("status") == "open"]))
-    
-    st.divider()
-    data = load_all_data()
-    
-    for trip in trips[:10]:
-        tmpl = data["scenarios"].get(trip.get("package_type", "standard"), {"emoji": "📦"})
-        with st.expander(f"{tmpl.get('emoji', '📦')} {trip['title']} - {fmt(trip.get('budget_per_person', 0))}"):
-            st.markdown(f"👤 **{trip.get('creator_name', 'Anonymous')}** | 📅 {trip.get('departure_date', '-')}")
-            st.markdown(f"⏱️ {trip.get('duration_days', 9)} hari | 👥 Max {trip.get('max_members', 10)} orang")
-            st.button("📩 Hubungi", key=f"contact_{trip['id']}")
-    
-    st.markdown(disclaimer_html(), unsafe_allow_html=True)
-
-def render_umrah_mandiri():
-    track_page("Umrah Mandiri")
-    st.header("🕋 Umrah Mandiri")
-    
-    tab1, tab2 = st.tabs(["📖 Panduan", "💬 Forum"])
-    
-    with tab1:
-        st.markdown("""
-### Apa itu Umrah Mandiri?
-Umrah yang diatur sendiri tanpa travel agent. Legal sejak 2019 dengan sistem e-visa.
-
-### 💰 Estimasi Biaya (9-10 hari)
-| Item | Estimasi Biaya |
-|------|----------------|
-| ✈️ Tiket PP | Rp 7-12jt |
-| 📄 Visa | Rp 500rb-1.5jt |
-| 🏨 Hotel | Rp 3.5-9jt |
-| 🚗 Transport | Rp 1-2jt |
-| 🍽️ Makan | Rp 1.5-3jt |
-| **Total** | **Rp 15-25jt** |
-
-### ✅ Kelebihan
-- 💰 Hemat 30-50% dari travel agent
-- ⏰ Jadwal fleksibel
-- 🕋 Lebih khusyuk & fokus ibadah
-
-### ⚠️ Disclaimer
-> **DYOR (Do Your Own Research)** - Pastikan Anda siap mengurus semuanya sendiri.
-        """)
-    
-    with tab2:
-        posts = db_get_forum_posts()
-        if not posts:  # Fallback data
-            posts = [
-                {"id": 1, "title": "Pengalaman Umrah Mandiri Rp 18 Juta", "author_name": "Pak Hendra", "likes": 47},
-                {"id": 2, "title": "Tips Wanita Solo Umrah Mandiri", "author_name": "Mbak Fatimah", "likes": 89},
-            ]
-        
-        for p in posts[:10]:
-            with st.expander(f"💬 {p.get('title', '-')} - {p.get('author_name', 'Anonim')}"):
-                st.markdown(f"❤️ {p.get('likes', 0)} likes | 👁️ {p.get('views', 0)} views")
-    
-    st.markdown(disclaimer_html(), unsafe_allow_html=True)
-
-def render_ai_chat():
-    track_page("AI Chat")
-    st.header("🤖 Chat AI Assistant")
-    
-    for m in st.session_state.chat_hist:
-        with st.chat_message(m["role"]): st.markdown(m["content"])
-    
-    if prompt := st.chat_input("Tanya tentang umrah..."):
-        st.session_state.chat_hist.append({"role": "user", "content": prompt})
-        with st.chat_message("user"): st.markdown(prompt)
-        
-        resp = st.session_state.ai.chat(prompt)
-        st.session_state.chat_hist.append({"role": "assistant", "content": resp})
-        with st.chat_message("assistant"): st.markdown(resp)
-    
-    if st.button("🗑️ Hapus Riwayat Chat"):
-        st.session_state.chat_hist = []
-        st.rerun()
-
-def render_time_analysis():
-    track_page("Analisis Waktu")
-    st.header("📅 Analisis Waktu Terbaik")
-    data = load_all_data()
-    
-    rows = []
-    for m in range(1, 13):
-        w = data["weather"][m]
-        s = get_season(m)
-        score = max(0, min(100, 100 - (w["temp"]-20)*2 - (s["mult"]-1)*50))
-        rows.append({"Bulan": get_month_name(m), "Suhu": f"{w['temp']}°C", "Kondisi": w["cond"], "Season": f"{s['icon']} {s['name']}", "Skor": int(score)})
-    
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-    st.success("**Rekomendasi Terbaik:** Januari-Februari (sejuk + murah) atau September-Oktober")
-
-def render_checklist():
-    track_page("Checklist")
-    st.header("✅ Checklist Persiapan Umrah")
-    st.caption("🔴 = Wajib | ⚪ = Opsional")
-    data = load_all_data()
-    
-    done, total = 0, 0
-    for cat_key, cat_data in data["checklist"].items():
-        with st.expander(cat_data["title"], expanded=True):
-            for item, is_required in cat_data["items"]:
-                total += 1
-                key = f"chk_{cat_key}_{item}"
-                if key not in st.session_state.checks: st.session_state.checks[key] = False
-                label = f"{'🔴' if is_required else '⚪'} {item}"
-                if st.checkbox(label, key=key, value=st.session_state.checks[key]):
-                    st.session_state.checks[key] = True
-                    done += 1
-    
-    st.divider()
-    progress = done / total if total > 0 else 0
-    st.progress(progress)
-    st.metric("Progress", f"{done}/{total} ({int(progress*100)}%)")
-    
-    if progress == 1.0:
-        st.balloons()
-        st.success("🎉 Alhamdulillah! Semua persiapan lengkap!")
-    elif progress >= 0.8: st.info("👍 Hampir selesai!")
-    elif progress >= 0.5: st.warning("⚠️ Masih ada yang perlu disiapkan")
-    else: st.error("📋 Masih banyak yang perlu disiapkan")
-
-def render_map():
-    track_page("Peta Lokasi")
-    st.header("🗺️ Peta Lokasi Penting")
-    data = load_all_data()
-    
-    for key, loc in data["locations"].items():
-        with st.expander(f"📍 {loc['name']}"):
-            url = f"https://www.google.com/maps?q={loc['lat']},{loc['lon']}&z=17&output=embed"
-            st.markdown(f'<iframe src="{url}" width="100%" height="300" style="border:0;border-radius:10px" loading="lazy"></iframe>', unsafe_allow_html=True)
-            st.markdown(f"📍 Koordinat: `{loc['lat']}, {loc['lon']}`")
-
-def render_currency():
-    track_page("Kurs")
-    st.header("💱 Kalkulator Kurs IDR ↔ SAR")
-    rate = get_exchange_rate()
-    st.info(f"**Kurs Saat Ini:** 1 SAR = Rp {rate:,}")
-    
-    c1, c2 = st.columns(2)
-    with c1:
-        st.subheader("Rupiah → SAR")
-        idr = st.number_input("Rupiah", 0, 1_000_000_000, 10_000_000, step=100_000)
-        st.metric("Saudi Riyal", f"SAR {idr/rate:,.2f}")
-    
-    with c2:
-        st.subheader("SAR → Rupiah")
-        sar = st.number_input("SAR", 0, 100_000, 1000, step=100)
-        st.metric("Rupiah", fmt(sar * rate))
-
-def render_weather():
-    track_page("Cuaca")
-    st.header("🌤️ Info Cuaca Arab Saudi")
-    data = load_all_data()
-    month = st.selectbox("Pilih Bulan", range(1, 13), format_func=get_month_full)
-    w = data["weather"][month]
-    s = get_season(month)
-    
-    c1, c2, c3 = st.columns(3)
-    c1.metric("🌡️ Suhu Rata-rata", f"{w['temp']}°C")
-    c2.metric("☁️ Kondisi", w["cond"])
-    c3.metric(f"{s['icon']} Season", s["name"])
-    
-    if w["temp"] >= 35:
-        st.warning("⚠️ **Tips:** Bawa sunscreen SPF 50+, minum banyak air, hindari aktivitas siang hari")
-    elif w["temp"] <= 25:
-        st.success("✅ **Cuaca ideal** untuk ibadah!")
-
-def render_saved():
-    track_page("Tersimpan")
-    st.header("📦 Rencana Tersimpan")
-    
-    if not st.session_state.plans:
-        st.info("📋 Belum ada rencana tersimpan. Buat rencana di menu **Simulasi Biaya**!")
         return
     
-    data = load_all_data()
-    for i, p in enumerate(st.session_state.plans):
-        r = p["data"]
-        tmpl = data["scenarios"].get(r["scenario"], {})
-        with st.expander(f"{tmpl.get('emoji', '')} {tmpl.get('name', '')} - {fmt(r['grand_total'])}"):
-            st.caption(f"📅 Dibuat: {p['date'][:16]}")
-            st.markdown(f"👥 {r['num_people']} orang | 📆 {r['total_days']} hari")
-            if st.button("🗑️ Hapus", key=f"del_{i}"):
-                st.session_state.plans.pop(i)
-                st.rerun()
-
-def render_emergency():
-    track_page("Emergency")
-    st.header("📞 Kontak Darurat")
-    data = load_all_data()
-    
-    for c in data["emergency"]:
-        col1, col2 = st.columns([3, 1])
-        col1.markdown(f"**{c['name']}**")
-        col2.code(c['phone'])
-    
-    st.divider()
-    st.warning("""
-    **💡 Tips Penting:**
-    - Simpan semua nomor di HP sebelum berangkat
-    - Catat nomor kamar hotel
-    - Bawa fotokopi paspor di tas terpisah
-    - Install: **Eatmarna**, **Tawakkalna**, **WhatsApp**
-    """)
-    st.markdown(f"📧 **Developer:** {CONTACT['email']}")
-    st.markdown(f"💬 **WhatsApp:** [{CONTACT['wa']}](https://wa.me/6281596588833)")
-
-def render_savings():
-    track_page("Tabungan")
-    st.header("💰 Kalkulator Tabungan Umrah")
-    
-    c1, c2 = st.columns(2)
-    target = c1.number_input("Target Biaya (Rp)", 20_000_000, 200_000_000, 35_000_000, step=1_000_000)
-    current = c1.number_input("Tabungan Saat Ini (Rp)", 0, 200_000_000, 5_000_000, step=500_000)
-    target_date = c2.date_input("Target Berangkat", value=datetime.now() + timedelta(days=365), min_value=datetime.now() + timedelta(days=30))
-    
-    remaining = target - current
-    days_left = (target_date - datetime.now().date()).days
-    
-    if remaining > 0 and days_left > 0:
-        daily = remaining / days_left
-        weekly = remaining / max(days_left // 7, 1)
-        monthly = remaining / max(days_left // 30, 1)
-        
-        st.divider()
-        c1, c2, c3 = st.columns(3)
-        c1.metric("📅 Harian", fmt(daily), f"{days_left} hari")
-        c2.metric("📆 Mingguan", fmt(weekly), f"{days_left//7} minggu")
-        c3.metric("🗓️ Bulanan", fmt(monthly), f"{days_left//30} bulan")
-        
-        progress = current / target
-        st.progress(min(progress, 1.0))
-        st.caption(f"Progress: {progress*100:.1f}%")
-        
-        if monthly > 5_000_000:
-            st.warning(f"⚠️ Target bulanan tinggi ({fmt(monthly)}). Pertimbangkan menunda atau pilih paket ekonomis.")
-        else:
-            st.success("✅ Target realistis! Tips: Sisihkan di awal gajian, buat rekening khusus.")
-    elif remaining <= 0:
-        st.success("🎉 Alhamdulillah! Dana sudah cukup. Saatnya booking!")
-    else:
-        st.error("⚠️ Target tanggal sudah lewat")
-
-def render_countdown():
-    track_page("Countdown")
-    st.header("⏰ Countdown Keberangkatan")
-    
-    dep_date = st.date_input("Tanggal Keberangkatan", value=datetime.now() + timedelta(days=90), min_value=datetime.now())
-    days_left = (dep_date - datetime.now().date()).days
-    
-    if days_left > 0:
-        weeks = days_left // 7
-        rem_days = days_left % 7
-        
-        st.markdown(f'''
-        <div style="text-align:center;padding:2rem;background:linear-gradient(135deg,#006B3C,#4e9f3d);border-radius:15px;color:white;margin:1rem 0">
-            <h1 style="font-size:4rem;margin:0">{days_left}</h1>
-            <p style="font-size:1.5rem">Hari Menuju Tanah Suci</p>
-            <p>({weeks} minggu {rem_days} hari)</p>
-        </div>
-        ''', unsafe_allow_html=True)
-        
-        st.subheader("📌 Milestone Persiapan")
-        milestones = [(90, "Booking tiket & hotel"), (60, "Urus visa & vaksin"), (30, "Siapkan perlengkapan"), 
-                      (14, "Medical check-up"), (7, "Packing & cek dokumen"), (3, "Konfirmasi booking"), (1, "Istirahat")]
-        for d, task in milestones:
-            if days_left >= d:
-                st.checkbox(f"H-{d}: {task}", key=f"ms_{d}")
-            else:
-                st.markdown(f"~~H-{d}: {task}~~ ✅")
-    elif days_left == 0:
-        st.balloons()
-        st.markdown('''<div style="text-align:center;padding:2rem;background:gold;border-radius:15px">
-        <h1>🕋 HARI INI!</h1><p>لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</p></div>''', unsafe_allow_html=True)
-    else:
-        st.info("Masukkan tanggal keberangkatan yang akan datang")
-
-def render_doa_manasik():
-    track_page("Doa Manasik")
-    st.header("📿 Doa & Panduan Manasik Umrah")
-    data = load_all_data()
-    
-    tab1, tab2 = st.tabs(["📖 Doa-Doa", "🚶 Tata Cara"])
-    
-    with tab1:
-        for key, doa in data["doa_manasik"].items():
-            with st.expander(doa["title"]):
-                st.markdown(f'''<div style="text-align:right;font-size:1.5rem;font-family:serif;line-height:2;background:#f5f5f5;padding:1rem;border-radius:10px">{doa["arab"]}</div>''', unsafe_allow_html=True)
-                st.markdown(f"**Latin:** *{doa['latin']}*")
-                st.markdown(f"**Arti:** {doa['arti']}")
-    
-    with tab2:
-        st.markdown("""
-### 🕋 Urutan Manasik Umrah
-
-1. **Ihram dari Miqat** - Mandi sunnah, pakai ihram, niat, baca talbiyah
-2. **Thawaf 7 putaran** - Mulai dari Hajar Aswad, putaran 1-3 ramal (jalan cepat)
-3. **Shalat 2 rakaat** - Di belakang Maqam Ibrahim
-4. **Minum Zamzam** - Berdoa sesuai hajat
-5. **Sa'i 7 kali** - Shafa→Marwah (1), Marwah→Shafa (2), berakhir di Marwah
-6. **Tahallul** - Pria cukur, wanita potong ±3cm
-7. **Selesai** ✅ - Keluar dari ihram
-        """)
-
-def render_analytics():
-    track_page("Analytics")
-    st.header("📊 Analytics Dashboard")
-    
-    if not is_admin():
-        st.error("⛔ Akses ditolak - Admin only")
-        return
-    
-    stats = db_get_visitor_stats()
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("👥 Total Visitors", f"{stats['total_visitors']:,}", f"+{stats['today_visitors']} today")
-    c2.metric("👁️ Total Views", f"{stats['total_views']:,}", f"+{stats['today_views']} today")
-    c3.metric("📊 Calculations", st.session_state.stats["calcs"])
-    c4.metric("📋 Plans Saved", st.session_state.stats["plans"])
-    
-    st.divider()
-    
-    st.subheader("📄 Page Views Breakdown")
-    page_stats = db_get_page_stats()
-    if page_stats:
-        df = pd.DataFrame([{"Page": k, "Views": v} for k, v in page_stats.items()])
-        st.dataframe(df, use_container_width=True, hide_index=True)
-        
-        # Export button
-        if st.button("📥 Export JSON"):
-            st.json({"stats": stats, "pages": page_stats})
-    else:
-        st.info("Belum ada data page views")
-
-def render_business_hub():
-    track_page("Business Hub")
-    st.header("💼 Business Hub")
-    
-    if not is_admin():
-        st.error("⛔ Akses ditolak - Admin only")
-        st.info("💡 Daftar dengan email mengandung 'admin' untuk akses penuh")
-        return
-    
-    tabs = st.tabs(["💰 Revenue", "🤝 Partners", "📈 Growth", "⚙️ Settings"])
-    
-    with tabs[0]:
-        st.subheader("💰 Revenue Dashboard")
-        c1, c2, c3 = st.columns(3)
-        c1.metric("💵 Revenue MTD", "Rp 0", "Setup required")
-        c2.metric("📊 Transactions", "0")
-        c3.metric("📈 Conversion", "0%")
-        st.info("💡 **Coming Soon:** Payment gateway integration untuk booking commissions")
-    
-    with tabs[1]:
-        st.subheader("🤝 Partner Management")
-        st.dataframe(pd.DataFrame([
-            {"Partner": "Travel Agent A", "Status": "🟡 Pending", "Commission": "5%"},
-            {"Partner": "Travel Agent B", "Status": "🟡 Pending", "Commission": "5%"},
-        ]), use_container_width=True, hide_index=True)
-        st.button("➕ Tambah Partner")
-    
-    with tabs[2]:
-        st.subheader("📈 Growth Metrics")
-        stats = db_get_visitor_stats()
-        
-        # Milestone tracker
-        milestones = [
-            {"name": "🎯 1,000 Users", "target": 1000, "current": stats['total_visitors']},
-            {"name": "🎯 10,000 Views", "target": 10000, "current": stats['total_views']},
-        ]
-        for m in milestones:
-            progress = min(m['current'] / m['target'], 1.0)
-            st.markdown(f"**{m['name']}** - {m['current']:,}/{m['target']:,}")
-            st.progress(progress)
-    
-    with tabs[3]:
-        st.subheader("⚙️ Platform Settings")
-        st.text_input("Company Name", value="LABBAIK")
-        st.text_input("Contact Email", value=CONTACT['email'])
-        st.text_input("WhatsApp", value=CONTACT['wa'])
-        st.button("💾 Save Settings")
-
-def render_guide():
-    track_page("Panduan Umrah")
-    st.header("🕋 Panduan Umrah Lengkap")
-    
-    tabs = st.tabs(["📖 Rukun", "📋 Langkah", "🤲 Doa", "💡 Tips"])
-    
-    with tabs[0]:
-        st.markdown("""
-### 5 Rukun Umrah
-1. **Ihram** - Niat dari miqat, memakai pakaian ihram
-2. **Thawaf** - Mengelilingi Ka'bah 7 kali
-3. **Sa'i** - Berjalan antara Safa-Marwa 7 kali
-4. **Tahallul** - Mencukur/memotong rambut
-5. **Tertib** - Melakukan urutan dengan benar
-        """)
-    
-    with tabs[1]:
-        st.markdown("""
-### Langkah-langkah Umrah
-1. Mandi sunnah & memakai ihram di miqat
-2. Niat umrah
-3. Membaca talbiyah
-4. Masuk Masjidil Haram
-5. Thawaf 7 putaran
-6. Shalat 2 rakaat di belakang Maqam Ibrahim
-7. Minum air zamzam
-8. Sa'i 7 kali
-9. Tahallul (potong rambut)
-        """)
-    
-    with tabs[2]:
-        st.markdown("""
-### Doa-doa Penting
-
-**Talbiyah:**
-> لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ
-
-**Doa Melihat Ka'bah:**
-> اللَّهُمَّ زِدْ هَذَا الْبَيْتَ تَشْرِيفًا وَتَعْظِيمًا وَتَكْرِيمًا وَمَهَابَةً
-        """)
-    
-    with tabs[3]:
-        st.markdown("""
-### Tips Penting
-- 📱 Unduh aplikasi **Nusuk** untuk manajemen umrah
-- 💊 Bawa obat-obatan pribadi yang cukup
-- 🧴 Gunakan sunscreen SPF 50+
-- 💧 Minum air minimal 2-3 liter/hari
-- 👟 Pakai sandal yang nyaman
-- 🔌 Bawa adaptor Type G untuk charger
-        """)
-
-def render_about():
-    track_page("About")
-    st.markdown(hero_html(), unsafe_allow_html=True)
-    
-    stats = db_get_visitor_stats()
-    st.markdown(f'''<div style="background:#1A1A1A;padding:15px;border-radius:10px;margin:15px 0;text-align:center">
-<span style="color:#D4AF37;font-size:1.5rem;font-weight:700">{stats['total_visitors']:,}</span> <span style="color:#888">users</span> • 
-<span style="color:#D4AF37;font-size:1.5rem;font-weight:700">{stats['total_views']:,}</span> <span style="color:#888">views</span>
-</div>''', unsafe_allow_html=True)
-    
-    st.markdown(f"""
-### 👨‍💻 Developer
-**MS Hadianto** | 📧 {CONTACT['email']} | 💬 [WhatsApp](https://wa.me/6281596588833)
-
-### ✨ Fitur v3.9.0
-💰 Simulasi Biaya • 📋 Itinerary Builder • 🤝 Umrah Bareng • 🕋 Umrah Mandiri + Forum • 🤖 AI Chat • ✅ Checklist Lengkap • 💰 Kalkulator Tabungan • ⏰ Countdown • 📿 Doa & Manasik • 🗺️ Peta Interaktif • 💱 Kurs Converter • 🌤️ Info Cuaca • 📞 Kontak Darurat • 📊 Analytics • 💼 Business Hub
-
-### 🔧 Tech Stack
-Streamlit • Neon PostgreSQL • Python • Claude AI
-
-### 🗄️ Database Status
-{"✅ Connected to Neon PostgreSQL" if db_available() else "⚠️ Offline mode - Login dengan admin@labbaik.id / @Jakarta01"}
-    """)
-    st.markdown(disclaimer_html(), unsafe_allow_html=True)
-    render_footer()
-
-# ═══════════════════════════════════════════════════════════════════
-# 🚀 MAIN APPLICATION
-# ═══════════════════════════════════════════════════════════════════
-def main():
-    init_state()
-    
-    if st.session_state.show_login:
-        render_login()
-        return
+    if is_logged_in():
+        st.session_state.show_login = False
     
     page = render_sidebar()
     
-    # Route mapping
-    routes = {
-        "Beranda": render_home, "Panduan": render_guide, "Simulasi": render_simulation,
-        "Budget": render_budget_finder, "Rencana": render_create_plan, "Bareng": render_umrah_bareng,
-        "Mandiri": render_umrah_mandiri, "Chat": render_ai_chat, "Waktu": render_time_analysis,
-        "Checklist": render_checklist, "Tabungan": render_savings, "Countdown": render_countdown,
-        "Doa": render_doa_manasik, "Peta": render_map, "Kurs": render_currency,
-        "Cuaca": render_weather, "Tersimpan": render_saved,
-        "Emergency": render_emergency, "Analytics": render_analytics, "Business": render_business_hub,
-        "Tentang": render_about,
-    }
-    
-    protected = ["Simulasi", "Budget", "Rencana", "Bareng", "Mandiri", "Chat", "Waktu", 
-                 "Checklist", "Tabungan", "Countdown", "Doa", "Peta", "Tersimpan", "Analytics", "Business"]
-    
-    for key, func in routes.items():
-        if key in page:
-            if key in protected and not logged_in():
-                st.warning("🔐 Silakan login untuk mengakses fitur ini")
-                render_login()
-            else:
-                func()
-            break
+    # Route pages
+    if "Beranda" in page:
+        render_home()
+        render_footer()
+    elif "Simulasi Biaya" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            render_cost_simulation()
+    elif "Cari by Budget" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            render_budget_finder()
+    elif "Perbandingan" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            render_scenario_comparison()
+    elif "Umrah Bareng" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            render_umrah_bareng()
+    elif "Umrah Mandiri" in page:
+        render_umrah_mandiri()
+    elif "Tools" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            render_tools_features()
+    elif "Rewards" in page or "Quiz" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            render_engagement_page()
+    elif "Profil" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            render_profile()
+    elif "Tentang" in page:
+        render_about()
+        render_footer()
 
 if __name__ == "__main__":
     main()
