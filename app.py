@@ -1788,6 +1788,7 @@ def render_umrah_bareng():
             
             slots_available = trip["slots_total"] - trip["slots_filled"]
             progress = trip["slots_filled"] / trip["slots_total"]
+            progress_pct = progress * 100
             
             # Package color
             package_colors = {
@@ -1798,42 +1799,50 @@ def render_umrah_bareng():
             }
             pkg_color = package_colors.get(trip["package"], "#666")
             
-            st.markdown(f"""
+            # Slot color
+            if slots_available > 3:
+                slot_color = "#4CAF50"
+            elif slots_available > 0:
+                slot_color = "#FF9800"
+            else:
+                slot_color = "#F44336"
+            
+            # Build card HTML
+            card_html = f'''
             <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; 
                         border: 1px solid #E0E0E0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                     <div>
                         <span style="background: {pkg_color}; color: white; padding: 3px 10px; border-radius: 12px; 
-                                     font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">{trip['package']}</span>
-                        <h3 style="margin: 10px 0 5px 0; color: #1A1A1A;">{trip['title']}</h3>
-                        <p style="color: #666; font-size: 0.9rem; margin: 0;">👤 {trip['organizer']} • 📍 {trip['departure_city']}</p>
+                                     font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">{trip["package"]}</span>
+                        <h3 style="margin: 10px 0 5px 0; color: #1A1A1A;">{trip["title"]}</h3>
+                        <p style="color: #666; font-size: 0.9rem; margin: 0;">👤 {trip["organizer"]} • 📍 {trip["departure_city"]}</p>
                     </div>
                     <div style="text-align: right;">
-                        <div style="color: #D4AF37; font-size: 1.2rem; font-weight: 700;">{trip['budget_range']}</div>
-                        <div style="color: #666; font-size: 0.8rem;">{trip['duration']} hari</div>
+                        <div style="color: #D4AF37; font-size: 1.2rem; font-weight: 700;">{trip["budget_range"]}</div>
+                        <div style="color: #666; font-size: 0.8rem;">{trip["duration"]} hari</div>
                     </div>
                 </div>
                 
-                <p style="color: #555; font-size: 0.9rem; margin-bottom: 15px;">{trip['description']}</p>
+                <p style="color: #555; font-size: 0.9rem; margin-bottom: 15px;">{trip["description"]}</p>
                 
                 <div style="display: flex; gap: 20px; margin-bottom: 15px; font-size: 0.85rem; color: #666;">
-                    <span>📅 {trip['departure_date']}</span>
-                    <span>➡️ {trip['return_date']}</span>
+                    <span>📅 {trip["departure_date"]}</span>
+                    <span>➡️ {trip["return_date"]}</span>
                 </div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span style="font-size: 0.85rem; color: #666;">👥 {trip['slots_filled']}/{trip['slots_total']} peserta</span>
-                        <span style="font-size: 0.85rem; color: {'#4CAF50' if slots_available > 3 else '#FF9800' if slots_available > 0 else '#F44336'};">
-                            {slots_available} slot tersisa
-                        </span>
+                        <span style="font-size: 0.85rem; color: #666;">👥 {trip["slots_filled"]}/{trip["slots_total"]} peserta</span>
+                        <span style="font-size: 0.85rem; color: {slot_color};">{slots_available} slot tersisa</span>
                     </div>
                     <div style="background: #E0E0E0; border-radius: 5px; height: 8px; overflow: hidden;">
-                        <div style="background: {pkg_color}; height: 100%; width: {progress * 100}%;"></div>
+                        <div style="background: {pkg_color}; height: 100%; width: {progress_pct:.1f}%;"></div>
                     </div>
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+            '''
+            st.markdown(card_html, unsafe_allow_html=True)
             
             # Action buttons
             col1, col2, col3 = st.columns([2, 1, 1])
@@ -1926,22 +1935,25 @@ def render_umrah_bareng():
         if my_organized:
             for trip in my_organized:
                 slots_available = trip["slots_total"] - trip["slots_filled"]
-                st.markdown(f"""
+                status_color = "#4CAF50" if trip['status'] == 'open' else "#666"
+                
+                organized_html = f'''
                 <div style="background: linear-gradient(135deg, #D4AF3720 0%, #C9A86C20 100%); 
                             border-radius: 12px; padding: 15px; margin-bottom: 10px;
                             border-left: 4px solid #D4AF37;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <strong>{trip['title']}</strong>
-                            <div style="color: #666; font-size: 0.85rem;">📅 {trip['departure_date']} • 👥 {trip['slots_filled']}/{trip['slots_total']}</div>
+                            <strong>{trip["title"]}</strong>
+                            <div style="color: #666; font-size: 0.85rem;">📅 {trip["departure_date"]} • 👥 {trip["slots_filled"]}/{trip["slots_total"]}</div>
                         </div>
-                        <span style="background: {'#4CAF50' if trip['status'] == 'open' else '#666'}; color: white; 
+                        <span style="background: {status_color}; color: white; 
                                      padding: 3px 10px; border-radius: 12px; font-size: 0.75rem;">
-                            {trip['status'].upper()}
+                            {trip["status"].upper()}
                         </span>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                '''
+                st.markdown(organized_html, unsafe_allow_html=True)
                 
                 col1, col2 = st.columns(2)
                 with col1:
@@ -1965,22 +1977,23 @@ def render_umrah_bareng():
         
         if my_joined:
             for trip in my_joined:
-                st.markdown(f"""
+                joined_html = f'''
                 <div style="background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px;
                             border: 1px solid #E0E0E0;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <strong>{trip['title']}</strong>
+                            <strong>{trip["title"]}</strong>
                             <div style="color: #666; font-size: 0.85rem;">
-                                👤 {trip['organizer']} • 📅 {trip['departure_date']} • 📍 {trip['departure_city']}
+                                👤 {trip["organizer"]} • 📅 {trip["departure_date"]} • 📍 {trip["departure_city"]}
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="color: #D4AF37; font-weight: 600;">{trip['budget_range']}</div>
+                            <div style="color: #D4AF37; font-weight: 600;">{trip["budget_range"]}</div>
                         </div>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                '''
+                st.markdown(joined_html, unsafe_allow_html=True)
                 
                 if st.button(f"💬 Grup WhatsApp", key=f"mywa_{trip['id']}"):
                     st.markdown(f"[Buka Grup]({trip['whatsapp']})")
@@ -2000,7 +2013,7 @@ def render_umrah_bareng():
         ]
         
         for icon, title, desc in tips:
-            st.markdown(f"""
+            tip_html = f'''
             <div style="background: #F5F5F5; border-radius: 12px; padding: 15px; margin-bottom: 10px;
                         display: flex; align-items: flex-start; gap: 15px;">
                 <div style="font-size: 1.5rem;">{icon}</div>
@@ -2009,7 +2022,8 @@ def render_umrah_bareng():
                     <div style="color: #666; font-size: 0.9rem;">{desc}</div>
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+            '''
+            st.markdown(tip_html, unsafe_allow_html=True)
         
         st.markdown("---")
         st.warning("""
