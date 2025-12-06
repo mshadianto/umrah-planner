@@ -268,6 +268,43 @@ EMERGENCY_CONTACTS = [
     {"name": "🏥 RS King Faisal Makkah", "phone": "+966-12-553-3300"},
 ]
 
+# Video Tutorials - Ustadz Adi Hidayat Featured
+VIDEO_TUTORIALS = [
+    {
+        "id": "uah_manasik",
+        "title": "Panduan Lengkap Manasik Umrah - Ustadz Adi Hidayat",
+        "url": "https://youtu.be/e1XsLF6aUaA?si=Bxpy9w5r7fkc2Yw1",
+        "description": "Kajian lengkap tata cara manasik umrah dari Ustadz Adi Hidayat, Lc., MA. Penjelasan detail mulai dari ihram hingga tahallul dengan dalil-dalil shahih.",
+        "speaker": "Ustadz Adi Hidayat, Lc., MA",
+        "duration": "2+ jam",
+        "featured": True,
+    },
+    {
+        "id": "generic_manasik",
+        "title": "Video Panduan Manasik Umrah Singkat",
+        "url": "https://www.youtube.com/watch?v=TRYDkDwqJv0",
+        "description": "Video panduan manasik umrah singkat untuk referensi tambahan.",
+        "speaker": "Various",
+        "duration": "~15 menit",
+        "featured": False,
+    }
+]
+
+# Currency Exchange Rates
+CURRENCY_RATES = {
+    "IDR_TO_SAR": 0.000242,
+    "SAR_TO_IDR": 4130,
+    "IDR_TO_USD": 0.0000645,
+    "USD_TO_IDR": 15500,
+}
+
+# Weather Data (Monthly Average)
+WEATHER_DATA = {
+    "Bulan": ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
+    "Makkah": [24, 25, 28, 32, 36, 38, 39, 38, 37, 33, 29, 25],
+    "Madinah": [18, 20, 24, 29, 34, 37, 38, 38, 35, 30, 24, 19],
+}
+
 # ============================================
 # ENGAGEMENT SYSTEM (v3.5.0)
 # ============================================
@@ -849,7 +886,7 @@ def render_scenario_comparison():
 def render_tools_features():
     st.header("🧰 Tools & Fitur")
     
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["💰 Tabungan", "⏰ Countdown", "📿 Doa & Manasik", "✅ Checklist", "📞 Darurat"])
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["💰 Tabungan", "⏰ Countdown", "📿 Doa & Manasik", "✅ Checklist", "📞 Darurat", "💱 Kurs", "🌡️ Cuaca"])
     
     # Tab 1: Savings Calculator
     with tab1:
@@ -925,11 +962,11 @@ def render_tools_features():
         else:
             st.info("📅 Tanggal sudah lewat. Pilih tanggal keberangkatan baru.")
     
-    # Tab 3: Doa & Manasik
+    # Tab 3: Doa & Manasik with Video Tutorial
     with tab3:
         st.subheader("📿 Doa & Manasik Umrah")
         
-        doa_tab, tata_tab = st.tabs(["🤲 Doa-doa", "📖 Tata Cara"])
+        doa_tab, tata_tab, video_tab = st.tabs(["🤲 Doa-doa", "📖 Tata Cara", "🎥 Video Tutorial"])
         
         with doa_tab:
             for key, doa in DOA_MANASIK.items():
@@ -962,6 +999,37 @@ def render_tools_features():
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+        
+        with video_tab:
+            st.markdown("#### 🎥 Video Panduan Manasik Umrah")
+            st.markdown("Pelajari tata cara manasik dari ulama terpercaya:")
+            
+            # Featured Video - Ustadz Adi Hidayat
+            for video in VIDEO_TUTORIALS:
+                if video.get("featured"):
+                    st.markdown(f"""
+                    <div style="background: linear-gradient(135deg, {COLORS['gold']} 0%, {COLORS['sand']} 100%); padding: 3px; border-radius: 15px; margin-bottom: 20px;">
+                        <div style="background: white; padding: 20px; border-radius: 12px;">
+                            <span style="background: {COLORS['gold']}; color: {COLORS['black']}; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">⭐ REKOMENDASI</span>
+                            <h4 style="margin: 10px 0 8px 0; color: {COLORS['black']};">{video['title']}</h4>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 8px;">{video['description']}</p>
+                            <p style="color: {COLORS['gold']}; font-size: 0.85rem; font-weight: 600;">🎤 {video['speaker']} | ⏱️ {video['duration']}</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.video(video['url'])
+                    st.markdown("---")
+            
+            # Other videos
+            st.markdown("#### 📺 Video Lainnya")
+            for video in VIDEO_TUTORIALS:
+                if not video.get("featured"):
+                    with st.expander(f"🎬 {video['title']}"):
+                        st.markdown(f"**{video['description']}**")
+                        st.markdown(f"🎤 *{video['speaker']}* | ⏱️ {video['duration']}")
+                        st.video(video['url'])
+            
+            st.info("💡 **Tips:** Tonton video beberapa kali sebelum berangkat dan hafalkan doa-doa utama.")
     
     # Tab 4: Checklist
     with tab4:
@@ -1009,6 +1077,110 @@ def render_tools_features():
         apps = ["Eatmarna - Booking sholat di Haram", "Tawakkalna - Health app resmi", "Nusuk - Layanan haji & umrah"]
         for app in apps:
             st.markdown(f"• {app}")
+    
+    # Tab 6: Currency Converter
+    with tab6:
+        st.subheader("💱 Konverter Mata Uang")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            from_currency = st.selectbox("Dari", ["IDR (Rupiah)", "SAR (Riyal)", "USD (Dollar)"], index=0)
+            amount = st.number_input("Jumlah", min_value=0.0, value=1000000.0, step=100000.0, format="%.0f")
+        with col2:
+            to_currency = st.selectbox("Ke", ["SAR (Riyal)", "IDR (Rupiah)", "USD (Dollar)"], index=0)
+        
+        from_code = from_currency.split()[0]
+        to_code = to_currency.split()[0]
+        
+        # Convert
+        if from_code == to_code:
+            result = amount
+        elif from_code == "IDR" and to_code == "SAR":
+            result = amount * CURRENCY_RATES["IDR_TO_SAR"]
+        elif from_code == "SAR" and to_code == "IDR":
+            result = amount * CURRENCY_RATES["SAR_TO_IDR"]
+        elif from_code == "IDR" and to_code == "USD":
+            result = amount * CURRENCY_RATES["IDR_TO_USD"]
+        elif from_code == "USD" and to_code == "IDR":
+            result = amount * CURRENCY_RATES["USD_TO_IDR"]
+        elif from_code == "SAR" and to_code == "USD":
+            result = amount * CURRENCY_RATES["SAR_TO_IDR"] * CURRENCY_RATES["IDR_TO_USD"]
+        elif from_code == "USD" and to_code == "SAR":
+            result = amount * CURRENCY_RATES["USD_TO_IDR"] * CURRENCY_RATES["IDR_TO_SAR"]
+        else:
+            result = amount
+        
+        st.markdown(f"""
+        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, {COLORS['green']} 0%, #388E3C 100%); border-radius: 15px; margin: 15px 0;">
+            <h2 style="margin: 0; color: white;">{amount:,.0f} {from_code} = {result:,.2f} {to_code}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Quick reference
+        st.markdown("**📊 Referensi Cepat:**")
+        ref_col1, ref_col2, ref_col3 = st.columns(3)
+        with ref_col1:
+            st.metric("1 SAR", f"Rp {CURRENCY_RATES['SAR_TO_IDR']:,.0f}")
+        with ref_col2:
+            st.metric("1 USD", f"Rp {CURRENCY_RATES['USD_TO_IDR']:,.0f}")
+        with ref_col3:
+            st.metric("Rp 1 Juta", f"{1000000 * CURRENCY_RATES['IDR_TO_SAR']:,.2f} SAR")
+        
+        st.caption("⚠️ Kurs bersifat estimasi. Cek kurs terkini sebelum penukaran.")
+    
+    # Tab 7: Weather Info
+    with tab7:
+        st.subheader("🌡️ Info Cuaca Makkah & Madinah")
+        
+        # Chart
+        df_weather = pd.DataFrame(WEATHER_DATA)
+        fig = px.line(df_weather, x="Bulan", y=["Makkah", "Madinah"], 
+                      title="Suhu Rata-rata Bulanan (°C)",
+                      markers=True)
+        fig.update_layout(yaxis_title="Suhu (°C)", legend_title="Kota")
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Current month
+        current_month = datetime.now().month
+        months_id = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+                     "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+        
+        makkah_temp = WEATHER_DATA["Makkah"][current_month - 1]
+        madinah_temp = WEATHER_DATA["Madinah"][current_month - 1]
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            delta = "🔥 Panas" if makkah_temp > 35 else "☀️ Hangat" if makkah_temp > 28 else "🌤️ Sejuk"
+            st.metric(f"🕋 Makkah ({months_id[current_month-1]})", f"{makkah_temp}°C", delta=delta)
+        with col2:
+            delta = "🔥 Panas" if madinah_temp > 35 else "☀️ Hangat" if madinah_temp > 28 else "🌤️ Sejuk"
+            st.metric(f"🕌 Madinah ({months_id[current_month-1]})", f"{madinah_temp}°C", delta=delta)
+        
+        # Recommendations
+        st.markdown("---")
+        st.markdown("**👕 Rekomendasi Pakaian:**")
+        if makkah_temp > 35:
+            st.warning("""
+            🌡️ **Cuaca Panas!**
+            - Pakai baju tipis & menyerap keringat
+            - Bawa payung untuk teduh
+            - Minum air minimal 3 liter/hari
+            - Hindari aktivitas siang (11:00-15:00)
+            - Gunakan sunscreen SPF 50+
+            """)
+        elif makkah_temp > 28:
+            st.info("""
+            ☀️ **Cuaca Hangat**
+            - Pakaian tipis tapi sopan
+            - Jaket tipis untuk AC
+            - Tetap bawa payung
+            """)
+        else:
+            st.success("""
+            🌤️ **Cuaca Nyaman**
+            - Waktu terbaik untuk umrah!
+            - Bawa jaket untuk malam hari
+            """)
 
 def render_engagement_page():
     st.header("🎮 Rewards & Quiz Center")
