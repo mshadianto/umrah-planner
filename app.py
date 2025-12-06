@@ -233,7 +233,7 @@ def render_invite_modal(referral_code):
     """Render invite modal with proper HTML rendering"""
     share_url = f"https://labbaik.streamlit.app?ref={referral_code}"
     
-    st.markdown(f"""
+        html_content = f"""
     <div style="background: linear-gradient(135deg, #1A1A1A 0%, #1E3D2F 100%);
                 border-radius: 25px; padding: 30px; margin: 20px 0;
                 border: 2px solid #4CAF5040; text-align: center;">
@@ -285,7 +285,8 @@ def render_invite_modal(referral_code):
             </a>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(html_content, unsafe_allow_html=True)
 
 try:
     from quiz_learning import render_quiz_page, init_quiz_state
@@ -1503,7 +1504,7 @@ def render_cost_simulation():
         with col1:
             scenario = st.selectbox("Skenario Paket", ["ekonomis", "standard", "premium", "vip"], format_func=lambda x: SCENARIO_TEMPLATES[x]["name"])
             num_people = st.number_input("Jumlah Jamaah", min_value=1, max_value=50, value=2)
-            duration = st.slider("Durasi (hari)", min_value=7, max_value=21, value=SCENARIO_TEMPLATES[scenario]["duration_days"])
+            duration = st.slider("Durasi (hari)", min_value=7, max_value=21, value=st.session_state.get("duration_days", 14), key="duration_days")
         
         with col2:
             departure_city = st.selectbox("Kota Keberangkatan", DEPARTURE_CITIES)
