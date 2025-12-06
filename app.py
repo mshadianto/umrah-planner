@@ -712,7 +712,7 @@ try:
     )
 except ImportError:
     __version__ = "3.5.0"
-    DEVELOPER = {"name": "KIM Consulting", "role": "Developer"}
+    DEVELOPER = {"name": "MSH Consulting", "role": "Developer"}
     APP_INFO = {"name": "LABBAIK", "version": __version__}
     CHANGELOG = []
     TECH_STACK = []
