@@ -9,25 +9,25 @@ Copyright (c) 2025 MS Hadianto. All Rights Reserved.
 
 ================================================================================
 Platform: AI-Powered Umrah Planning Platform
-Version:  4.2.0
-Codename: Labbaik Community
+Version:  4.3.0
+Codename: Labbaik Community+
 Author:   MS Hadianto
 Email:    sopian.hadianto@gmail.com
 Website:  labbaik.ai
 ================================================================================
 
-Version: 4.2.0
+Version: 4.3.0
 Updated: 2025-12-06
 Changes: 
-- Added comprehensive Umrah Bareng feature (like club booking app)
-  - Browse & filter open trips
-  - Create new trip as organizer
-  - Join existing trips
-  - My trips dashboard (organized & joined)
-  - WhatsApp group integration
-  - Tips & guidelines
-- Removed credential hints from login page
-- Enhanced security for admin access
+- Added "Buat Rencana" feature with detailed Makkah/Madinah duration selection
+  - Separate nights selection for Makkah & Madinah
+  - Real-time hotel cost preview per city
+  - Season multiplier for accurate pricing
+  - Complete cost breakdown per component
+  - Travel checklist with checkboxes
+- Fixed HTML rendering issues in Umrah Bareng cards
+- Integrated features from v3.1.0 modular version
+- Kept single-file architecture for lightweight access
 """
 
 import streamlit as st
@@ -49,7 +49,7 @@ except ImportError:
     @dataclass
     class AppConfig:
         name: str = "LABBAIK"
-        version: str = "4.2.0"
+        version: str = "4.3.0"
     
     @dataclass
     class LLMConfig:
@@ -98,7 +98,7 @@ BRAND = {
     "talbiyah": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ",
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
-    "version": "4.2.0",
+    "version": "4.3.0",
 }
 
 COLORS = {
@@ -813,7 +813,7 @@ def render_sidebar():
             nav_items = ["🏠 Beranda", "🕋 Umrah Mandiri", "ℹ️ Tentang"]
         else:
             nav_items = [
-                "🏠 Beranda", "💰 Simulasi Biaya", "💵 Cari by Budget",
+                "🏠 Beranda", "💰 Simulasi Biaya", "📋 Buat Rencana", "💵 Cari by Budget",
                 "🤝 Umrah Bareng", "🕋 Umrah Mandiri", "📊 Perbandingan",
                 "🧰 Tools & Fitur", "🎮 Rewards & Quiz", "👤 Profil", "ℹ️ Tentang"
             ]
@@ -1006,6 +1006,184 @@ def render_budget_finder():
                     st.markdown(f"✅ {f}")
     else:
         st.warning("⚠️ Budget belum mencukupi. Minimum Rp 20 juta per orang untuk Paket Ekonomis.")
+
+def render_create_plan():
+    """Render create plan page with Makkah/Madinah duration selection"""
+    st.header("📋 Buat Rencana Umrah Lengkap")
+    st.markdown("Susun rencana perjalanan umrah dengan estimasi biaya detail per komponen.")
+    
+    st.markdown("### 📝 Detail Perjalanan")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        scenario = st.selectbox("Skenario Paket", list(SCENARIO_TEMPLATES.keys()), 
+                               format_func=lambda x: SCENARIO_TEMPLATES[x]["name"], key="plan_scenario")
+        num_people = st.number_input("Jumlah Jamaah", min_value=1, max_value=50, value=2, key="plan_num_people")
+        departure_city = st.selectbox("Kota Keberangkatan", list(DEPARTURE_CITIES.keys()))
+        
+        months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+                  "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+        departure_month = st.selectbox("Bulan Keberangkatan", range(1, 13), 
+                                       format_func=lambda x: months[x-1], key="plan_month")
+    
+    with col2:
+        st.markdown("#### 🕋 Durasi Menginap")
+        nights_makkah = st.slider("🕋 Lama di Mekkah (malam)", min_value=2, max_value=10, value=4, 
+                                  key="nights_makkah", help="Pilih jumlah malam menginap di Mekkah")
+        nights_madinah = st.slider("🕌 Lama di Madinah (malam)", min_value=2, max_value=10, value=3, 
+                                   key="nights_madinah", help="Pilih jumlah malam menginap di Madinah")
+        total_duration = nights_makkah + nights_madinah + 2
+        st.info(f"📅 **Total Durasi:** {total_duration} hari ({nights_makkah} malam Mekkah + {nights_madinah} malam Madinah + 2 hari transit)")
+    
+    st.markdown("---")
+    st.markdown("### 💰 Preview Biaya Akomodasi")
+    
+    hotel_makkah = HOTEL_PRICES[scenario]["makkah"]
+    hotel_madinah = HOTEL_PRICES[scenario]["madinah"]
+    additional = ADDITIONAL_COSTS[scenario]
+    
+    cost_makkah = hotel_makkah["price"] * nights_makkah
+    cost_madinah = hotel_madinah["price"] * nights_madinah
+    cost_accommodation = cost_makkah + cost_madinah
+    
+    col1, col2, col3 = st.columns(3)
+    
+    # Build hotel cards HTML separately to avoid f-string issues
+    with col1:
+        makkah_html = f'''
+        <div style="background: #fff3e0; padding: 15px; border-radius: 10px; border-left: 4px solid #e65100;">
+            <div style="font-weight: 700; color: #e65100; margin-bottom: 8px;">🕋 Hotel Mekkah</div>
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">{hotel_makkah["name"]}</div>
+            <div style="font-size: 0.8rem; color: #888;">Rp {hotel_makkah["price"]:,}/malam × {nights_makkah} malam</div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: #e65100; margin-top: 8px;">Rp {cost_makkah:,}</div>
+        </div>
+        '''
+        st.markdown(makkah_html, unsafe_allow_html=True)
+    
+    with col2:
+        madinah_html = f'''
+        <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #2e7d32;">
+            <div style="font-weight: 700; color: #2e7d32; margin-bottom: 8px;">🕌 Hotel Madinah</div>
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">{hotel_madinah["name"]}</div>
+            <div style="font-size: 0.8rem; color: #888;">Rp {hotel_madinah["price"]:,}/malam × {nights_madinah} malam</div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: #2e7d32; margin-top: 8px;">Rp {cost_madinah:,}</div>
+        </div>
+        '''
+        st.markdown(madinah_html, unsafe_allow_html=True)
+    
+    with col3:
+        total_accommodation = cost_accommodation * num_people
+        total_html = f'''
+        <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 15px; border-radius: 10px;">
+            <div style="font-weight: 700; color: #D4AF37; margin-bottom: 8px;">💰 Total Akomodasi</div>
+            <div style="font-size: 0.85rem; color: #C9A86C; margin-bottom: 5px;">Per orang: Rp {cost_accommodation:,}</div>
+            <div style="font-size: 0.8rem; color: #888;">× {num_people} jamaah</div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: #D4AF37; margin-top: 8px;">Rp {total_accommodation:,}</div>
+        </div>
+        '''
+        st.markdown(total_html, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    special_requests = st.text_area("Permintaan Khusus (opsional)", 
+                                     placeholder="Misal: jamaah lansia, butuh kursi roda, vegetarian, dll.")
+    
+    if st.button("🚀 Buat Rencana Lengkap", use_container_width=True, type="primary"):
+        # Calculate all costs
+        flight_cost = additional["flight"]
+        visa_cost = additional["visa"]
+        transport_cost = additional["transport"]
+        meals_cost = additional["meals"] * total_duration
+        
+        total_per_person = cost_accommodation + flight_cost + visa_cost + transport_cost + meals_cost
+        grand_total = total_per_person * num_people
+        
+        # Apply season multiplier
+        season_multiplier = 1.0
+        season_name = "Regular"
+        for season_key, season in SEASONS.items():
+            if departure_month in season["months"]:
+                season_multiplier = season["multiplier"]
+                season_name = season["name"]
+                break
+        
+        total_per_person_adjusted = int(total_per_person * season_multiplier)
+        grand_total_adjusted = int(grand_total * season_multiplier)
+        
+        st.success("✅ Rencana berhasil dibuat!")
+        award_points(POINTS_CONFIG["create_plan"], "Buat Rencana Umrah")
+        
+        st.markdown("### 📊 Ringkasan Perjalanan")
+        sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
+        with sum_col1:
+            st.metric("👥 Jamaah", f"{num_people} orang")
+        with sum_col2:
+            st.metric("🕋 Mekkah", f"{nights_makkah} malam")
+        with sum_col3:
+            st.metric("🕌 Madinah", f"{nights_madinah} malam")
+        with sum_col4:
+            st.metric("📅 Total", f"{total_duration} hari")
+        
+        if season_multiplier != 1.0:
+            if season_multiplier > 1:
+                st.warning(f"⚠️ **{season_name}**: Harga naik {int((season_multiplier-1)*100)}% di bulan ini")
+            else:
+                st.success(f"🎉 **{season_name}**: Hemat {int((1-season_multiplier)*100)}% di bulan ini!")
+        
+        st.markdown("### 💰 Rincian Biaya Per Orang")
+        
+        cost_items = [
+            ("✈️ Tiket Pesawat PP", flight_cost),
+            ("🕋 Hotel Mekkah", cost_makkah),
+            ("🕌 Hotel Madinah", cost_madinah),
+            ("📄 Visa & Handling", visa_cost),
+            ("🚐 Transportasi Lokal", transport_cost),
+            (f"🍽️ Makan ({total_duration} hari)", meals_cost),
+        ]
+        
+        for item_name, item_cost in cost_items:
+            item_html = f'''
+            <div style="display: flex; justify-content: space-between; padding: 8px 12px; 
+                        background: #f9f9f9; border-radius: 5px; margin: 4px 0;">
+                <span>{item_name}</span>
+                <span style="font-weight: 600;">Rp {item_cost:,}</span>
+            </div>
+            '''
+            st.markdown(item_html, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        total_col1, total_col2 = st.columns(2)
+        with total_col1:
+            perperson_html = f'''
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 0.9rem; color: #1565c0;">Per Orang</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: #1565c0;">Rp {total_per_person_adjusted:,}</div>
+            </div>
+            '''
+            st.markdown(perperson_html, unsafe_allow_html=True)
+        with total_col2:
+            grandtotal_html = f'''
+            <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333 100%); padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 0.9rem; color: #D4AF37;">GRAND TOTAL ({num_people} orang)</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: #D4AF37;">Rp {grand_total_adjusted:,}</div>
+            </div>
+            '''
+            st.markdown(grandtotal_html, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.markdown("### 📋 Checklist Persiapan")
+        
+        checklist = [
+            ("📄 Dokumen", ["Paspor (min. 6 bulan)", "Visa Umrah", "Tiket Pesawat", "Voucher Hotel"]),
+            ("🧳 Pakaian", ["Ihram (pria)", "Mukena (wanita)", "Pakaian harian", "Sandal nyaman"]),
+            ("💊 Kesehatan", ["Obat pribadi", "Masker", "Hand sanitizer", "Vitamin"]),
+        ]
+        
+        for category, items in checklist:
+            st.markdown(f"**{category}**")
+            for item in items:
+                st.checkbox(item, key=f"check_{item}")
 
 def render_scenario_comparison():
     st.header("📊 Perbandingan Skenario")
@@ -2246,6 +2424,12 @@ def main():
             render_login_page()
         else:
             render_cost_simulation()
+    elif "Buat Rencana" in page:
+        if not is_logged_in():
+            st.warning("🔐 Silakan login")
+            render_login_page()
+        else:
+            render_create_plan()
     elif "Cari by Budget" in page:
         if not is_logged_in():
             st.warning("🔐 Silakan login")
