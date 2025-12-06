@@ -24,7 +24,7 @@ st.set_page_config(
 # ═══════════════════════════════════════════════════════════════════
 # 📊 CONSTANTS
 # ═══════════════════════════════════════════════════════════════════
-VERSION = "3.8.2"
+VERSION = "3.9.0"
 BRAND = {"name": "LABBAIK", "arabic": "لَبَّيْكَ", "tagline": "Panggilan-Nya, Langkahmu"}
 COLORS = {"black": "#1A1A1A", "gold": "#D4AF37", "green": "#006B3C", "sand": "#C9A86C"}
 CONTACT = {"email": "sopian.hadianto@gmail.com", "wa": "+62 815 9658 833"}
@@ -285,14 +285,33 @@ def load_all_data():
             "premium": {"flight": 18000000, "visa": 500000, "transport": 1200000, "meals": 800000},
             "vip": {"flight": 30000000, "visa": 500000, "transport": 2000000, "meals": 1500000}
         },
-        "weather": {m: {"temp": [20,22,26,31,36,38,39,39,36,31,25,21][m-1], "cond": ["Sejuk","Sejuk","Hangat","Panas","Sangat Panas","Ekstrem","Ekstrem","Ekstrem","Panas","Hangat","Sejuk","Sejuk"][m-1]} for m in range(1,13)},
-        "checklist": [
-            {"cat": "📄 Dokumen", "items": ["Paspor (valid >6 bln)", "Foto 4x6 bg putih", "KTP", "Vaksin Meningitis", "KK"]},
-            {"cat": "👔 Pakaian", "items": ["Ihram 2 set (pria)", "Mukena 2 set (wanita)", "Sandal nyaman"]},
-            {"cat": "📿 Ibadah", "items": ["Buku doa & manasik", "Al-Quran kecil", "Sajadah travel"]},
-            {"cat": "💊 Kesehatan", "items": ["Obat pribadi", "Vitamin", "Masker", "Sunscreen SPF 50+"]},
-            {"cat": "🔌 Elektronik", "items": ["HP + charger", "Adaptor Type G", "Power bank"]},
-        ],
+        "weather": {m: {"temp": [24,25,28,32,36,38,39,38,37,33,29,25][m-1], "cond": ["Sejuk","Sejuk","Hangat","Panas","Sangat Panas","Ekstrem","Ekstrem","Ekstrem","Panas","Hangat","Sejuk","Sejuk"][m-1]} for m in range(1,13)},
+        "checklist": {
+            "dokumen": {"title": "📄 Dokumen", "items": [
+                ("Paspor (valid >6 bln)", True), ("Fotokopi paspor 5 lbr", True), ("Foto 4x6 bg putih 10 lbr", True),
+                ("KK + KTP asli & copy", True), ("Buku Nikah (jika menikah)", True), ("Kartu Vaksin Meningitis", True),
+                ("Sertifikat Vaksin COVID", True), ("Tiket & Voucher Hotel", True), ("Asuransi Perjalanan", True)]},
+            "pakaian": {"title": "👕 Pakaian", "items": [
+                ("Kain Ihram 2 set (pria)", True), ("Mukena putih 3 set (wanita)", True), ("Baju muslim 5 set", True),
+                ("Sandal jepit thawaf", True), ("Sepatu nyaman", True), ("Jaket tipis (AC)", True)]},
+            "kesehatan": {"title": "💊 Kesehatan", "items": [
+                ("Obat pribadi", True), ("Obat sakit kepala/demam", True), ("Obat maag/pencernaan", True),
+                ("Vitamin & suplemen", True), ("Masker banyak", True), ("Hand sanitizer", True),
+                ("Sunblock SPF 50+", True), ("Minyak angin/balsem", True)]},
+            "elektronik": {"title": "📱 Elektronik", "items": [
+                ("HP + charger", True), ("Power bank", True), ("Adapter universal Type G", True)]},
+            "lainnya": {"title": "🎒 Lainnya", "items": [
+                ("Koper + tas kecil", True), ("Tas pinggang uang", True), ("Payung lipat", True),
+                ("Botol minum", True), ("Uang SAR & IDR", True), ("Buku Doa Umrah", True)]}
+        },
+        "doa_manasik": {
+            "niat": {"title": "1️⃣ Niat Ihram", "arab": "لَبَّيْكَ اللَّهُمَّ عُمْرَةً", "latin": "Labbaika Allahumma 'Umratan", "arti": "Aku memenuhi panggilan-Mu ya Allah untuk umrah"},
+            "talbiyah": {"title": "2️⃣ Talbiyah", "arab": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ", "latin": "Labbaika Allahumma labbaik, labbaika laa syariika laka labbaik...", "arti": "Aku memenuhi panggilan-Mu ya Allah..."},
+            "kabah": {"title": "3️⃣ Melihat Ka'bah", "arab": "اللَّهُمَّ زِدْ هَذَا الْبَيْتَ تَشْرِيفًا وَتَعْظِيمًا وَتَكْرِيمًا وَمَهَابَةً", "latin": "Allahumma zid hadhal baita tasyrifan wa ta'zhiman...", "arti": "Ya Allah, tambahkanlah kemuliaan rumah ini..."},
+            "thawaf": {"title": "4️⃣ Mulai Thawaf", "arab": "بِسْمِ اللهِ وَاللهُ أَكْبَرُ", "latin": "Bismillahi wallahu akbar", "arti": "Dengan nama Allah, Allah Maha Besar"},
+            "rukun": {"title": "5️⃣ Rukun Yamani-Hajar Aswad", "arab": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ", "latin": "Rabbana atina fid-dunya hasanah wa fil-akhirati hasanah wa qina 'adzaban-nar", "arti": "Ya Tuhan kami, berilah kami kebaikan di dunia dan akhirat..."},
+            "sai": {"title": "6️⃣ Mulai Sa'i (Shafa)", "arab": "إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللهِ", "latin": "Innash-shafa wal-marwata min sya'a'irillah", "arti": "Sesungguhnya Shafa dan Marwah adalah syi'ar Allah"},
+        },
         "locations": {
             "kabah": {"name": "Ka'bah & Masjidil Haram", "lat": 21.4225, "lon": 39.8262},
             "safa_marwa": {"name": "Bukit Safa & Marwa", "lat": 21.4234, "lon": 39.8277},
@@ -301,10 +320,12 @@ def load_all_data():
             "masjid_quba": {"name": "Masjid Quba", "lat": 24.4397, "lon": 39.6169},
         },
         "emergency": [
-            {"name": "KBRI Riyadh", "phone": "+966-11-488-2800"},
-            {"name": "KJRI Jeddah", "phone": "+966-12-667-0645"},
-            {"name": "Ambulans Saudi", "phone": "997"},
-            {"name": "Polisi Saudi", "phone": "999"},
+            {"name": "🏛️ KBRI Riyadh", "phone": "+966-11-488-2800"},
+            {"name": "🏛️ KJRI Jeddah", "phone": "+966-12-667-6270"},
+            {"name": "🚔 Polisi Saudi", "phone": "999"},
+            {"name": "🚑 Ambulans", "phone": "997"},
+            {"name": "🚒 Pemadam", "phone": "998"},
+            {"name": "🏥 RS King Faisal Makkah", "phone": "+966-12-553-3300"},
         ],
     }
 
@@ -411,17 +432,55 @@ def is_admin():
 
 def login(email, pwd):
     if not email or not pwd: return False, "Email dan password harus diisi"
+    
+    # Try database first
     user = db_login(email.strip().lower(), pwd)
     if user:
         st.session_state.auth = {"ok": True, "user": user}
         return True, "Login berhasil!"
+    
+    # Fallback: Check default admin credentials
+    if email.strip().lower() == DEFAULT_ADMIN["email"] and pwd == DEFAULT_ADMIN["password"]:
+        st.session_state.auth = {"ok": True, "user": {
+            "id": 1, "email": DEFAULT_ADMIN["email"], 
+            "name": DEFAULT_ADMIN["name"], "role": "admin", "avatar": "👑"
+        }}
+        return True, "Login berhasil! (Offline Mode)"
+    
+    # Fallback: Check session state users
+    if "users_db" in st.session_state:
+        user_data = st.session_state.users_db.get(email.strip().lower())
+        if user_data and verify_pwd(pwd, user_data.get("pwd", "")):
+            st.session_state.auth = {"ok": True, "user": {
+                "id": hash(email), "email": user_data["email"],
+                "name": user_data["name"], "role": user_data.get("role", "user"), "avatar": "👤"
+            }}
+            return True, "Login berhasil! (Offline Mode)"
+    
     return False, "Email/password salah atau belum terdaftar"
 
 def register(email, name, pwd):
     if not email or not name or not pwd: return False, "Semua field harus diisi"
     if "@" not in email: return False, "Format email tidak valid"
     if len(pwd) < 6: return False, "Password minimal 6 karakter"
-    return db_register(email.strip(), pwd, name.strip())
+    
+    # Try database first
+    ok, msg = db_register(email.strip(), pwd, name.strip())
+    if ok: return True, msg
+    
+    # Fallback: Use session state
+    if "users_db" not in st.session_state:
+        st.session_state.users_db = {}
+    
+    email_lower = email.strip().lower()
+    if email_lower in st.session_state.users_db:
+        return False, "Email sudah terdaftar"
+    
+    role = "admin" if "admin" in email_lower else "user"
+    st.session_state.users_db[email_lower] = {
+        "email": email_lower, "pwd": hash_pwd(pwd), "name": name.strip(), "role": role
+    }
+    return True, f"✅ Registrasi berhasil! Role: {role.upper()} (Offline Mode)"
 
 def logout(): st.session_state.auth = {"ok": False, "user": None}
 
@@ -438,7 +497,7 @@ def hero_html():
 <div style="font-size:1.8rem;color:#D4AF37">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
 <div style="font-size:2rem;font-weight:700;color:white;letter-spacing:.3em;margin:10px 0">LABBAIK</div>
 <div style="color:#C9A86C">Panggilan-Nya, Langkahmu</div>
-<span style="background:#D4AF37;color:#1A1A1A;padding:4px 12px;border-radius:12px;font-size:.75rem;font-weight:600">v3.8.2</span>
+<span style="background:#D4AF37;color:#1A1A1A;padding:4px 12px;border-radius:12px;font-size:.75rem;font-weight:600">v3.9.0</span>
 </div>'''
 
 @st.cache_data(ttl=86400)
@@ -446,7 +505,7 @@ def sidebar_html():
     return '''<div style="text-align:center;padding:15px;border-bottom:1px solid #333;margin-bottom:12px">
 <div style="font-size:1.3rem;color:#D4AF37">لَبَّيْكَ</div>
 <div style="font-size:1rem;font-weight:700;color:white;letter-spacing:.2em">LABBAIK</div>
-<div style="font-size:.7rem;color:#C9A86C">v3.8.2</div>
+<div style="font-size:.7rem;color:#C9A86C">v3.9.0</div>
 </div>'''
 
 def disclaimer_html():
@@ -470,7 +529,7 @@ def render_footer():
 <div style="color:#C9A86C;font-size:1.3rem;font-weight:700">{stats['total_views']:,}</div>
 </div>
 </div>
-<div style="color:#666;font-size:.65rem">© 2025 LABBAIK v3.8.2 • Made with ❤️ by MS Hadianto</div>
+<div style="color:#666;font-size:.65rem">© 2025 LABBAIK v3.9.0 • Made with ❤️ by MS Hadianto</div>
 </div>''', unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════
@@ -499,8 +558,9 @@ def render_sidebar():
         else:
             menu = ["🏠 Beranda", "💰 Simulasi Biaya", "💵 Cari by Budget", "📋 Buat Rencana",
                     "🤝 Umrah Bareng", "🕋 Umrah Mandiri", "🤖 Chat AI", "📅 Analisis Waktu",
-                    "✅ Checklist", "🗺️ Peta Lokasi", "💱 Kurs", "🌤️ Cuaca",
-                    "📦 Tersimpan", "⏰ Reminder", "📞 Emergency"]
+                    "✅ Checklist", "💰 Tabungan", "⏰ Countdown", "📿 Doa & Manasik",
+                    "🗺️ Peta Lokasi", "💱 Kurs", "🌤️ Cuaca",
+                    "📦 Tersimpan", "📞 Emergency"]
             if is_admin():
                 menu.extend(["📊 Analytics", "💼 Business Hub"])
             menu.append("ℹ️ Tentang")
@@ -799,23 +859,32 @@ def render_time_analysis():
 def render_checklist():
     track_page("Checklist")
     st.header("✅ Checklist Persiapan Umrah")
+    st.caption("🔴 = Wajib | ⚪ = Opsional")
     data = load_all_data()
     
     done, total = 0, 0
-    for cat in data["checklist"]:
-        st.subheader(cat["cat"])
-        for item in cat["items"]:
-            total += 1
-            key = f"chk_{item}"
-            if key not in st.session_state.checks: st.session_state.checks[key] = False
-            if st.checkbox(item, key=key, value=st.session_state.checks[key]):
-                st.session_state.checks[key] = True
-                done += 1
+    for cat_key, cat_data in data["checklist"].items():
+        with st.expander(cat_data["title"], expanded=True):
+            for item, is_required in cat_data["items"]:
+                total += 1
+                key = f"chk_{cat_key}_{item}"
+                if key not in st.session_state.checks: st.session_state.checks[key] = False
+                label = f"{'🔴' if is_required else '⚪'} {item}"
+                if st.checkbox(label, key=key, value=st.session_state.checks[key]):
+                    st.session_state.checks[key] = True
+                    done += 1
     
     st.divider()
     progress = done / total if total > 0 else 0
     st.progress(progress)
     st.metric("Progress", f"{done}/{total} ({int(progress*100)}%)")
+    
+    if progress == 1.0:
+        st.balloons()
+        st.success("🎉 Alhamdulillah! Semua persiapan lengkap!")
+    elif progress >= 0.8: st.info("👍 Hampir selesai!")
+    elif progress >= 0.5: st.warning("⚠️ Masih ada yang perlu disiapkan")
+    else: st.error("📋 Masih banyak yang perlu disiapkan")
 
 def render_map():
     track_page("Peta Lokasi")
@@ -882,36 +951,123 @@ def render_saved():
                 st.session_state.plans.pop(i)
                 st.rerun()
 
-def render_reminder():
-    track_page("Reminder")
-    st.header("⏰ Reminder Persiapan")
-    
-    with st.form("add_rem"):
-        c1, c2 = st.columns(2)
-        title = c1.text_input("Judul Reminder")
-        date = c2.date_input("Tanggal", min_value=datetime.now().date())
-        if st.form_submit_button("➕ Tambah Reminder"):
-            if title:
-                st.session_state.reminders.append({"title": title, "date": date.isoformat()})
-                st.success("✅ Reminder ditambahkan!")
-                st.rerun()
-    
-    for i, rem in enumerate(st.session_state.reminders):
-        days = (datetime.fromisoformat(rem["date"]).date() - datetime.now().date()).days
-        icon = "🔴" if days < 0 else "🟡" if days <= 7 else "🟢"
-        status = "Lewat" if days < 0 else f"{days} hari lagi"
-        st.markdown(f"{icon} **{rem['title']}** - {status}")
-
 def render_emergency():
     track_page("Emergency")
     st.header("📞 Kontak Darurat")
     data = load_all_data()
+    
     for c in data["emergency"]:
-        st.markdown(f"📞 **{c['name']}**: `{c['phone']}`")
+        col1, col2 = st.columns([3, 1])
+        col1.markdown(f"**{c['name']}**")
+        col2.code(c['phone'])
     
     st.divider()
+    st.warning("""
+    **💡 Tips Penting:**
+    - Simpan semua nomor di HP sebelum berangkat
+    - Catat nomor kamar hotel
+    - Bawa fotokopi paspor di tas terpisah
+    - Install: **Eatmarna**, **Tawakkalna**, **WhatsApp**
+    """)
     st.markdown(f"📧 **Developer:** {CONTACT['email']}")
     st.markdown(f"💬 **WhatsApp:** [{CONTACT['wa']}](https://wa.me/6281596588833)")
+
+def render_savings():
+    track_page("Tabungan")
+    st.header("💰 Kalkulator Tabungan Umrah")
+    
+    c1, c2 = st.columns(2)
+    target = c1.number_input("Target Biaya (Rp)", 20_000_000, 200_000_000, 35_000_000, step=1_000_000)
+    current = c1.number_input("Tabungan Saat Ini (Rp)", 0, 200_000_000, 5_000_000, step=500_000)
+    target_date = c2.date_input("Target Berangkat", value=datetime.now() + timedelta(days=365), min_value=datetime.now() + timedelta(days=30))
+    
+    remaining = target - current
+    days_left = (target_date - datetime.now().date()).days
+    
+    if remaining > 0 and days_left > 0:
+        daily = remaining / days_left
+        weekly = remaining / max(days_left // 7, 1)
+        monthly = remaining / max(days_left // 30, 1)
+        
+        st.divider()
+        c1, c2, c3 = st.columns(3)
+        c1.metric("📅 Harian", fmt(daily), f"{days_left} hari")
+        c2.metric("📆 Mingguan", fmt(weekly), f"{days_left//7} minggu")
+        c3.metric("🗓️ Bulanan", fmt(monthly), f"{days_left//30} bulan")
+        
+        progress = current / target
+        st.progress(min(progress, 1.0))
+        st.caption(f"Progress: {progress*100:.1f}%")
+        
+        if monthly > 5_000_000:
+            st.warning(f"⚠️ Target bulanan tinggi ({fmt(monthly)}). Pertimbangkan menunda atau pilih paket ekonomis.")
+        else:
+            st.success("✅ Target realistis! Tips: Sisihkan di awal gajian, buat rekening khusus.")
+    elif remaining <= 0:
+        st.success("🎉 Alhamdulillah! Dana sudah cukup. Saatnya booking!")
+    else:
+        st.error("⚠️ Target tanggal sudah lewat")
+
+def render_countdown():
+    track_page("Countdown")
+    st.header("⏰ Countdown Keberangkatan")
+    
+    dep_date = st.date_input("Tanggal Keberangkatan", value=datetime.now() + timedelta(days=90), min_value=datetime.now())
+    days_left = (dep_date - datetime.now().date()).days
+    
+    if days_left > 0:
+        weeks = days_left // 7
+        rem_days = days_left % 7
+        
+        st.markdown(f'''
+        <div style="text-align:center;padding:2rem;background:linear-gradient(135deg,#006B3C,#4e9f3d);border-radius:15px;color:white;margin:1rem 0">
+            <h1 style="font-size:4rem;margin:0">{days_left}</h1>
+            <p style="font-size:1.5rem">Hari Menuju Tanah Suci</p>
+            <p>({weeks} minggu {rem_days} hari)</p>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        st.subheader("📌 Milestone Persiapan")
+        milestones = [(90, "Booking tiket & hotel"), (60, "Urus visa & vaksin"), (30, "Siapkan perlengkapan"), 
+                      (14, "Medical check-up"), (7, "Packing & cek dokumen"), (3, "Konfirmasi booking"), (1, "Istirahat")]
+        for d, task in milestones:
+            if days_left >= d:
+                st.checkbox(f"H-{d}: {task}", key=f"ms_{d}")
+            else:
+                st.markdown(f"~~H-{d}: {task}~~ ✅")
+    elif days_left == 0:
+        st.balloons()
+        st.markdown('''<div style="text-align:center;padding:2rem;background:gold;border-radius:15px">
+        <h1>🕋 HARI INI!</h1><p>لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</p></div>''', unsafe_allow_html=True)
+    else:
+        st.info("Masukkan tanggal keberangkatan yang akan datang")
+
+def render_doa_manasik():
+    track_page("Doa Manasik")
+    st.header("📿 Doa & Panduan Manasik Umrah")
+    data = load_all_data()
+    
+    tab1, tab2 = st.tabs(["📖 Doa-Doa", "🚶 Tata Cara"])
+    
+    with tab1:
+        for key, doa in data["doa_manasik"].items():
+            with st.expander(doa["title"]):
+                st.markdown(f'''<div style="text-align:right;font-size:1.5rem;font-family:serif;line-height:2;background:#f5f5f5;padding:1rem;border-radius:10px">{doa["arab"]}</div>''', unsafe_allow_html=True)
+                st.markdown(f"**Latin:** *{doa['latin']}*")
+                st.markdown(f"**Arti:** {doa['arti']}")
+    
+    with tab2:
+        st.markdown("""
+### 🕋 Urutan Manasik Umrah
+
+1. **Ihram dari Miqat** - Mandi sunnah, pakai ihram, niat, baca talbiyah
+2. **Thawaf 7 putaran** - Mulai dari Hajar Aswad, putaran 1-3 ramal (jalan cepat)
+3. **Shalat 2 rakaat** - Di belakang Maqam Ibrahim
+4. **Minum Zamzam** - Berdoa sesuai hajat
+5. **Sa'i 7 kali** - Shafa→Marwah (1), Marwah→Shafa (2), berakhir di Marwah
+6. **Tahallul** - Pria cukur, wanita potong ±3cm
+7. **Selesai** ✅ - Keluar dari ihram
+        """)
 
 def render_analytics():
     track_page("Analytics")
@@ -1056,14 +1212,14 @@ def render_about():
 ### 👨‍💻 Developer
 **MS Hadianto** | 📧 {CONTACT['email']} | 💬 [WhatsApp](https://wa.me/6281596588833)
 
-### ✨ Fitur v3.8.2
-💰 Simulasi Biaya • 📋 Itinerary Builder • 🤝 Umrah Bareng • 🕋 Umrah Mandiri + Forum • 🤖 AI Chat Assistant • ✅ Checklist • 🗺️ Peta Interaktif • 💱 Kurs Converter • 🌤️ Info Cuaca • ⏰ Reminder • 📞 Emergency Contacts • 📊 Analytics • 💼 Business Hub
+### ✨ Fitur v3.9.0
+💰 Simulasi Biaya • 📋 Itinerary Builder • 🤝 Umrah Bareng • 🕋 Umrah Mandiri + Forum • 🤖 AI Chat • ✅ Checklist Lengkap • 💰 Kalkulator Tabungan • ⏰ Countdown • 📿 Doa & Manasik • 🗺️ Peta Interaktif • 💱 Kurs Converter • 🌤️ Info Cuaca • 📞 Kontak Darurat • 📊 Analytics • 💼 Business Hub
 
 ### 🔧 Tech Stack
 Streamlit • Neon PostgreSQL • Python • Claude AI
 
 ### 🗄️ Database Status
-{"✅ Connected to Neon PostgreSQL" if db_available() else "⚠️ Offline mode"}
+{"✅ Connected to Neon PostgreSQL" if db_available() else "⚠️ Offline mode - Login dengan admin@labbaik.id / @Jakarta01"}
     """)
     st.markdown(disclaimer_html(), unsafe_allow_html=True)
     render_footer()
@@ -1085,14 +1241,15 @@ def main():
         "Beranda": render_home, "Panduan": render_guide, "Simulasi": render_simulation,
         "Budget": render_budget_finder, "Rencana": render_create_plan, "Bareng": render_umrah_bareng,
         "Mandiri": render_umrah_mandiri, "Chat": render_ai_chat, "Waktu": render_time_analysis,
-        "Checklist": render_checklist, "Peta": render_map, "Kurs": render_currency,
-        "Cuaca": render_weather, "Tersimpan": render_saved, "Reminder": render_reminder,
+        "Checklist": render_checklist, "Tabungan": render_savings, "Countdown": render_countdown,
+        "Doa": render_doa_manasik, "Peta": render_map, "Kurs": render_currency,
+        "Cuaca": render_weather, "Tersimpan": render_saved,
         "Emergency": render_emergency, "Analytics": render_analytics, "Business": render_business_hub,
         "Tentang": render_about,
     }
     
     protected = ["Simulasi", "Budget", "Rencana", "Bareng", "Mandiri", "Chat", "Waktu", 
-                 "Checklist", "Peta", "Tersimpan", "Reminder", "Analytics", "Business"]
+                 "Checklist", "Tabungan", "Countdown", "Doa", "Peta", "Tersimpan", "Analytics", "Business"]
     
     for key, func in routes.items():
         if key in page:
