@@ -1766,7 +1766,7 @@ def render_about():
         ### 👨‍💻 Developer
         
         **MS Hadianto**  
-        Founder & Lead Developer - MSH Consulting
+        Founder & Lead Developer - KIM Consulting
         
         📧 sopian.hadianto@gmail.com  
         📱 +62 815 9658 833
@@ -1788,18 +1788,23 @@ def render_about():
         cols = st.columns(3)
         for i, (tier_id, tier) in enumerate(SPONSORSHIP_TIERS.items()):
             with cols[i]:
+                # Build benefits list HTML
+                benefits_html = ""
+                for b in tier['benefits']:
+                    benefits_html += f'<div style="margin-bottom: 5px;">✓ {b}</div>'
+                
                 st.markdown(f"""
-                <div style="background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%);
+                <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
                             border-radius: 15px; padding: 20px; text-align: center;
                             border: 2px solid {tier['color']}40; height: 320px;">
                     <div style="font-size: 2rem; margin-bottom: 10px;">{tier['icon']}</div>
                     <div style="color: {tier['color']}; font-size: 1.1rem; font-weight: 700;">{tier['name']}</div>
-                    <div style="color: {COLORS['gold']}; font-size: 1.3rem; font-weight: 700; margin: 15px 0;">
+                    <div style="color: #D4AF37; font-size: 1.3rem; font-weight: 700; margin: 15px 0;">
                         Rp {tier['price']:,.0f}
                     </div>
                     <div style="color: #888; font-size: 0.8rem; margin-bottom: 15px;">per bulan</div>
                     <div style="text-align: left; color: #E8E8E8; font-size: 0.8rem;">
-                        {"".join([f"<div style='margin-bottom: 5px;'>✓ {b}</div>" for b in tier['benefits']])}
+                        {benefits_html}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1817,18 +1822,28 @@ def render_about():
                 is_popular = plan.get("popular", False)
                 border_style = f"3px solid {COLORS['gold']}" if is_popular else "1px solid #555"
                 
+                # Build features list HTML
+                features_html = ""
+                for f in plan['features'][:5]:
+                    features_html += f'<div style="padding:5px 0;border-bottom:1px solid #eee;">✅ {f}</div>'
+                
+                # Popular badge
+                popular_badge = ""
+                if is_popular:
+                    popular_badge = f'<div style="position:absolute;top:-10px;right:20px;background:{COLORS["gold"]};color:{COLORS["black"]};padding:3px 15px;border-radius:20px;font-size:0.75rem;font-weight:bold;">POPULER</div>'
+                
                 st.markdown(f"""
                 <div style="background: white; border: {border_style}; border-radius: 15px;
                             padding: 25px; text-align: center; height: 380px; position: relative;">
-                    {f'<div style="position:absolute;top:-10px;right:20px;background:{COLORS["gold"]};color:{COLORS["black"]};padding:3px 15px;border-radius:20px;font-size:0.75rem;font-weight:bold;">POPULER</div>' if is_popular else ''}
+                    {popular_badge}
                     <div style="font-size: 2rem; margin-bottom: 10px;">{plan['badge']}</div>
-                    <h4 style="color: {COLORS['black']}; margin: 0;">{plan['name']}</h4>
-                    <div style="font-size: 1.8rem; font-weight: bold; color: {COLORS['green']}; margin: 15px 0;">
+                    <h4 style="color: #1A1A1A; margin: 0;">{plan['name']}</h4>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: #006B3C; margin: 15px 0;">
                         {plan['price_display']}
                     </div>
                     <div style="color: #666; font-size: 0.85rem; margin-bottom: 15px;">/ bulan</div>
                     <div style="text-align: left; font-size: 0.85rem;">
-                        {''.join([f'<div style="padding:5px 0;border-bottom:1px solid #eee;">✅ {f}</div>' for f in plan['features'][:5]])}
+                        {features_html}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
