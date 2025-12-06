@@ -6,7 +6,7 @@ __version__ = "3.4.1"
 DEVELOPER = {
     "name": "MS Hadianto",
     "role": "Founder & Lead Developer",
-    "company": "KIM Consulting",
+    "company": "MSH Consulting",
     "email": "sopian.hadianto@gmail.com",
     "whatsapp": "6281596588833",
     "github": "https://github.com/mshadianto",
