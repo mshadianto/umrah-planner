@@ -9,21 +9,23 @@ Copyright (c) 2025 MS Hadianto. All Rights Reserved.
 
 ================================================================================
 Platform: AI-Powered Umrah Planning Platform
-Version:  4.0.0
-Codename: Labbaik Ultimate
+Version:  4.1.0
+Codename: Labbaik Ultimate+
 Author:   MS Hadianto
 Email:    sopian.hadianto@gmail.com
 Website:  labbaik.ai
 ================================================================================
 
-Version: 4.0.0
+Version: 4.1.0
 Updated: 2025-12-06
 Changes: 
-- Merged v3.5.0 Engagement System + v3.9.0 Enhanced Features
-- Removed PWA for lightweight access
-- Added: Savings Calculator, Countdown, Doa & Manasik, Enhanced Checklist
-- Added: Points, Levels, Badges, Streaks, Quiz, Referral System
-- Optimized imports and performance
+- Enhanced Engagement System (10 Levels, 18 Badges, Leaderboard, Umrah Readiness Score)
+- Added Daily Challenges & Rewards
+- Added Subscription Plans (Basic, Premium, VIP)
+- Added Sponsorship/Partnership Tiers (Bronze, Silver, Gold)
+- Added Visitor Stats Display
+- Enhanced Quiz with Perfect Score Badge
+- Optimized Level Progress System
 """
 
 import streamlit as st
@@ -45,7 +47,7 @@ except ImportError:
     @dataclass
     class AppConfig:
         name: str = "LABBAIK"
-        version: str = "4.0.0"
+        version: str = "4.1.0"
     
     @dataclass
     class LLMConfig:
@@ -94,7 +96,7 @@ BRAND = {
     "talbiyah": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ",
     "tagline": "Panggilan-Nya, Langkahmu",
     "description": "Platform AI Perencanaan Umrah #1 Indonesia",
-    "version": "4.0.0",
+    "version": "4.1.0",
 }
 
 COLORS = {
@@ -310,20 +312,134 @@ WEATHER_DATA = {
 # ============================================
 POINTS_CONFIG = {
     "daily_login": 10,
+    "daily_streak_bonus": 5,
     "complete_simulation": 25,
     "share_social": 50,
     "referral_signup": 200,
     "referral_bonus": 75,
     "quiz_correct": 15,
     "read_guide": 10,
+    "complete_profile": 50,
+    "create_plan": 30,
+    "compare_packages": 10,
+    "helpful_answer": 30,
+    "complete_learning": 100,
 }
 
+# Enhanced Levels System (10 Levels)
+LEVELS = [
+    {"level": 1, "name": "Jamaah Pemula", "min_points": 0, "icon": "🌱", "color": "#8BC34A"},
+    {"level": 2, "name": "Jamaah Aktif", "min_points": 100, "icon": "🌿", "color": "#4CAF50"},
+    {"level": 3, "name": "Jamaah Setia", "min_points": 300, "icon": "🌳", "color": "#2E7D32"},
+    {"level": 4, "name": "Calon Mutawwif", "min_points": 600, "icon": "⭐", "color": "#FFC107"},
+    {"level": 5, "name": "Mutawwif", "min_points": 1000, "icon": "🌟", "color": "#FF9800"},
+    {"level": 6, "name": "Mutawwif Senior", "min_points": 1500, "icon": "💫", "color": "#FF5722"},
+    {"level": 7, "name": "Jamaah Berpengalaman", "min_points": 2500, "icon": "🏅", "color": "#9C27B0"},
+    {"level": 8, "name": "Pakar Umrah", "min_points": 4000, "icon": "🎖️", "color": "#673AB7"},
+    {"level": 9, "name": "Mentor Jamaah", "min_points": 6000, "icon": "👑", "color": "#3F51B5"},
+    {"level": 10, "name": "Haji Mabrur", "min_points": 10000, "icon": "🕋", "color": "#D4AF37"},
+]
+
+# Enhanced Badges System
 BADGES = {
-    "newcomer": {"name": "Pendatang Baru", "icon": "🌟", "points": 0},
-    "explorer": {"name": "Penjelajah", "icon": "🔍", "points": 100},
-    "planner": {"name": "Perencana Handal", "icon": "📋", "points": 500},
-    "expert": {"name": "Ahli Umrah", "icon": "🎓", "points": 1000},
-    "ambassador": {"name": "Duta LABBAIK", "icon": "👑", "points": 2500},
+    # Starter Badges
+    "newcomer": {"name": "Pendatang Baru", "icon": "🌟", "points": 0, "category": "starter"},
+    "profile_complete": {"name": "Profil Lengkap", "icon": "📝", "points": 50, "category": "starter"},
+    
+    # Planning Badges
+    "explorer": {"name": "Penjelajah", "icon": "🔍", "points": 100, "category": "planning"},
+    "planner": {"name": "Perencana Handal", "icon": "📋", "points": 500, "category": "planning"},
+    "budget_master": {"name": "Ahli Anggaran", "icon": "📊", "points": 750, "category": "planning"},
+    
+    # Achievement Badges
+    "expert": {"name": "Ahli Umrah", "icon": "🎓", "points": 1000, "category": "achievement"},
+    "ambassador": {"name": "Duta LABBAIK", "icon": "👑", "points": 2500, "category": "achievement"},
+    "legend": {"name": "Legenda LABBAIK", "icon": "🏆", "points": 5000, "category": "achievement"},
+    
+    # Streak Badges
+    "streak_7": {"name": "Istiqomah Seminggu", "icon": "🔥", "points": 100, "category": "streak"},
+    "streak_30": {"name": "Istiqomah Sebulan", "icon": "💎", "points": 500, "category": "streak"},
+    "streak_100": {"name": "Istiqomah 100 Hari", "icon": "🏆", "points": 2000, "category": "streak"},
+    
+    # Social Badges
+    "first_share": {"name": "Penyebar Kebaikan", "icon": "📤", "points": 50, "category": "social"},
+    "influencer": {"name": "Influencer Umrah", "icon": "🌟", "points": 1000, "category": "social"},
+    "community_hero": {"name": "Pahlawan Komunitas", "icon": "🦸", "points": 750, "category": "social"},
+    
+    # Learning Badges
+    "doa_master": {"name": "Hafidz Doa", "icon": "📖", "points": 200, "category": "learning"},
+    "manasik_complete": {"name": "Lulus Manasik", "icon": "🎓", "points": 300, "category": "learning"},
+    "perfect_quiz": {"name": "Nilai Sempurna", "icon": "💯", "points": 200, "category": "learning"},
+}
+
+# Daily Rewards System
+DAILY_REWARDS = [
+    {"day": 1, "reward": "10 LP", "points": 10, "icon": "🎁"},
+    {"day": 2, "reward": "15 LP", "points": 15, "icon": "🎁"},
+    {"day": 3, "reward": "20 LP", "points": 20, "icon": "🎁"},
+    {"day": 4, "reward": "25 LP", "points": 25, "icon": "🎁"},
+    {"day": 5, "reward": "30 LP", "points": 30, "icon": "🎁"},
+    {"day": 6, "reward": "40 LP", "points": 40, "icon": "🎁"},
+    {"day": 7, "reward": "100 LP + Badge", "points": 100, "icon": "🏆"},
+]
+
+# Daily Challenges
+DAILY_CHALLENGES = [
+    {"id": "simulate_budget", "title": "Simulasi Budget", "desc": "Lakukan 1x simulasi biaya", "points": 20, "icon": "💰"},
+    {"id": "read_tips", "title": "Pembaca Aktif", "desc": "Baca 3 tips umrah", "points": 15, "icon": "📚"},
+    {"id": "share_app", "title": "Berbagi Kebaikan", "desc": "Share LABBAIK", "points": 25, "icon": "📤"},
+    {"id": "complete_quiz", "title": "Uji Pengetahuan", "desc": "Selesaikan 1 quiz", "points": 30, "icon": "❓"},
+]
+
+# Subscription Plans
+SUBSCRIPTION_PLANS = {
+    "basic": {
+        "name": "Basic Member",
+        "price": 49000,
+        "price_display": "Rp 49.000",
+        "features": ["50 Chat AI / hari", "Simpan 5 rencana", "Diskon 5% booking"],
+        "badge": "🥉"
+    },
+    "premium": {
+        "name": "Premium Member",
+        "price": 149000,
+        "price_display": "Rp 149.000",
+        "features": ["Unlimited Chat AI", "Simpan 20 rencana", "Export PDF", "Price alert", "Diskon 10%"],
+        "badge": "⭐",
+        "popular": True
+    },
+    "vip": {
+        "name": "VIP Elite",
+        "price": 499000,
+        "price_display": "Rp 499.000",
+        "features": ["Semua fitur Premium", "Dedicated assistant 24/7", "Konsultasi video call", "Diskon 15%"],
+        "badge": "👑"
+    }
+}
+
+# Sponsorship Tiers
+SPONSORSHIP_TIERS = {
+    "bronze": {
+        "name": "Bronze Partner",
+        "price": 2500000,
+        "benefits": ["Logo di footer", "1 slot featured", "Basic analytics"],
+        "color": "#CD7F32",
+        "icon": "🥉"
+    },
+    "silver": {
+        "name": "Silver Partner",
+        "price": 5000000,
+        "benefits": ["Logo di sidebar", "3 slot featured", "Priority listing", "Monthly report"],
+        "color": "#C0C0C0",
+        "icon": "🥈"
+    },
+    "gold": {
+        "name": "Gold Partner",
+        "price": 10000000,
+        "benefits": ["Logo di homepage", "5 slot featured", "Top priority", "Weekly report", "Custom branding"],
+        "color": "#FFD700",
+        "icon": "🥇"
+    }
 }
 
 QUIZ_QUESTIONS = [
@@ -471,18 +587,54 @@ def init_engagement():
         st.session_state.engagement = {
             "points": 0, "level": 1, "streak": 0,
             "badges": ["newcomer"], "daily_claimed": False,
-            "referral_count": 0, "quiz_completed": []
+            "referral_count": 0, "quiz_completed": [],
+            "last_login": None, "stats": {
+                "simulations": 0, "plans_created": 0,
+                "shares": 0, "articles_read": 0
+            }
         }
+
+def get_user_level(points):
+    """Get user level based on points"""
+    current_level = LEVELS[0]
+    for level in LEVELS:
+        if points >= level["min_points"]:
+            current_level = level
+        else:
+            break
+    return current_level
+
+def get_next_level(current_level):
+    """Get next level info"""
+    for i, level in enumerate(LEVELS):
+        if level["level"] == current_level["level"]:
+            if i < len(LEVELS) - 1:
+                return LEVELS[i + 1]
+    return None
+
+def calculate_level_progress(points, current_level):
+    """Calculate progress to next level"""
+    next_level = get_next_level(current_level)
+    if next_level is None:
+        return 100
+    current_min = current_level["min_points"]
+    next_min = next_level["min_points"]
+    progress = (points - current_min) / (next_min - current_min) * 100
+    return min(100, max(0, progress))
 
 def award_points(amount, reason=""):
     init_engagement()
     st.session_state.engagement["points"] += amount
-    # Check level up
     points = st.session_state.engagement["points"]
-    new_level = 1 + (points // 500)
-    if new_level > st.session_state.engagement["level"]:
-        st.session_state.engagement["level"] = new_level
-        st.toast(f"🎉 Level Up! Sekarang Level {new_level}")
+    
+    # Check level up using new system
+    new_level = get_user_level(points)
+    old_level_num = st.session_state.engagement["level"]
+    
+    if new_level["level"] > old_level_num:
+        st.session_state.engagement["level"] = new_level["level"]
+        st.toast(f"🎉 Level Up! Sekarang {new_level['icon']} {new_level['name']}")
+    
     # Check badges
     for badge_id, badge in BADGES.items():
         if points >= badge["points"] and badge_id not in st.session_state.engagement["badges"]:
@@ -1183,70 +1335,268 @@ def render_tools_features():
             """)
 
 def render_engagement_page():
-    st.header("🎮 Rewards & Quiz Center")
+    st.header("🎮 Rewards & Engagement Center")
     
     init_engagement()
     eng = st.session_state.engagement
     points = eng["points"]
-    level = 1 + (points // 500)
+    level = get_user_level(points)
+    progress = calculate_level_progress(points, level)
+    next_level = get_next_level(level)
     
-    # Stats
-    col1, col2, col3 = st.columns(3)
+    # Enhanced Stats Display with Level Progress
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%); 
+                padding: 20px; border-radius: 15px; margin-bottom: 20px;
+                border: 1px solid {COLORS['gold']}40;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 2.5rem;">{level['icon']}</span>
+                <div>
+                    <div style="color: {level['color']}; font-weight: 700; font-size: 1.2rem;">{level['name']}</div>
+                    <div style="color: {COLORS['sand']}; font-size: 0.85rem;">Level {level['level']}</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="color: {COLORS['gold']}; font-weight: 800; font-size: 2rem;">{points:,}</div>
+                <div style="color: {COLORS['sand']}; font-size: 0.8rem;">LABBAIK Points</div>
+            </div>
+        </div>
+        <div style="background: {COLORS['black']}; border-radius: 10px; height: 10px; overflow: hidden;">
+            <div style="background: linear-gradient(90deg, {COLORS['gold']} 0%, {level['color']} 100%); 
+                        height: 100%; width: {progress}%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+            <span style="color: {COLORS['sand']}; font-size: 0.75rem;">{level['min_points']} LP</span>
+            <span style="color: {COLORS['sand']}; font-size: 0.75rem;">
+                {f"{next_level['min_points']} LP" if next_level else "MAX LEVEL! 🏆"}
+            </span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Streak Fire Display
+    streak = eng["streak"]
+    flame_color = "#FF9800" if streak < 7 else ("#F44336" if streak < 30 else COLORS['gold'])
+    col1, col2 = st.columns([1, 2])
     with col1:
         st.markdown(f"""
-        <div style="background: {COLORS['black']}; padding: 20px; border-radius: 15px; text-align: center;">
-            <div style="font-size: 2rem;">⭐</div>
-            <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800;">{points:,}</div>
-            <div style="color: {COLORS['sand']};">LABBAIK Points</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"""
-        <div style="background: {COLORS['black']}; padding: 20px; border-radius: 15px; text-align: center;">
-            <div style="font-size: 2rem;">🏆</div>
-            <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800;">{level}</div>
-            <div style="color: {COLORS['sand']};">Level</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"""
-        <div style="background: {COLORS['black']}; padding: 20px; border-radius: 15px; text-align: center;">
-            <div style="font-size: 2rem;">🔥</div>
-            <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800;">{eng['streak']}</div>
-            <div style="color: {COLORS['sand']};">Streak</div>
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+                    padding: 20px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 2.5rem; text-shadow: 0 0 20px {flame_color};">🔥</div>
+            <div style="color: white; font-size: 2rem; font-weight: 800;">{streak}</div>
+            <div style="color: rgba(255,255,255,0.9); font-size: 0.85rem;">Hari Berturut</div>
         </div>
         """, unsafe_allow_html=True)
     
-    # Daily claim
-    if not eng["daily_claimed"]:
-        if st.button("🎁 Klaim Bonus Harian (+10 LP)", use_container_width=True):
-            award_points(10, "Daily login")
-            st.session_state.engagement["daily_claimed"] = True
-            st.session_state.engagement["streak"] += 1
-            st.success("✅ +10 LP diklaim!")
-            st.rerun()
-    else:
-        st.info("✅ Bonus harian sudah diklaim. Kembali besok!")
+    with col2:
+        # Daily claim
+        if not eng["daily_claimed"]:
+            day_index = min(streak, len(DAILY_REWARDS) - 1)
+            today_reward = DAILY_REWARDS[day_index]
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, {COLORS['black']} 0%, #2D1F3D 100%);
+                        border: 2px solid {COLORS['gold']}; border-radius: 15px; padding: 20px; text-align: center;">
+                <div style="font-size: 2rem;">🎁</div>
+                <div style="color: {COLORS['gold']}; font-size: 1.1rem; font-weight: 700;">Hadiah Hari ke-{streak + 1}</div>
+                <div style="color: white; font-size: 1.3rem; font-weight: 800; margin: 5px 0;">{today_reward['reward']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("🎁 Klaim Bonus Harian!", use_container_width=True, type="primary"):
+                award_points(today_reward["points"], "Daily login")
+                st.session_state.engagement["daily_claimed"] = True
+                st.session_state.engagement["streak"] += 1
+                if streak + 1 == 7:
+                    if "streak_7" not in eng["badges"]:
+                        eng["badges"].append("streak_7")
+                        st.toast("🏅 Badge: Istiqomah Seminggu!")
+                st.balloons()
+                st.rerun()
+        else:
+            st.info("✅ Bonus harian sudah diklaim. Kembali besok untuk melanjutkan streak!")
     
     st.markdown("---")
     
-    # Badges
-    st.subheader("🏅 Badges")
-    badge_cols = st.columns(5)
-    for i, (badge_id, badge) in enumerate(BADGES.items()):
-        with badge_cols[i % 5]:
-            owned = badge_id in eng["badges"]
-            opacity = "1" if owned else "0.3"
+    # Tabs for different sections
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Tantangan", "🏆 Badge", "📊 Leaderboard", "🎁 Referral", "🕋 Kesiapan"])
+    
+    with tab1:
+        st.subheader("📋 Tantangan Harian")
+        for challenge in DAILY_CHALLENGES:
             st.markdown(f"""
-            <div style="text-align: center; opacity: {opacity}; padding: 10px;">
-                <div style="font-size: 2rem;">{badge['icon']}</div>
-                <div style="font-size: 0.75rem;">{badge['name']}</div>
+            <div style="background: #FFFFFF10; border-radius: 10px; padding: 12px 15px; margin-bottom: 8px;
+                        display: flex; justify-content: space-between; align-items: center;
+                        border-left: 3px solid {COLORS['gold']};">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.3rem;">{challenge['icon']}</span>
+                    <div>
+                        <div style="font-weight: 600;">{challenge['title']}</div>
+                        <div style="color: {COLORS['sand']}; font-size: 0.8rem;">{challenge['desc']}</div>
+                    </div>
+                </div>
+                <div style="background: {COLORS['gold']}; color: {COLORS['black']}; padding: 5px 12px;
+                            border-radius: 15px; font-weight: 700; font-size: 0.85rem;">
+                    +{challenge['points']} LP
+                </div>
             </div>
             """, unsafe_allow_html=True)
     
+    with tab2:
+        st.subheader("🏆 Koleksi Badge")
+        owned_count = len(eng["badges"])
+        total_badges = len([b for b in BADGES.values() if b.get("category") != "secret"])
+        st.markdown(f"**Progress:** {owned_count}/{total_badges} badges")
+        
+        badge_cols = st.columns(5)
+        for i, (badge_id, badge) in enumerate(BADGES.items()):
+            with badge_cols[i % 5]:
+                owned = badge_id in eng["badges"]
+                opacity = "1" if owned else "0.3"
+                border = f"2px solid {COLORS['gold']}" if owned else "1px solid #333"
+                st.markdown(f"""
+                <div style="text-align: center; opacity: {opacity}; padding: 15px;
+                            background: {COLORS['black']}; border-radius: 12px;
+                            border: {border}; margin-bottom: 10px;">
+                    <div style="font-size: 2rem;">{badge['icon']}</div>
+                    <div style="font-size: 0.7rem; color: {COLORS['gold'] if owned else '#666'}; margin-top: 5px;">{badge['name']}</div>
+                    <div style="font-size: 0.65rem; color: #888;">{badge['points']} LP</div>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    with tab3:
+        st.subheader("📊 Leaderboard Mingguan")
+        
+        # Sample leaderboard data
+        leaders = [
+            {"rank": 1, "name": "Ahmad Fauzi", "city": "Jakarta", "points": 15420, "avatar": "👳"},
+            {"rank": 2, "name": "Siti Aisyah", "city": "Surabaya", "points": 12850, "avatar": "👩"},
+            {"rank": 3, "name": "Muhammad Rizki", "city": "Bandung", "points": 11200, "avatar": "👨"},
+            {"rank": 4, "name": "Fatimah Zahra", "city": "Medan", "points": 9800, "avatar": "👩"},
+            {"rank": 5, "name": "Ibrahim Hassan", "city": "Makassar", "points": 8500, "avatar": "👨"},
+        ]
+        medal_colors = ["#FFD700", "#C0C0C0", "#CD7F32", "#555", "#555"]
+        
+        for i, leader in enumerate(leaders):
+            rank_display = ["🥇", "🥈", "🥉"][i] if i < 3 else f"#{leader['rank']}"
+            st.markdown(f"""
+            <div style="background: {medal_colors[i]}15; border-radius: 12px; padding: 12px 15px;
+                        margin-bottom: 8px; display: flex; align-items: center; gap: 15px;
+                        border: 1px solid {medal_colors[i]}40;">
+                <div style="font-size: 1.3rem; width: 40px; text-align: center;">{rank_display}</div>
+                <div style="font-size: 1.5rem;">{leader['avatar']}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600;">{leader['name']}</div>
+                    <div style="color: {COLORS['sand']}; font-size: 0.75rem;">📍 {leader['city']}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="color: {COLORS['gold']}; font-weight: 700;">{leader['points']:,}</div>
+                    <div style="color: {COLORS['sand']}; font-size: 0.7rem;">LP</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div style="text-align: center; margin-top: 15px; padding: 10px; background: {COLORS['gold']}20; border-radius: 10px;">
+            📊 Peringkat Anda: <strong style="color: {COLORS['gold']};">#42</strong> • {points:,} LP
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with tab4:
+        st.subheader("🎁 Ajak Teman")
+        user = get_current_user()
+        user_id = user.get("id", "guest") if user else "guest"
+        ref_code = generate_referral_code(str(user_id))
+        referrals = eng.get("referral_count", 0)
+        
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);
+                    border-radius: 20px; padding: 25px; text-align: center;
+                    border: 1px solid {COLORS['gold']}50;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">🎁</div>
+            <div style="color: white; font-size: 1.2rem; font-weight: 700;">Ajak Teman, Dapat Bonus!</div>
+            <div style="color: {COLORS['sand']}; margin: 10px 0;">
+                Dapatkan <strong style="color: {COLORS['gold']};">200 LP</strong> untuk setiap teman yang bergabung
+            </div>
+            
+            <div style="background: {COLORS['black']}; border-radius: 15px; padding: 15px; margin: 20px 0;
+                        border: 2px dashed {COLORS['gold']}50;">
+                <div style="color: {COLORS['sand']}; font-size: 0.85rem;">Kode Referral Anda</div>
+                <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800; letter-spacing: 4px;">{ref_code}</div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-around; padding: 15px; background: {COLORS['black']}50; border-radius: 10px;">
+                <div>
+                    <div style="color: {COLORS['gold']}; font-size: 1.5rem; font-weight: 700;">{referrals}</div>
+                    <div style="color: {COLORS['sand']}; font-size: 0.75rem;">Teman Diajak</div>
+                </div>
+                <div style="width: 1px; background: {COLORS['gold']}30;"></div>
+                <div>
+                    <div style="color: #4CAF50; font-size: 1.5rem; font-weight: 700;">{referrals * 200}</div>
+                    <div style="color: {COLORS['sand']}; font-size: 0.75rem;">LP Didapat</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with tab5:
+        st.subheader("🕋 Skor Kesiapan Umrah")
+        
+        # Calculate readiness based on various factors
+        readiness = {
+            "knowledge": min(100, (len([q for q in eng.get("quiz_completed", [])]) / len(QUIZ_QUESTIONS)) * 100) if QUIZ_QUESTIONS else 50,
+            "financial": 60,
+            "physical": 75,
+            "spiritual": 70,
+            "documents": 40,
+        }
+        overall = sum(readiness.values()) // len(readiness)
+        
+        # Circular progress
+        st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 25px;">
+            <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
+                <svg viewBox="0 0 36 36" style="transform: rotate(-90deg);">
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          fill="none" stroke="{COLORS['black']}" stroke-width="3"/>
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          fill="none" stroke="{COLORS['green']}" stroke-width="3"
+                          stroke-dasharray="{overall}, 100"/>
+                </svg>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                    <div style="color: {COLORS['green']}; font-size: 2rem; font-weight: 800;">{overall}%</div>
+                    <div style="color: {COLORS['sand']}; font-size: 0.7rem;">SIAP</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Progress bars for each category
+        categories = [
+            ("📚 Pengetahuan Manasik", readiness["knowledge"], "#2196F3"),
+            ("💰 Keuangan & Tabungan", readiness["financial"], COLORS['gold']),
+            ("🏃 Persiapan Fisik", readiness["physical"], "#4CAF50"),
+            ("🤲 Persiapan Spiritual", readiness["spiritual"], "#9C27B0"),
+            ("📄 Dokumen & Visa", readiness["documents"], "#FF9800"),
+        ]
+        
+        for name, value, color in categories:
+            st.markdown(f"""
+            <div style="margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="font-size: 0.9rem;">{name}</span>
+                    <span style="color: {color}; font-weight: 600;">{value:.0f}%</span>
+                </div>
+                <div style="background: {COLORS['black']}; border-radius: 5px; height: 8px; overflow: hidden;">
+                    <div style="background: {color}; height: 100%; width: {value}%;"></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.info("💡 Tingkatkan skor dengan menyelesaikan quiz, checklist, dan fitur lainnya!")
+    
     st.markdown("---")
     
-    # Quiz
+    # Quiz Section
     st.subheader("🧠 Quiz Umrah")
     
     if "quiz_index" not in st.session_state:
@@ -1275,26 +1625,13 @@ def render_engagement_page():
         st.success(f"🎉 Quiz Selesai! Skor: {score}/{total}")
         if score == total:
             st.balloons()
+            if "perfect_quiz" not in eng["badges"]:
+                eng["badges"].append("perfect_quiz")
+                st.toast("🏅 Badge: Nilai Sempurna!")
         if st.button("🔄 Ulangi Quiz"):
             st.session_state.quiz_index = 0
             st.session_state.quiz_score = 0
             st.rerun()
-    
-    st.markdown("---")
-    
-    # Referral
-    st.subheader("🎁 Ajak Teman")
-    user = get_current_user()
-    user_id = user.get("id", "guest") if user else "guest"
-    ref_code = generate_referral_code(str(user_id))
-    
-    st.markdown(f"""
-    <div style="background: {COLORS['black']}; padding: 20px; border-radius: 15px; text-align: center;">
-        <div style="color: {COLORS['sand']};">Kode Referral Anda:</div>
-        <div style="color: {COLORS['gold']}; font-size: 2rem; font-weight: 800; letter-spacing: 4px;">{ref_code}</div>
-        <div style="color: #888; font-size: 0.85rem; margin-top: 10px;">Dapat +200 LP setiap teman mendaftar!</div>
-    </div>
-    """, unsafe_allow_html=True)
 
 def render_umrah_mandiri():
     st.header("🕋 Umrah Mandiri")
@@ -1406,7 +1743,23 @@ def render_about():
     </div>
     """, unsafe_allow_html=True)
     
-    tab1, tab2 = st.tabs(["👨‍💻 Developer", "⚖️ Disclaimer"])
+    # Visitor Stats Bar
+    visitor_count = st.session_state.get("visitor_count", 1250)
+    page_views = st.session_state.get("page_views", 3500)
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("👥 Pengunjung", f"{visitor_count:,}")
+    with col2:
+        st.metric("👁️ Total Views", f"{page_views:,}")
+    with col3:
+        st.metric("⭐ Rating", "4.9/5")
+    with col4:
+        st.metric("🕋 Fitur", "25+")
+    
+    st.markdown("---")
+    
+    tab1, tab2, tab3, tab4 = st.tabs(["👨‍💻 Developer", "🤝 Kerjasama", "💎 Upgrade", "⚖️ Disclaimer"])
     
     with tab1:
         st.markdown("""
@@ -1428,6 +1781,62 @@ def render_about():
         """)
     
     with tab2:
+        st.subheader("🤝 Kerjasama & Partnership")
+        st.markdown("LABBAIK membuka kesempatan kerjasama dengan berbagai pihak untuk memberikan layanan terbaik bagi jamaah umrah Indonesia.")
+        
+        # Sponsorship Tiers
+        cols = st.columns(3)
+        for i, (tier_id, tier) in enumerate(SPONSORSHIP_TIERS.items()):
+            with cols[i]:
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, {COLORS['black']} 0%, #2D2D2D 100%);
+                            border-radius: 15px; padding: 20px; text-align: center;
+                            border: 2px solid {tier['color']}40; height: 320px;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">{tier['icon']}</div>
+                    <div style="color: {tier['color']}; font-size: 1.1rem; font-weight: 700;">{tier['name']}</div>
+                    <div style="color: {COLORS['gold']}; font-size: 1.3rem; font-weight: 700; margin: 15px 0;">
+                        Rp {tier['price']:,.0f}
+                    </div>
+                    <div style="color: #888; font-size: 0.8rem; margin-bottom: 15px;">per bulan</div>
+                    <div style="text-align: left; color: #E8E8E8; font-size: 0.8rem;">
+                        {"".join([f"<div style='margin-bottom: 5px;'>✓ {b}</div>" for b in tier['benefits']])}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.markdown("📧 Hubungi: **partner@labbaik.id** atau **sopian.hadianto@gmail.com**")
+    
+    with tab3:
+        st.subheader("💎 Paket Langganan")
+        st.markdown("Upgrade untuk akses fitur premium dan diskon eksklusif!")
+        
+        cols = st.columns(3)
+        for i, (plan_id, plan) in enumerate(SUBSCRIPTION_PLANS.items()):
+            with cols[i]:
+                is_popular = plan.get("popular", False)
+                border_style = f"3px solid {COLORS['gold']}" if is_popular else "1px solid #555"
+                
+                st.markdown(f"""
+                <div style="background: white; border: {border_style}; border-radius: 15px;
+                            padding: 25px; text-align: center; height: 380px; position: relative;">
+                    {f'<div style="position:absolute;top:-10px;right:20px;background:{COLORS["gold"]};color:{COLORS["black"]};padding:3px 15px;border-radius:20px;font-size:0.75rem;font-weight:bold;">POPULER</div>' if is_popular else ''}
+                    <div style="font-size: 2rem; margin-bottom: 10px;">{plan['badge']}</div>
+                    <h4 style="color: {COLORS['black']}; margin: 0;">{plan['name']}</h4>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: {COLORS['green']}; margin: 15px 0;">
+                        {plan['price_display']}
+                    </div>
+                    <div style="color: #666; font-size: 0.85rem; margin-bottom: 15px;">/ bulan</div>
+                    <div style="text-align: left; font-size: 0.85rem;">
+                        {''.join([f'<div style="padding:5px 0;border-bottom:1px solid #eee;">✅ {f}</div>' for f in plan['features'][:5]])}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.info("💡 Fitur upgrade akan segera tersedia! Saat ini semua fitur dapat diakses GRATIS.")
+    
+    with tab4:
         st.markdown(f"""
         <div style="background: #FFEBEE; border: 2px solid #D32F2F; border-radius: 15px; padding: 20px;">
             <h4 style="color: #B71C1C;">⚠️ DISCLAIMER</h4>
