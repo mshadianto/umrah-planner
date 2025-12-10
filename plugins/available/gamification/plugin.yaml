@@ -1,0 +1,146 @@
+# =============================================================================
+# Gamification Plugin Metadata
+# =============================================================================
+name: gamification
+version: "1.0.0"
+description: "Gamification system with badges, points, and achievements"
+author: "LABBAIK AI Team"
+author_email: "dev@labbaik.cloud"
+license: "Proprietary"
+homepage: "https://labbaik.cloud"
+
+# Plugin requirements
+min_app_version: "6.0.0"
+python_requires: ">=3.10"
+
+# Dependencies (other plugins)
+dependencies: []
+
+# Plugin capabilities
+capabilities:
+  - badges
+  - points
+  - leaderboard
+  - achievements
+
+# Default configuration
+config:
+  # Points per action
+  points_per_chat: 5
+  points_per_simulation: 10
+  points_per_login: 2
+  
+  # Level thresholds
+  level_thresholds:
+    - 0      # Level 1
+    - 100    # Level 2
+    - 300    # Level 3
+    - 600    # Level 4
+    - 1000   # Level 5
+    - 1500   # Level 6
+    - 2500   # Level 7
+    - 4000   # Level 8
+    - 6000   # Level 9
+    - 10000  # Level 10
+  
+  # Enable leaderboard
+  leaderboard_enabled: true
+  leaderboard_size: 10
+
+# UI locations where this plugin can render
+ui_locations:
+  - sidebar  # Progress widget
+  - profile  # Full badges page
+  - leaderboard  # Leaderboard page
+
+# Hooks this plugin listens to
+hooks:
+  - USER_LOGIN
+  - CHAT_MESSAGE_SENT
+  - COST_CALCULATED
+  - BOOKING_CONFIRMED
+
+# Available badges
+badges:
+  - id: newcomer
+    name: "Pendatang Baru"
+    name_arabic: "القادم الجديد"
+    description: "Kunjungi LABBAIK AI untuk pertama kali"
+    icon: "🌟"
+    points: 10
+    
+  - id: curious_learner
+    name: "Penanya Aktif"
+    name_arabic: "المتعلم الفضولي"
+    description: "Ajukan 10 pertanyaan ke AI"
+    icon: "❓"
+    points: 25
+    requirement:
+      type: count
+      action: chat_message
+      threshold: 10
+    
+  - id: planner
+    name: "Perencana"
+    name_arabic: "المخطط"
+    description: "Selesaikan simulasi biaya pertama"
+    icon: "📋"
+    points: 15
+    requirement:
+      type: count
+      action: cost_simulation
+      threshold: 1
+    
+  - id: expert_planner
+    name: "Ahli Perencana"
+    name_arabic: "خبير التخطيط"
+    description: "Selesaikan 10 simulasi biaya"
+    icon: "🎯"
+    points: 50
+    requirement:
+      type: count
+      action: cost_simulation
+      threshold: 10
+    
+  - id: community_member
+    name: "Anggota Komunitas"
+    name_arabic: "عضو المجتمع"
+    description: "Bergabung dengan Umrah Bareng"
+    icon: "👥"
+    points: 30
+    
+  - id: knowledge_seeker
+    name: "Pencari Ilmu"
+    name_arabic: "طالب العلم"
+    description: "Baca semua panduan Umrah Mandiri"
+    icon: "📚"
+    points: 40
+    
+  - id: daily_visitor
+    name: "Pengunjung Setia"
+    name_arabic: "الزائر اليومي"
+    description: "Kunjungi 7 hari berturut-turut"
+    icon: "📅"
+    points: 35
+    requirement:
+      type: streak
+      action: daily_visit
+      threshold: 7
+    
+  - id: arabic_learner
+    name: "Pelajar Bahasa Arab"
+    name_arabic: "متعلم العربية"
+    description: "Pelajari 20 frasa bahasa Arab"
+    icon: "🔤"
+    points: 30
+    requirement:
+      type: count
+      action: arabic_phrase_learned
+      threshold: 20
+
+# Tags for categorization
+tags:
+  - gamification
+  - badges
+  - engagement
+  - motivation
