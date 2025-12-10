@@ -109,6 +109,22 @@ except ImportError:
     state_manager = None
     init_state = None
 
+# Visitor Analytics
+try:
+    from services.analytics.visitor_analytics import (
+        VisitorAnalytics,
+        get_analytics,
+        track_visitor,
+        track_page_view,
+        get_demo_stats,
+    )
+except ImportError:
+    VisitorAnalytics = None
+    get_analytics = None
+    track_visitor = None
+    track_page_view = None
+    get_demo_stats = None
+
 __all__ = [
     # AI Services
     "GroqChatService",
@@ -169,4 +185,11 @@ __all__ = [
     "StateKeys",
     "state_manager",
     "init_state",
+    
+    # Visitor Analytics
+    "VisitorAnalytics",
+    "get_analytics",
+    "track_visitor",
+    "track_page_view",
+    "get_demo_stats",
 ]

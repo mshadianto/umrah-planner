@@ -1,31 +1,24 @@
 [theme]
-primaryColor = "#1a5f3c"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f8f9fa"
-textColor = "#1a1a1a"
+primaryColor = "#d4af37"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#1a1a2e"
+textColor = "#fafafa"
 font = "sans serif"
 
 [server]
 headless = true
-port = 8501
 enableCORS = false
 enableXsrfProtection = true
 maxUploadSize = 10
 
 [browser]
 gatherUsageStats = false
-serverAddress = "localhost"
-serverPort = 8501
+serverAddress = "0.0.0.0"
 
 [runner]
 magicEnabled = true
-installTracer = false
-fixMatplotlib = true
+fastReruns = true
 
 [client]
-showErrorDetails = true
-toolbarMode = "auto"
-
-[logger]
-level = "info"
-messageFormat = "%(asctime)s %(levelname)s - %(message)s"
+showErrorDetails = false
+toolbarMode = "minimal"

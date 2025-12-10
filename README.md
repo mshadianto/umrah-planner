@@ -1,267 +1,164 @@
-# 🕋 LABBAIK AI v6.0
+# 🕋 LABBAIK AI v6.0 - Super Boom Edition
 
-**Asisten Perjalanan Umrah Cerdas** - AI-powered Umrah planning platform for Indonesian pilgrims.
+<div align="center">
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/streamlit-1.32+-red.svg)](https://streamlit.io/)
-[![License](https://img.shields.io/badge/license-proprietary-green.svg)](LICENSE)
+![LABBAIK AI](https://img.shields.io/badge/LABBAIK-AI%20v6.0-gold?style=for-the-badge&logo=kaaba)
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red?style=for-the-badge&logo=streamlit)
+![License](https://img.shields.io/badge/License-Proprietary-gray?style=for-the-badge)
 
----
+**Platform Perencanaan Umrah AI #1 Indonesia**
 
-## 📋 Overview
+*Panggilan-Nya, Langkahmu*
 
-LABBAIK AI is a comprehensive Umrah planning platform that combines AI-powered assistance with practical planning tools. Built with a modular, enterprise-grade architecture, it helps Indonesian pilgrims plan their spiritual journey with confidence.
+[Demo](https://labbaik.streamlit.app) · [Dokumentasi](https://docs.labbaik.cloud) · [Feedback](https://labbaik.cloud/feedback)
 
-### Key Features
-
-- 💬 **AI Chat Assistant** - Intelligent Q&A about Umrah using Groq/OpenAI
-- 🧮 **Cost Simulator** - Accurate cost estimation with seasonal adjustments
-- 📖 **Umrah Mandiri** - Comprehensive independent pilgrimage guide
-- 👥 **Umrah Bareng** - Peer-to-peer trip matching
-- 📝 **Booking Integration** - Partner booking system
-- 🏆 **Gamification** - Badges, points, and engagement features
-- 🔌 **Plugin System** - Extensible architecture for custom features
+</div>
 
 ---
 
-## 🏗️ Architecture
+## ✨ Fitur Utama
 
-```
-labbaik-v6/
-├── app/                    # Application Entry Point
-├── core/                   # Core Business Logic
-│   ├── config.py          # Configuration Management
-│   ├── constants.py       # Application Constants
-│   ├── exceptions.py      # Custom Exceptions
-│   └── logging_config.py  # Logging Configuration
-├── services/              # Business Services
-│   ├── ai/               # AI Services (Chat, RAG, Embeddings)
-│   ├── auth/             # Authentication Services
-│   ├── database/         # Database & Repositories
-│   ├── cost/             # Cost Calculation
-│   └── notification/     # Notifications
-├── data/                  # Data Layer
-│   ├── models/           # Pydantic Models
-│   └── schemas/          # API Schemas
-├── ui/                    # UI Components
-│   ├── components/       # Reusable Components
-│   ├── pages/            # Page Definitions
-│   └── layouts/          # Page Layouts
-├── plugins/               # Plugin System
-│   ├── base.py           # Plugin Base Classes
-│   └── available/        # Available Plugins
-├── tests/                 # Test Suite
-├── config/                # Configuration Files
-└── docs/                  # Documentation
-```
+### 🧭 Umrah Mandiri
+- **Virtual Manasik Simulator** - Latihan 8 rukun umrah interaktif
+- **3 Pilar Framework** - Checklist persiapan komprehensif
+- **AI Budget Optimizer** - Hitung estimasi biaya dengan tips hemat
+- **Weather & Crowd Prediction** - Info cuaca dan prediksi keramaian
+- **Koleksi 20+ Doa** - Arab, Latin, dan terjemahan
+- **Emergency SOS** - Kontak darurat lengkap
 
-### Design Principles
+### 👥 Umrah Bareng
+- **Smart Matching System** - AI matching berdasarkan preferensi
+- **Trip Leader Verified** - Profil leader dengan rating
+- **Group Chat** - Diskusi dengan calon teman perjalanan
+- **Trip Management** - Kelola trip end-to-end
 
-1. **Separation of Concerns** - Clear boundaries between layers
-2. **Dependency Injection** - Loosely coupled components
-3. **Repository Pattern** - Abstracted data access
-4. **Plugin Architecture** - Extensible without core modifications
-5. **Configuration First** - Environment-based settings
+### 🎮 Gamification
+- **10 Level Progress** - Dari Pemula hingga Grand Master
+- **Daily Challenges** - Tantangan harian dengan XP rewards
+- **Achievement System** - 10+ achievements untuk di-unlock
+- **Leaderboard** - Kompetisi dengan jamaah lain
+
+### 💰 Tools
+- **AI Chat Assistant** - Tanya apa saja 24/7
+- **Cost Simulator** - Estimasi biaya real-time
+- **Savings Tracker** - Track tabungan umrah
+- **Countdown Timer** - Hitung mundur ke hari H
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Deploy ke Streamlit Cloud
 
-### Prerequisites
-
-- Python 3.10+
-- PostgreSQL 15+ (optional, for full features)
-- Redis (optional, for caching)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/mshadianto/labbaik-ai.git
-   cd labbaik-ai
-   ```
-
-2. **Create virtual environment**
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # Linux/Mac
-   # or
-   .venv\Scripts\activate     # Windows
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
-
-5. **Run the application**
-   ```bash
-   streamlit run app/main.py
-   ```
-
-### Using Docker
-
+### Langkah 1: Download & Extract
 ```bash
-# Development
-docker-compose up
-
-# Production
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Download labbaik-v6-deploy.zip dari link yang diberikan
+unzip labbaik-v6-deploy.zip
+cd umrah-planner-v6
 ```
 
----
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `LABBAIK_ENV` | Environment (development/production) | No |
-| `DATABASE_URL` | PostgreSQL connection string | Yes* |
-| `GROQ_API_KEY` | Groq API key for LLM | Yes |
-| `OPENAI_API_KEY` | OpenAI API key (fallback) | No |
-| `SESSION_SECRET_KEY` | Session encryption key | Yes |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID | No |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth secret | No |
-
-*Required for full functionality
-
-### Configuration File
-
-Edit `config/settings.yaml` for detailed configuration:
-
-```yaml
-environment: development
-debug: true
-
-ai:
-  groq_model: "llama-3.3-70b-versatile"
-  groq_temperature: 0.7
-
-ui:
-  app_name: "LABBAIK AI"
-  features:
-    chat: true
-    simulator: true
-    gamification: true
-```
-
----
-
-## 🧪 Testing
-
+### Langkah 2: Push ke GitHub
 ```bash
-# Run all tests
-pytest
+# Inisialisasi git
+git init
+git branch -M main
+git remote add origin https://github.com/mshadianto/umrah-planner.git
 
-# Run with coverage
-pytest --cov=app --cov=core --cov=services
+# Commit & Push
+git add -A
+git commit -m "🚀 LABBAIK AI v6.0 - Super Boom Edition"
+git push -u origin main --force
+```
 
-# Run specific test category
-pytest -m unit
-pytest -m integration
+### Langkah 3: Deploy di Streamlit Cloud
+1. Buka https://share.streamlit.io
+2. Klik **New app**
+3. Pilih repository: `mshadianto/umrah-planner`
+4. Branch: `main`
+5. Main file: `app.py`
+6. Klik **Deploy**
 
-# Run specific test file
-pytest tests/unit/test_ai_services.py -v
+### Langkah 4: Konfigurasi Secrets
+Di Streamlit Cloud → App Settings → Secrets, tambahkan:
+
+```toml
+DATABASE_URL = "postgresql://neondb_owner:xxx@ep-xxx.neon.tech/neondb?sslmode=require"
+GROQ_API_KEY = "gsk_xxx"
+OPENAI_API_KEY = "sk-xxx"
 ```
 
 ---
 
-## 🔌 Plugin Development
+## 📁 Struktur Project
 
-Create custom plugins to extend LABBAIK AI:
-
-```python
-from plugins.base import BasePlugin, PluginMetadata, PluginHook, HookEvents
-
-class MyPlugin(BasePlugin):
-    def __init__(self):
-        metadata = PluginMetadata(
-            name="my-plugin",
-            version="1.0.0",
-            description="My custom plugin"
-        )
-        super().__init__(metadata)
-    
-    def initialize(self, context) -> bool:
-        # Setup logic
-        return True
-    
-    def activate(self) -> bool:
-        self.status = PluginStatus.ACTIVE
-        return True
-    
-    @PluginHook(HookEvents.CHAT_MESSAGE_SENT)
-    def on_chat_message(self, user_id: str, message: str):
-        # Handle chat messages
-        pass
+```
+umrah-planner-v6/
+├── app.py                 # Main entry point
+├── requirements.txt       # Dependencies
+├── .streamlit/
+│   └── config.toml       # Streamlit config
+├── ui/
+│   ├── pages/
+│   │   ├── home.py       # Homepage (BLACK GOLD theme)
+│   │   ├── chat.py       # AI Chat Assistant
+│   │   ├── simulator.py  # Cost Simulator
+│   │   ├── umrah_mandiri.py  # Umrah Mandiri (Gamification!)
+│   │   ├── umrah_bareng.py   # Umrah Bareng (Smart Matching)
+│   │   └── booking.py    # Booking System
+│   └── components/       # Reusable components
+├── services/
+│   ├── ai/              # AI services (Groq/OpenAI)
+│   ├── database/        # Neon PostgreSQL
+│   └── cost/            # Cost calculator
+├── core/                # Config, constants, exceptions
+├── data/
+│   ├── models/          # Data models
+│   └── knowledge/       # FAQ, Arabic phrases, guides
+└── config/              # YAML configurations
 ```
 
 ---
 
-## 📦 Deployment
+## 🗄️ Database (Neon PostgreSQL)
 
-### Streamlit Cloud
-
-1. Connect your GitHub repository
-2. Set environment variables in Streamlit Cloud
-3. Deploy!
-
-### Docker Production
-
-```bash
-docker build -t labbaik-ai:latest --target production .
-docker run -d -p 8501:8501 --env-file .env labbaik-ai:latest
-```
-
-### Kubernetes
-
-Helm charts available in `deploy/helm/`.
+Tabel yang tersedia:
+- `users` - Data pengguna
+- `visitor_stats` - Statistik pengunjung
+- `visitor_logs` - Log kunjungan
+- `open_trips` - Trip yang dibuka
+- `trip_members` - Member dalam trip
+- `saved_trips` - Trip yang disimpan
+- `forum_posts` - Post forum
+- `forum_comments` - Komentar
+- `post_likes` - Like pada post
 
 ---
 
-## 📚 Documentation
+## 🎨 Theme: BLACK GOLD
 
-- [Architecture Guide](docs/ARCHITECTURE.md)
-- [API Documentation](docs/API.md)
-- [Plugin Development](docs/PLUGINS.md)
-- [Deployment Guide](docs/DEPLOYMENT.md)
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Warna premium yang digunakan:
+- Background: `#0d0d0d`, `#1a1a1a`
+- Gold Primary: `#d4af37`
+- Gold Light: `#f4d03f`
+- Text: `#fafafa`, `#888888`
 
 ---
 
-## 📄 License
+## 📞 Kontak
 
-Proprietary - © 2024 MS Hadianto. All rights reserved.
-
----
-
-## 🙏 Acknowledgments
-
-- Built with [Streamlit](https://streamlit.io/)
-- AI powered by [Groq](https://groq.com/) and [OpenAI](https://openai.com/)
-- RAG with [ChromaDB](https://www.trychroma.com/) and [Sentence Transformers](https://www.sbert.net/)
+- **Developer:** MS Hadianto
+- **Website:** https://labbaik.cloud
+- **Email:** info@mshadianto.id
 
 ---
 
-<p align="center">
-  <strong>🕋 LABBAIK AI - Membantu Perjalanan Spiritual Anda 🕋</strong>
-  <br>
-  <em>Do Your Own Research • Plan Your Journey • Trust Your Heart</em>
-</p>
+## 📜 License
+
+Proprietary - © 2025 MS Hadianto. All rights reserved.
+
+---
+
+<div align="center">
+
+**🕋 LABBAIK - Panggilan-Nya, Langkahmu**
+
+</div>
