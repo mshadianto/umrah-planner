@@ -147,7 +147,7 @@ Warna premium yang digunakan:
 
 - **Developer:** MS Hadianto
 - **Website:** https://labbaik.cloud
-- **Email:** info@mshadianto.id
+- **Email:** sopian.hadianto@gmail.com
 
 ---
 
