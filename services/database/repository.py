@@ -13,12 +13,27 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 import json
 
-from core.config import get_settings
-from core.exceptions import DatabaseError, ConnectionError, RecordNotFoundError
-
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+
+# =============================================================================
+# CUSTOM EXCEPTIONS (inline to avoid circular import)
+# =============================================================================
+
+class DatabaseError(Exception):
+    """Database operation error."""
+    pass
+
+class ConnectionError(Exception):
+    """Database connection error."""
+    pass
+
+class RecordNotFoundError(Exception):
+    """Record not found error."""
+    def __init__(self, entity: str, id: str):
+        super().__init__(f"{entity} with id {id} not found")
 
 
 # =============================================================================
@@ -47,30 +62,66 @@ class DatabaseConnection:
         self._connection_string = None
         self._initialized = True
     
+    def _get_connection_string(self) -> Optional[str]:
+        """Get database URL from environment or settings."""
+        # Try environment variable first (Streamlit secrets are exposed as env vars)
+        db_url = os.getenv("DATABASE_URL")
+        if db_url:
+            return db_url
+        
+        # Try Streamlit secrets
+        try:
+            import streamlit as st
+            if hasattr(st, 'secrets') and 'DATABASE_URL' in st.secrets:
+                return st.secrets['DATABASE_URL']
+        except:
+            pass
+        
+        # Try settings (may cause circular import, so wrap in try)
+        try:
+            from core.config import get_settings
+            settings = get_settings()
+            if settings and hasattr(settings, 'database') and settings.database.url:
+                return settings.database.url
+        except:
+            pass
+        
+        return None
+    
     def initialize(self, connection_string: Optional[str] = None) -> bool:
         """
         Initialize the database connection pool.
         
         Args:
-            connection_string: Database URL (uses settings if not provided)
+            connection_string: Database URL (auto-detect if not provided)
         
         Returns:
             True if initialization successful
         """
+        # Already initialized
+        if self._pool:
+            return True
+        
         try:
             from psycopg2 import pool
             
-            self._connection_string = connection_string or get_settings().database.url
+            self._connection_string = connection_string or self._get_connection_string()
             
             if not self._connection_string:
                 logger.warning("No database URL configured")
                 return False
             
-            settings = get_settings()
+            # Get pool size from settings or use default
+            pool_size = 5
+            try:
+                from core.config import get_settings
+                pool_size = get_settings().database.pool_size
+            except:
+                pass
             
             self._pool = pool.ThreadedConnectionPool(
                 minconn=1,
-                maxconn=settings.database.pool_size,
+                maxconn=pool_size,
                 dsn=self._connection_string
             )
             
@@ -88,12 +139,15 @@ class DatabaseConnection:
     def get_connection(self):
         """
         Get a connection from the pool.
+        Auto-initializes pool if not already done.
         
         Yields:
             Database connection
         """
+        # AUTO-INITIALIZE if not done yet
         if not self._pool:
-            raise ConnectionError("Database pool not initialized")
+            if not self.initialize():
+                raise ConnectionError("Database pool not initialized. Check DATABASE_URL in secrets.")
         
         conn = None
         try:
@@ -197,6 +251,7 @@ class DatabaseConnection:
         """Close all connections in the pool."""
         if self._pool:
             self._pool.closeall()
+            self._pool = None
             logger.info("Database connections closed")
 
 
