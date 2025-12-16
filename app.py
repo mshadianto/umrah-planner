@@ -61,6 +61,20 @@ def track_visitor():
         st.session_state.visitor_counted = True
         # TODO: Integrate with Neon DB visitor_stats table
 
+# Price Intelligence Health Indicator
+def render_price_health():
+    """Render Price Intelligence health status."""
+    try:
+        from services.price.monitoring import render_health_indicator
+        render_health_indicator()
+    except ImportError:
+        # Fallback jika module belum ada
+        db_status = "🟢 Online" if os.getenv("DATABASE_URL") else "🟡 Offline Mode"
+        st.caption(f"Status: {db_status}")
+    except Exception:
+        # Silent fallback
+        st.caption("📊 Mode offline")
+
 # Sidebar navigation
 def render_sidebar():
     """Render sidebar with navigation and branding."""
@@ -76,9 +90,8 @@ def render_sidebar():
         
         st.markdown("---")
         
-        # Connection status
-        db_status = "🟢 Online" if os.getenv("DATABASE_URL") else "🟡 Offline Mode"
-        st.caption(f"Status: {db_status}")
+        # Price Intelligence Status (with fallback)
+        render_price_health()
         
         st.markdown("---")
         
