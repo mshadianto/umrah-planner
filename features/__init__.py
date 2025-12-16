@@ -11,6 +11,8 @@ Features included:
 4. 3D Manasik - Interactive ritual simulation
 5. Smart Comparison - AI-powered package comparison
 6. Analytics Dashboard - Enhanced visitor analytics
+7. WhatsApp Service - WAHA integration for notifications
+8. Doa Player - Voice-guided doa/dzikir
 """
 
 # Crowd Prediction
@@ -67,6 +69,34 @@ from features.smart_comparison import (
     UserPreferences,
 )
 
+# WhatsApp Service (WAHA)
+try:
+    from features.whatsapp_service import (
+        WAHAClient,
+        WhatsAppService,
+        MessageTemplates,
+        render_whatsapp_status,
+        render_whatsapp_test,
+        render_whatsapp_settings,
+        send_sos_via_whatsapp,
+    )
+except ImportError:
+    pass
+
+# Doa Player
+try:
+    from features.doa_player import (
+        Doa,
+        DoaCategory,
+        UMRAH_DOAS,
+        render_doa_card,
+        render_doa_list,
+        render_doa_player_page,
+        render_doa_mini_widget,
+    )
+except ImportError:
+    pass
+
 __all__ = [
     # Crowd Prediction
     "CrowdPredictor",
@@ -111,6 +141,24 @@ __all__ = [
     "match_packages",
     "PackageDetails",
     "UserPreferences",
+    
+    # WhatsApp Service
+    "WAHAClient",
+    "WhatsAppService",
+    "MessageTemplates",
+    "render_whatsapp_status",
+    "render_whatsapp_test",
+    "render_whatsapp_settings",
+    "send_sos_via_whatsapp",
+    
+    # Doa Player
+    "Doa",
+    "DoaCategory",
+    "UMRAH_DOAS",
+    "render_doa_card",
+    "render_doa_list",
+    "render_doa_player_page",
+    "render_doa_mini_widget",
 ]
 
 # Version

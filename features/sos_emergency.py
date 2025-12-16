@@ -2,13 +2,14 @@
 LABBAIK AI v6.0 - Enhanced SOS Emergency System
 ================================================
 One-tap emergency system with:
-- WhatsApp integration for instant alerts
+- WhatsApp integration for instant alerts (via WAHA)
 - GPS location sharing
 - Pre-configured emergency contacts
 - Embassy & hospital quick dial
 - Group notification for Umrah Bareng
 
 Inspired by PilgrimPal's emergency features.
+Now with WAHA WhatsApp API integration!
 """
 
 import streamlit as st
@@ -18,6 +19,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 import urllib.parse
 import json
+
+# WAHA Integration (optional - graceful fallback)
+try:
+    from services.whatsapp import WhatsAppService, get_whatsapp_service
+    HAS_WAHA = True
+except ImportError:
+    HAS_WAHA = False
+    def get_whatsapp_service():
+        return None
 
 # =============================================================================
 # DATA STRUCTURES
@@ -470,6 +480,38 @@ def render_sos_activated():
     
     if contacts:
         st.markdown("**Kontak Pribadi:**")
+        
+        # WAHA Direct Send Button (if available)
+        if HAS_WAHA:
+            wa_service = get_whatsapp_service()
+            if wa_service and wa_service.is_available:
+                if st.button("🚀 KIRIM KE SEMUA KONTAK (OTOMATIS)", type="primary", use_container_width=True):
+                    with st.spinner("Mengirim pesan darurat..."):
+                        user_info = st.session_state.sos_user_info
+                        location = st.session_state.sos_location
+                        
+                        phones = [c.phone for c in contacts]
+                        result = wa_service.send_sos_alert(
+                            recipients=phones,
+                            name=user_info.get("name", "Unknown"),
+                            emergency_type=template['title'],
+                            location=location.address or "Lokasi tidak diketahui",
+                            latitude=location.latitude,
+                            longitude=location.longitude,
+                            details=details
+                        )
+                        
+                        if result.get("success"):
+                            st.success(f"✅ Pesan terkirim ke {result.get('sent')}/{result.get('total')} kontak!")
+                            st.balloons()
+                        else:
+                            st.error("❌ Gagal mengirim. Gunakan link manual di bawah.")
+                
+                st.caption("☝️ Klik untuk kirim otomatis via WhatsApp API")
+                st.markdown("---")
+        
+        # Manual WhatsApp links (fallback)
+        st.markdown("**Atau kirim manual:**")
         cols = st.columns(min(len(contacts), 3))
         
         for i, contact in enumerate(contacts):

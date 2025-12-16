@@ -123,6 +123,69 @@ except ImportError:
     def render_analytics_dashboard():
         st.warning("⚠️ Fitur Analytics Dashboard belum tersedia")
 
+# WhatsApp / WAHA Integration
+try:
+    from services.whatsapp import (
+        render_whatsapp_settings,
+        render_whatsapp_status,
+        get_whatsapp_service,
+    )
+    HAS_WHATSAPP = True
+except ImportError:
+    HAS_WHATSAPP = False
+    def render_whatsapp_settings():
+        st.warning("⚠️ WhatsApp Integration belum tersedia")
+    def render_whatsapp_status():
+        pass
+    def get_whatsapp_service():
+        return None
+
+# Doa Player (Coming Soon)
+HAS_DOA_PLAYER = False
+def render_doa_player_page():
+    st.markdown("# 🤲 Doa & Dzikir")
+    st.info("🚧 Fitur ini sedang dalam pengembangan...")
+    st.markdown("""
+    **Coming Soon:**
+    - Audio doa Umrah & Haji
+    - Dzikir pagi & petang
+    - Bacaan thawaf & sa'i
+    - Mode offline
+    """)
+
+# WhatsApp Service (WAHA)
+try:
+    from features.whatsapp_service import (
+        render_whatsapp_settings,
+        render_whatsapp_status,
+        WhatsAppService,
+    )
+    HAS_WHATSAPP = True
+except ImportError:
+    HAS_WHATSAPP = False
+    def render_whatsapp_settings():
+        st.warning("⚠️ Fitur WhatsApp belum tersedia")
+    def render_whatsapp_status():
+        pass
+
+# Doa Player
+try:
+    from features.doa_player import (
+        render_doa_player_page,
+        render_doa_mini_widget,
+    )
+    HAS_DOA_PLAYER = True
+except ImportError:
+    HAS_DOA_PLAYER = False
+    def render_doa_player_page():
+        st.warning("⚠️ Fitur Doa Player belum tersedia")
+    def render_doa_mini_widget():
+        pass
+except ImportError:
+    HAS_ANALYTICS = False
+    def render_analytics_dashboard():
+        st.warning("⚠️ Fitur Analytics Dashboard belum tersedia")
+
 # Page Tracking
 try:
     from services.analytics import track_page
@@ -328,7 +391,9 @@ def render_sidebar():
             ("📊", "Prediksi Keramaian", "crowd", HAS_CROWD_PREDICTION),
             ("📍", "Group Tracking", "tracking", HAS_TRACKING),
             ("🕋", "Manasik 3D", "manasik", HAS_MANASIK),
+            ("🤲", "Doa & Dzikir", "doa", HAS_DOA_PLAYER),
             ("🔍", "Bandingkan Paket", "compare", HAS_COMPARISON),
+            ("📱", "WhatsApp", "whatsapp", HAS_WHATSAPP),
             ("📈", "Analytics", "analytics", HAS_ANALYTICS),
         ]
         
@@ -345,6 +410,13 @@ def render_sidebar():
         # 📊 Quick Widgets
         # =====================================================================
         st.markdown("### 📊 Quick Info")
+        
+        # WhatsApp Status
+        if HAS_WHATSAPP:
+            try:
+                render_whatsapp_status()
+            except:
+                pass
         
         # Crowd Widget
         if HAS_CROWD_PREDICTION:
@@ -364,6 +436,13 @@ def render_sidebar():
         if HAS_MANASIK:
             try:
                 render_manasik_mini_widget()
+            except:
+                pass
+        
+        # Doa Mini Widget
+        if HAS_DOA_PLAYER:
+            try:
+                render_doa_mini_widget()
             except:
                 pass
         
@@ -439,6 +518,8 @@ def render_page():
         "manasik": render_manasik_page,
         "compare": render_smart_comparison_page,
         "analytics": render_analytics_dashboard,
+        "whatsapp": render_whatsapp_settings,
+        "doa": render_doa_player_page,
     }
     
     renderer = page_map.get(page, render_home_page)
