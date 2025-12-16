@@ -284,7 +284,7 @@ def calculate_scores(package: PackageDetails) -> None:
     flight_score += 20 if package.is_direct else 0
     flight_score = min(flight_score, 100) * 0.2
     
-    package.comfort_score = hotel_score + meal_score + flight_score
+    package.comfort_score = min(100, hotel_score + meal_score + flight_score)
     
     # Value Score (0-100)
     # Price per day per quality point
@@ -298,13 +298,13 @@ def calculate_scores(package: PackageDetails) -> None:
     
     package.value_score = min(100, max(0, 100 - (actual_price_per_quality - baseline_price_per_quality) / 1000))
     
-    # Total Score (weighted average)
-    package.total_score = (
+    # Total Score (weighted average) - capped at 100
+    package.total_score = min(100, (
         package.location_score * 0.35 +
         package.comfort_score * 0.35 +
         package.value_score * 0.20 +
         package.rating_overall * 20 * 0.10  # Convert 0-5 rating to 0-100
-    )
+    ))
 
 
 def match_packages(
@@ -342,6 +342,9 @@ def match_packages(
         if preferences.prefer_meals_included and pkg.includes_meals in ["half_board", "full_board"]:
             match_score += 5
         
+        # Cap match_score at 100
+        match_score = min(100, match_score)
+        
         results.append((pkg, match_score))
     
     # Sort by match score descending
@@ -355,14 +358,7 @@ def match_packages(
 # =============================================================================
 
 def render_package_card(package: PackageDetails, match_score: float = None, show_details: bool = True):
-    """Render a package card."""
-    
-    tier_colors = {
-        PackageTier.BUDGET: "#22c55e",
-        PackageTier.STANDARD: "#3b82f6",
-        PackageTier.PREMIUM: "#8b5cf6",
-        PackageTier.VIP: "#d4af37",
-    }
+    """Render a package card using Streamlit components."""
     
     tier_labels = {
         PackageTier.BUDGET: "💚 Budget",
@@ -371,62 +367,44 @@ def render_package_card(package: PackageDetails, match_score: float = None, show
         PackageTier.VIP: "👑 VIP",
     }
     
-    color = tier_colors.get(package.tier, "#888")
     tier_label = tier_labels.get(package.tier, "Standard")
     
-    # Score badge
-    score_html = ""
-    if match_score:
-        score_html = f"""
-        <div style="position: absolute; top: 10px; right: 10px; background: {color}; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold;">
-            {match_score:.0f}% Match
-        </div>
-        """
-    
-    # Stars
-    stars_makkah = "⭐" * package.hotel_makkah_stars
-    stars_madinah = "⭐" * package.hotel_madinah_stars
-    
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); padding: 1.5rem; border-radius: 20px; border: 1px solid {color}; position: relative; margin-bottom: 1rem;">
-        {score_html}
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div>
-                <span style="background: {color}; color: white; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem;">{tier_label}</span>
-                <h3 style="color: white; margin: 0.5rem 0;">{package.name}</h3>
-                <div style="color: #888; font-size: 0.85rem;">{package.provider}</div>
-            </div>
-            <div style="text-align: right;">
-                <div style="color: #d4af37; font-size: 1.5rem; font-weight: bold;">Rp {package.price:,.0f}</div>
-                <div style="color: #888; font-size: 0.8rem;">{package.duration_days} hari</div>
-            </div>
-        </div>
+    # Use Streamlit container
+    with st.container():
+        # Header row
+        col1, col2, col3 = st.columns([1, 2, 1])
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div style="background: #2d2d2d; padding: 0.75rem; border-radius: 10px;">
-                <div style="color: #d4af37; font-size: 0.75rem;">🕋 MAKKAH ({package.nights_makkah} malam)</div>
-                <div style="color: white; font-weight: bold;">{package.hotel_makkah}</div>
-                <div style="color: #888; font-size: 0.8rem;">{stars_makkah} • {package.hotel_makkah_distance_m}m</div>
-            </div>
-            <div style="background: #2d2d2d; padding: 0.75rem; border-radius: 10px;">
-                <div style="color: #d4af37; font-size: 0.75rem;">🕌 MADINAH ({package.nights_madinah} malam)</div>
-                <div style="color: white; font-weight: bold;">{package.hotel_madinah}</div>
-                <div style="color: #888; font-size: 0.8rem;">{stars_madinah} • {package.hotel_madinah_distance_m}m</div>
-            </div>
-        </div>
+        with col1:
+            st.markdown(f"**{tier_label}**")
         
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <span style="background: #333; color: #888; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem;">✈️ {package.airline}</span>
-                <span style="background: #333; color: #888; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem;">{"🎯 Direct" if package.is_direct else "🔄 Transit"}</span>
-                <span style="background: #333; color: #888; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem;">🍽️ {package.includes_meals}</span>
-            </div>
-            <div style="color: #d4af37;">
-                ⭐ {package.rating_overall} ({package.review_count} review)
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"### {package.name}")
+            st.caption(package.provider)
+        
+        with col3:
+            if match_score:
+                st.metric("Match", f"{min(100, match_score):.0f}%")
+            st.markdown(f"**Rp {package.price:,.0f}**")
+            st.caption(f"{package.duration_days} hari")
+        
+        # Hotels row
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(f"🕋 **MAKKAH** ({package.nights_makkah} malam)")
+            st.markdown(f"{package.hotel_makkah}")
+            st.caption(f"{'⭐' * package.hotel_makkah_stars} • {package.hotel_makkah_distance_m}m dari Masjid")
+        
+        with col2:
+            st.markdown(f"🕌 **MADINAH** ({package.nights_madinah} malam)")
+            st.markdown(f"{package.hotel_madinah}")
+            st.caption(f"{'⭐' * package.hotel_madinah_stars} • {package.hotel_madinah_distance_m}m dari Masjid")
+        
+        # Flight & amenities
+        flight_type = "✈️ Direct" if package.is_direct else "✈️ Transit"
+        st.markdown(f"{flight_type} {package.airline} | 🍽️ {package.includes_meals} | ⭐ {package.rating_overall} ({package.review_count} review)")
+        
+        st.divider()
 
 
 def render_score_breakdown(package: PackageDetails):
@@ -446,7 +424,9 @@ def render_score_breakdown(package: PackageDetails):
         with col1:
             st.markdown(f"**{label}**")
             st.caption(desc)
-            st.progress(score / 100)
+            # Clamp progress between 0 and 1
+            progress_value = max(0.0, min(1.0, score / 100))
+            st.progress(progress_value)
         with col2:
             st.markdown(f"**{score:.0f}**")
 
