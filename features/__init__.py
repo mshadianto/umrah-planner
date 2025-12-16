@@ -97,6 +97,19 @@ try:
 except ImportError:
     pass
 
+# PWA Support
+try:
+    from features.pwa_support import (
+        init_pwa,
+        render_install_button,
+        render_pwa_settings_page,
+        render_offline_indicator,
+        PWA_MANIFEST,
+        OFFLINE_HTML,
+    )
+except ImportError:
+    pass
+
 __all__ = [
     # Crowd Prediction
     "CrowdPredictor",
@@ -159,6 +172,14 @@ __all__ = [
     "render_doa_list",
     "render_doa_player_page",
     "render_doa_mini_widget",
+    
+    # PWA Support
+    "init_pwa",
+    "render_install_button",
+    "render_pwa_settings_page",
+    "render_offline_indicator",
+    "PWA_MANIFEST",
+    "OFFLINE_HTML",
 ]
 
 # Version

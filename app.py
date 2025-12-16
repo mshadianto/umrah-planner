@@ -140,18 +140,37 @@ except ImportError:
     def get_whatsapp_service():
         return None
 
-# Doa Player (Coming Soon)
-HAS_DOA_PLAYER = False
-def render_doa_player_page():
-    st.markdown("# 🤲 Doa & Dzikir")
-    st.info("🚧 Fitur ini sedang dalam pengembangan...")
-    st.markdown("""
-    **Coming Soon:**
-    - Audio doa Umrah & Haji
-    - Dzikir pagi & petang
-    - Bacaan thawaf & sa'i
-    - Mode offline
-    """)
+# Doa Player
+try:
+    from features.doa_player import (
+        render_doa_player_page,
+        render_doa_mini_widget,
+    )
+    HAS_DOA_PLAYER = True
+except ImportError:
+    HAS_DOA_PLAYER = False
+    def render_doa_player_page():
+        st.markdown("# 🤲 Doa & Dzikir")
+        st.info("🚧 Fitur ini sedang dalam pengembangan...")
+    def render_doa_mini_widget():
+        pass
+
+# PWA Support
+try:
+    from features.pwa_support import (
+        init_pwa,
+        render_pwa_settings_page,
+        render_install_button,
+    )
+    HAS_PWA = True
+except ImportError:
+    HAS_PWA = False
+    def init_pwa():
+        pass
+    def render_pwa_settings_page():
+        st.warning("⚠️ PWA Support belum tersedia")
+    def render_install_button():
+        pass
 
 # WhatsApp Service (WAHA)
 try:
@@ -395,6 +414,7 @@ def render_sidebar():
             ("🔍", "Bandingkan Paket", "compare", HAS_COMPARISON),
             ("📱", "WhatsApp", "whatsapp", HAS_WHATSAPP),
             ("📈", "Analytics", "analytics", HAS_ANALYTICS),
+            ("📲", "Install App", "install", HAS_PWA),
         ]
         
         for icon, label, page_key, is_available in new_features:
@@ -520,6 +540,7 @@ def render_page():
         "analytics": render_analytics_dashboard,
         "whatsapp": render_whatsapp_settings,
         "doa": render_doa_player_page,
+        "install": render_pwa_settings_page,
     }
     
     renderer = page_map.get(page, render_home_page)
@@ -542,6 +563,10 @@ def main():
     """Main application entry point."""
     # Initialize session state
     init_session_state()
+    
+    # Initialize PWA support
+    if HAS_PWA:
+        init_pwa()
     
     # Track visitor
     track_visitor()
