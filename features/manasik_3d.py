@@ -506,16 +506,19 @@ def render_ritual_step_card(ritual: RitualInfo, expanded: bool = False):
 def render_ritual_progress():
     """Render ritual progress tracker."""
     
-    if "manasik_progress" not in st.session_state:
+    # Initialize with all ritual steps if empty
+    if "manasik_progress" not in st.session_state or not st.session_state.manasik_progress:
         st.session_state.manasik_progress = {step.value: False for step in RitualStep}
     
     progress = st.session_state.manasik_progress
     completed = sum(1 for v in progress.values() if v)
-    total = len(progress)
+    total = len(RitualStep)  # Use enum length, not dict length
     
     st.markdown("### 📊 Progress Umrah Anda")
     
-    st.progress(completed / total)
+    # Safe division
+    progress_pct = completed / total if total > 0 else 0
+    st.progress(progress_pct)
     st.caption(f"{completed}/{total} rukun selesai")
     
     # Checkboxes for each step
@@ -604,15 +607,22 @@ def render_manasik_page():
 def render_manasik_mini_widget():
     """Mini widget for sidebar."""
     
+    # Ensure manasik_progress is initialized
+    if "manasik_progress" not in st.session_state or not st.session_state.manasik_progress:
+        st.session_state.manasik_progress = {step.value: False for step in RitualStep}
+    
     progress = st.session_state.get("manasik_progress", {})
     completed = sum(1 for v in progress.values() if v)
-    total = len(RitualStep)
+    total = len(RitualStep)  # Use enum length, always 6
+    
+    # Safe percentage calculation
+    pct = (completed / total * 100) if total > 0 else 0
     
     st.markdown(f"""
     <div style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); padding: 1rem; border-radius: 15px; border: 1px solid #d4af37;">
         <div style="color: #d4af37; font-size: 0.8rem;">🕋 Manasik Progress</div>
         <div style="background: #333; border-radius: 10px; height: 10px; margin: 0.5rem 0; overflow: hidden;">
-            <div style="width: {completed/total*100}%; height: 100%; background: linear-gradient(90deg, #d4af37, #f4d03f);"></div>
+            <div style="width: {pct}%; height: 100%; background: linear-gradient(90deg, #d4af37, #f4d03f);"></div>
         </div>
         <div style="color: #888; font-size: 0.75rem;">{completed}/{total} rukun selesai</div>
     </div>
