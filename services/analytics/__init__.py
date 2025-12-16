@@ -1,19 +1,21 @@
 """
-LABBAIK AI v6.0 - Analytics Services
+LABBAIK AI v6.0 - Analytics Module
+==================================
+Real-time visitor tracking and analytics.
 """
 
-from .visitor_analytics import (
-    VisitorAnalytics,
-    get_analytics,
-    track_visitor,
-    track_page_view,
-    get_demo_stats,
+from .tracker import (
+    AnalyticsTracker,
+    get_analytics_tracker,
+    track_page,
+    get_visitor_stats,
+    with_analytics
 )
 
 __all__ = [
-    "VisitorAnalytics",
-    "get_analytics",
-    "track_visitor",
-    "track_page_view",
-    "get_demo_stats",
+    "AnalyticsTracker",
+    "get_analytics_tracker",
+    "track_page", 
+    "get_visitor_stats",
+    "with_analytics"
 ]

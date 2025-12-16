@@ -413,6 +413,13 @@ def render_ai_status():
 
 def render_chat_page():
     """Main chat page renderer."""
+
+    # Track page view
+    try:
+        from services.analytics import track_page
+        track_page("chat")
+    except:
+        pass
     
     # Initialize state
     init_chat_state()

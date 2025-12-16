@@ -1122,6 +1122,13 @@ def render_dyor():
 
 def render_umrah_mandiri_page():
     """Main page renderer."""
+
+    # Track page view
+    try:
+        from services.analytics import track_page
+        track_page("umrah_mandiri")
+    except:
+        pass
     
     init_super_state()
     

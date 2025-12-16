@@ -640,6 +640,13 @@ def render_saved_simulations():
 
 def render_simulator_page():
     """Main cost simulator page renderer."""
+
+    # Track page view
+    try:
+        from services.analytics import track_page
+        track_page("simulator")
+    except:
+        pass
     
     # Initialize state
     init_simulator_state()

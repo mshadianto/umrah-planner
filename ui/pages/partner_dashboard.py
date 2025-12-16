@@ -306,6 +306,13 @@ def render_partner_profile():
 
 def render_partner_dashboard():
     """Render the main partner dashboard."""
+
+    # Track page view
+    try:
+        from services.analytics import track_page
+        track_page("partner_dashboard")
+    except:
+        pass
     # Header
     st.markdown("""
     <div style="text-align: center; padding: 20px 0;">

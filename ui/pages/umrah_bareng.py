@@ -1676,6 +1676,13 @@ def render_leaderboard_view():
 
 def render_umrah_bareng_page():
     """Main Umrah Bareng page renderer."""
+
+    # Track page view
+    try:
+        from services.analytics import track_page
+        track_page("umrah_bareng")
+    except:
+        pass
     
     # Initialize state
     init_umrah_bareng_state()

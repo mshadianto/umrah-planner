@@ -1180,6 +1180,13 @@ def render_step_confirmation():
 
 def render_booking_page():
     """Main booking page renderer."""
+
+    # Track page view
+    try:
+        from services.analytics import track_page
+        track_page("booking")
+    except:
+        pass
     
     # Initialize state
     init_booking_state()
