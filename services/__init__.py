@@ -39,6 +39,50 @@ from services.cost.calculator import (
     get_season_type,
 )
 
+# ============================================
+# PRICE INTELLIGENCE SERVICES (NEW)
+# ============================================
+try:
+    from services.price.repository import (
+        PriceRepository,
+        PricePackage,
+        PriceHotel,
+        PriceFlight,
+        get_price_repo,
+        get_cached_packages,
+        get_cached_hotels,
+        get_cached_flights,
+        get_cached_price_summary,
+        get_cached_price_ranges,
+        format_price_idr,
+        format_duration,
+    )
+    from services.price.monitoring import (
+        PriceMonitor,
+        render_health_indicator,
+        render_monitoring_dashboard,
+        render_last_update_badge,
+        get_cached_health_status,
+    )
+except ImportError:
+    PriceRepository = None
+    PricePackage = None
+    PriceHotel = None
+    PriceFlight = None
+    get_price_repo = None
+    get_cached_packages = None
+    get_cached_hotels = None
+    get_cached_flights = None
+    get_cached_price_summary = None
+    get_cached_price_ranges = None
+    format_price_idr = None
+    format_duration = None
+    PriceMonitor = None
+    render_health_indicator = None
+    render_monitoring_dashboard = None
+    render_last_update_badge = None
+    get_cached_health_status = None
+
 # Auth services - may not exist yet
 try:
     from services.auth.auth_service import (
@@ -151,6 +195,25 @@ __all__ = [
     "compare_packages",
     "compare_seasons",
     "get_season_type",
+    
+    # Price Intelligence (NEW)
+    "PriceRepository",
+    "PricePackage",
+    "PriceHotel",
+    "PriceFlight",
+    "get_price_repo",
+    "get_cached_packages",
+    "get_cached_hotels",
+    "get_cached_flights",
+    "get_cached_price_summary",
+    "get_cached_price_ranges",
+    "format_price_idr",
+    "format_duration",
+    "PriceMonitor",
+    "render_health_indicator",
+    "render_monitoring_dashboard",
+    "render_last_update_badge",
+    "get_cached_health_status",
     
     # Auth
     "AuthService",

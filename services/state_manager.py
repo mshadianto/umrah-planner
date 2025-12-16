@@ -7,7 +7,7 @@ with Streamlit session state.
 
 import streamlit as st
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Callable
+from typing import Dict, List, Any, Optional, Callable, Tuple
 from dataclasses import dataclass, field
 import json
 
@@ -474,7 +474,6 @@ class StateManager:
 
 
 # Missing import
-from typing import Tuple
 
 # Global instance
 state_manager = StateManager()
