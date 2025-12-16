@@ -779,7 +779,7 @@ def render_pillars():
                 col1, col2, col3 = st.columns([0.5, 3, 1])
                 
                 with col1:
-                    if st.checkbox("", value=is_done, key=f"{pid}_{task['id']}", label_visibility="collapsed"):
+                    if st.checkbox("✓", value=is_done, key=f"{pid}_{task['id']}", label_visibility="collapsed"):
                         if task["id"] not in st.session_state.um_tasks[pid]:
                             st.session_state.um_tasks[pid].append(task["id"])
                             add_xp(task["xp"], task["name"])
