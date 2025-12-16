@@ -11,33 +11,97 @@ import random
 import os
 
 # =============================================================================
-# VISITOR ANALYTICS
+# VISITOR ANALYTICS - DATABASE CONNECTED
 # =============================================================================
 
 def get_visitor_stats():
-    """Get visitor stats from DB or demo data."""
+    """
+    Get visitor stats from database with proper fallback.
+    Priority: Database > Session State > Demo Data
+    """
     try:
-        from services.analytics import get_analytics, get_demo_stats
+        from services.database.repository import get_db
         
-        analytics = get_analytics()
-        if os.getenv("DATABASE_URL") or st.secrets.get("DATABASE_URL"):
-            return analytics.get_analytics_summary()
-        else:
-            return get_demo_stats()
+        db = get_db()
+        if db:
+            # Try to get real stats from visitor_stats table
+            stats_query = """
+                SELECT 
+                    COALESCE(SUM(unique_visitors), 0) as total_visitors,
+                    COALESCE(SUM(page_views), 0) as total_views
+                FROM visitor_stats
+            """
+            result = db.fetch_one(stats_query)
+            
+            if result and (result.get('total_visitors', 0) > 0 or result.get('total_views', 0) > 0):
+                # Get today's stats
+                today_query = """
+                    SELECT 
+                        COALESCE(SUM(unique_visitors), 0) as visitors_today,
+                        COALESCE(SUM(page_views), 0) as views_today
+                    FROM visitor_stats
+                    WHERE date = CURRENT_DATE
+                """
+                today = db.fetch_one(today_query) or {}
+                
+                # Get this week's stats
+                week_query = """
+                    SELECT 
+                        COALESCE(SUM(unique_visitors), 0) as visitors_week
+                    FROM visitor_stats
+                    WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+                """
+                week = db.fetch_one(week_query) or {}
+                
+                # Get popular pages
+                pages_query = """
+                    SELECT page, SUM(page_views) as views
+                    FROM visitor_stats
+                    GROUP BY page
+                    ORDER BY views DESC
+                    LIMIT 5
+                """
+                popular = db.fetch_all(pages_query) or []
+                
+                return {
+                    "total_visitors": result.get('total_visitors', 0),
+                    "total_views": result.get('total_views', 0),
+                    "visitors_today": today.get('visitors_today', 0),
+                    "visitors_week": week.get('visitors_week', 0),
+                    "visitors_month": result.get('total_visitors', 0),
+                    "popular_pages": [{"page": p['page'], "views": p['views']} for p in popular] if popular else [],
+                    "source": "database"
+                }
     except Exception as e:
-        # Fallback demo data
-        return {
-            "total_visitors": 975,
-            "total_views": 1328,
-            "visitors_today": 47,
-            "visitors_week": 312,
-            "visitors_month": 975,
-            "popular_pages": [
-                {"page": "home", "views": 523},
-                {"page": "umrah_mandiri", "views": 287},
-                {"page": "simulator", "views": 198},
-            ],
-        }
+        pass  # Fall through to demo data
+    
+    # Fallback: Use session-based counting
+    if "visitor_count" not in st.session_state:
+        st.session_state.visitor_count = random.randint(950, 1050)
+    if "page_view_count" not in st.session_state:
+        st.session_state.page_view_count = random.randint(1300, 1400)
+    
+    # Increment on each visit
+    if not st.session_state.get("counted_this_session"):
+        st.session_state.visitor_count += 1
+        st.session_state.page_view_count += random.randint(1, 3)
+        st.session_state.counted_this_session = True
+    
+    return {
+        "total_visitors": st.session_state.visitor_count,
+        "total_views": st.session_state.page_view_count,
+        "visitors_today": random.randint(40, 60),
+        "visitors_week": random.randint(280, 350),
+        "visitors_month": st.session_state.visitor_count,
+        "popular_pages": [
+            {"page": "home", "views": 523},
+            {"page": "umrah_mandiri", "views": 287},
+            {"page": "simulator", "views": 198},
+            {"page": "chat", "views": 156},
+            {"page": "booking", "views": 89},
+        ],
+        "source": "demo"
+    }
 
 
 def render_visitor_stats_section():
@@ -47,12 +111,15 @@ def render_visitor_stats_section():
     
     # Get stats
     stats = get_visitor_stats()
+    is_live = stats.get("source") == "database"
     
     # Section Header
-    st.markdown("""
+    status_badge = "🟢 Live Data" if is_live else "📊 Demo Data"
+    st.markdown(f"""
     <div style="text-align: center; margin-bottom: 1.5rem;">
         <h2 style="color: #d4af37; margin-bottom: 0.5rem;">📊 Statistik Platform</h2>
         <p style="color: #888;">Antusiasme jamaah terhadap LABBAIK AI</p>
+        <span style="background: {'#1a5f3c' if is_live else '#444'}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem;">{status_badge}</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -173,22 +240,83 @@ def render_visitor_stats_section():
             """, unsafe_allow_html=True)
     
     # Live indicator
-    st.markdown("""
+    indicator_color = "#4ade80" if is_live else "#fbbf24"
+    indicator_text = "Data realtime dari Neon Database" if is_live else "Demo mode - Connect database for live data"
+    
+    st.markdown(f"""
     <div style="text-align: center; margin-top: 1.5rem;">
         <span style="display: inline-flex; align-items: center; background: #1a1a1a; 
                      padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid #333;">
-            <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; 
+            <span style="width: 8px; height: 8px; background: {indicator_color}; border-radius: 50%; 
                          margin-right: 0.5rem; animation: pulse 2s infinite;"></span>
-            <span style="color: #888; font-size: 0.85rem;">Data realtime dari Neon Database</span>
+            <span style="color: #888; font-size: 0.85rem;">{indicator_text}</span>
         </span>
     </div>
     <style>
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
+    @keyframes pulse {{
+        0%, 100% {{ opacity: 1; }}
+        50% {{ opacity: 0.5; }}
+    }}
     </style>
     """, unsafe_allow_html=True)
+
+
+# =============================================================================
+# PRICE INTELLIGENCE SECTION (NEW)
+# =============================================================================
+
+def render_price_intelligence_section():
+    """Render live price intelligence section."""
+    try:
+        from services.price.monitoring import get_cached_health_status
+        from services.price.repository import get_cached_packages, format_price_idr
+        
+        status = get_cached_health_status()
+        packages = get_cached_packages(limit=3)
+        
+        if not packages:
+            return  # Skip if no data
+        
+        st.markdown("---")
+        st.markdown("""
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <h2 style="color: #d4af37; margin-bottom: 0.5rem;">💰 Harga Paket Umrah Terkini</h2>
+            <p style="color: #888;">Data live dari berbagai travel agent</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Show health status
+        overall = status.get('overall', 'unknown')
+        if overall == 'healthy':
+            st.success("🟢 Data Harga Live - Update otomatis setiap 6 jam")
+        elif overall in ['warning', 'degraded']:
+            st.warning("🟡 Data mungkin tertunda")
+        
+        # Show top 3 packages
+        cols = st.columns(3)
+        for col, pkg in zip(cols, packages[:3]):
+            with col:
+                with st.container(border=True):
+                    st.markdown(f"### {pkg.get('package_name', 'Paket')[:25]}...")
+                    st.caption(f"🏢 {pkg.get('source_name', 'Travel Agent')}")
+                    
+                    price = float(pkg.get('price_idr', 0))
+                    st.markdown(f"## {format_price_idr(price)}")
+                    
+                    duration = pkg.get('duration_days', 0)
+                    city = pkg.get('departure_city', '')
+                    st.caption(f"📅 {duration} hari | 🛫 {city}")
+        
+        # CTA
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🔍 Lihat Semua Harga", type="primary", use_container_width=True):
+                st.session_state.current_page = "simulator"
+                st.rerun()
+                
+    except Exception as e:
+        pass  # Skip section if price intelligence not available
+
 
 # =============================================================================
 # PAGE CONFIG & STYLING
@@ -971,7 +1099,8 @@ def render_home_page():
     
     # Render sections
     render_hero_section()
-    render_visitor_stats_section()  # NEW: Visitor Statistics
+    render_price_intelligence_section()  # NEW: Live Price Data
+    render_visitor_stats_section()
     render_3_pilar_framework()
     render_features_showcase()
     render_package_preview()
