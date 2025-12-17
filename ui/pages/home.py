@@ -1,112 +1,141 @@
 """
-LABBAIK AI v6.0 - Home Page (Super WOW Edition)
-===============================================
-Stunning landing page with hero section, features showcase,
-testimonials, stats counter, and interactive elements.
+LABBAIK AI v6.0 - Home Page (COMPLETE FIXED VERSION)
+====================================================
+Fixed: Aggressive database detection + debug widget
+All changes marked with # 🔧 FIX
 """
 
 import streamlit as st
 from datetime import datetime, date, timedelta
 import random
 import os
+import logging  # 🔧 FIX: Added logging
+
+logger = logging.getLogger(__name__)  # 🔧 FIX: Added logger
 
 # =============================================================================
-# VISITOR ANALYTICS - DATABASE CONNECTED
+# VISITOR ANALYTICS - AGGRESSIVE DATABASE DETECTION
 # =============================================================================
 
 def get_visitor_stats():
     """
-    Get visitor stats - FORCE FRESH DATABASE READ
+    Get visitor stats - AGGRESSIVE DATABASE DETECTION
+    🔧 FIX: Forces database usage if ANY rows exist (not checking counts > 0)
     Priority: Direct Database Query > Analytics Service > Demo Fallback
     """
-    # Force bypass any cache
     import time
     _cache_buster = int(time.time())
+    
+    logger.info("🔍 get_visitor_stats() called")  # 🔧 FIX: Added logging
     
     # Try direct database query FIRST (most reliable)
     try:
         from services.database.repository import get_db
         
         db = get_db()
+        logger.info(f"Database connection object: {db}")  # 🔧 FIX: Added logging
+        
         if db:
-            # Get total stats with last update timestamp
+            # 🔧 FIX: Test connection first
+            try:
+                test = db.fetch_one("SELECT NOW() as time")
+                logger.info(f"✅ Database connection OK: {test}")
+            except Exception as conn_err:
+                logger.error(f"❌ Connection test failed: {conn_err}")
+                raise
+            
+            # 🔧 FIX: Get stats with row count
             stats_query = """
                 SELECT 
                     COALESCE(SUM(unique_visitors), 0) as total_visitors,
                     COALESCE(SUM(page_views), 0) as total_views,
-                    MAX(updated_at) as last_update
+                    MAX(updated_at) as last_update,
+                    COUNT(*) as row_count
                 FROM visitor_stats
             """
             result = db.fetch_one(stats_query)
+            logger.info(f"📊 Query result: {result}")  # 🔧 FIX: Added logging
             
-            # Check if we have ANY data (even if zeros)
-            if result is not None:
+            # 🔧 FIX: AGGRESSIVE - Use database if table has ANY rows
+            # Don't care if counts are 0 - as long as table has data
+            if result is not None and result.get('row_count', 0) > 0:
                 total_visitors = int(result.get('total_visitors', 0))
                 total_views = int(result.get('total_views', 0))
                 
-                # Only use database if we have actual data OR fresh timestamp
-                if total_visitors > 0 or total_views > 0 or result.get('last_update'):
-                    # Get today's stats
-                    today_query = """
-                        SELECT 
-                            COALESCE(SUM(unique_visitors), 0) as visitors_today,
-                            COALESCE(SUM(page_views), 0) as views_today
-                        FROM visitor_stats
-                        WHERE date = CURRENT_DATE
-                    """
-                    today = db.fetch_one(today_query) or {}
-                    
-                    # Get this week's stats
-                    week_query = """
-                        SELECT 
-                            COALESCE(SUM(unique_visitors), 0) as visitors_week
-                        FROM visitor_stats
-                        WHERE date >= CURRENT_DATE - INTERVAL '7 days'
-                    """
-                    week = db.fetch_one(week_query) or {}
-                    
-                    # Get popular pages
-                    pages_query = """
-                        SELECT page, SUM(page_views) as views
-                        FROM visitor_stats
-                        GROUP BY page
-                        ORDER BY views DESC
-                        LIMIT 6
-                    """
-                    popular = db.fetch_all(pages_query) or []
-                    
-                    return {
-                        "total_visitors": total_visitors,
-                        "total_views": total_views,
-                        "visitors_today": int(today.get('visitors_today', 0)),
-                        "visitors_week": int(week.get('visitors_week', 0)),
-                        "visitors_month": total_visitors,
-                        "popular_pages": [{"page": p['page'], "views": int(p['views'])} for p in popular] if popular else [],
-                        "engagement": {
-                            "avg_pages_per_visit": 1.3,
-                            "avg_session_duration": "4m 32s",
-                            "returning_visitors_pct": 34,
-                            "mobile_users_pct": 67,
-                            "top_region": "Jakarta"
-                        },
-                        "source": "database",
-                        "last_update": str(result.get('last_update', ''))
+                logger.info(f"✅ Using database: {total_visitors} visitors, {total_views} views")  # 🔧 FIX
+                
+                # Get today's stats
+                today_query = """
+                    SELECT 
+                        COALESCE(SUM(unique_visitors), 0) as visitors_today,
+                        COALESCE(SUM(page_views), 0) as views_today
+                    FROM visitor_stats
+                    WHERE date = CURRENT_DATE
+                """
+                today = db.fetch_one(today_query) or {}
+                
+                # Get this week's stats
+                week_query = """
+                    SELECT 
+                        COALESCE(SUM(unique_visitors), 0) as visitors_week
+                    FROM visitor_stats
+                    WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+                """
+                week = db.fetch_one(week_query) or {}
+                
+                # Get popular pages
+                pages_query = """
+                    SELECT page, SUM(page_views) as views
+                    FROM visitor_stats
+                    GROUP BY page
+                    ORDER BY views DESC
+                    LIMIT 6
+                """
+                popular = db.fetch_all(pages_query) or []
+                
+                # 🔧 FIX: Calculate engagement rate properly
+                avg_pages = round(total_views / max(total_visitors, 1), 1)
+                
+                return {
+                    "total_visitors": total_visitors,
+                    "total_views": total_views,
+                    "visitors_today": int(today.get('visitors_today', 0)),
+                    "visitors_week": int(week.get('visitors_week', 0)),
+                    "visitors_month": total_visitors,
+                    "popular_pages": [{"page": p['page'], "views": int(p['views'])} for p in popular] if popular else [],
+                    "engagement": {
+                        "avg_pages_per_visit": avg_pages,  # 🔧 FIX: Dynamic calculation
+                        "avg_session_duration": "4m 32s",
+                        "returning_visitors_pct": 34,
+                        "mobile_users_pct": 67,
+                        "top_region": "Jakarta"
+                    },
+                    "source": "database",
+                    "last_update": str(result.get('last_update', '')),
+                    "debug_info": {  # 🔧 FIX: Added debug info
+                        "row_count": result.get('row_count', 0),
+                        "cache_buster": _cache_buster
                     }
+                }
+            else:
+                logger.warning(f"⚠️ Database table empty or no rows: {result}")  # 🔧 FIX
+                
     except Exception as e:
-        # Log error but continue to fallback
-        import logging
-        logging.error(f"Database query failed: {e}")
+        logger.error(f"❌ Database query failed: {e}", exc_info=True)  # 🔧 FIX: Better error logging
     
     # Try analytics service as backup
     try:
         from services.analytics import get_visitor_stats as get_stats
         stats = get_stats()
         if stats and stats.get('source') == 'database':
+            logger.info("ℹ️ Using analytics service data")  # 🔧 FIX
             return stats
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Analytics service unavailable: {e}")  # 🔧 FIX
     
     # Fallback: Use session-based demo counting
+    logger.warning("⚠️ FALLBACK TO DEMO DATA")  # 🔧 FIX
+    
     if "visitor_count" not in st.session_state:
         st.session_state.visitor_count = random.randint(950, 1050)
     if "page_view_count" not in st.session_state:
@@ -303,7 +332,96 @@ def render_visitor_stats_section():
 
 
 # =============================================================================
-# PRICE INTELLIGENCE SECTION (NEW)
+# 🔧 FIX: DEBUG WIDGET (NEW)
+# =============================================================================
+
+def render_debug_widget():
+    """🔧 FIX: Temporary debug widget - can be collapsed by default."""
+    with st.sidebar.expander("🔍 DB Debug", expanded=False):
+        st.caption("Debug Mode - Remove after fixing")
+        
+        if st.button("🔄 Test Database", use_container_width=True):
+            try:
+                from services.database.repository import get_db
+                
+                db = get_db()
+                
+                if not db:
+                    st.error("❌ DB connection is None")
+                else:
+                    # Test 1: Connection
+                    try:
+                        test = db.fetch_one("SELECT NOW() as time")
+                        st.success(f"✅ Connected: {test.get('time')}")
+                    except Exception as e:
+                        st.error(f"❌ Connection failed: {e}")
+                        return
+                    
+                    # Test 2: Count rows
+                    try:
+                        count = db.fetch_one("""
+                            SELECT 
+                                COUNT(*) as rows,
+                                COALESCE(SUM(unique_visitors), 0) as visitors,
+                                COALESCE(SUM(page_views), 0) as views,
+                                MAX(updated_at) as last_update
+                            FROM visitor_stats
+                        """)
+                        
+                        st.write("📊 **Database Stats:**")
+                        st.json(count)
+                        
+                        if count and count.get('rows', 0) > 0:
+                            st.success(f"✅ Found {count['rows']} rows in visitor_stats")
+                        else:
+                            st.warning("⚠️ visitor_stats table is EMPTY!")
+                            
+                    except Exception as e:
+                        st.error(f"❌ Query failed: {e}")
+                    
+                    # Test 3: Today's data
+                    try:
+                        today = db.fetch_all("""
+                            SELECT page, unique_visitors, page_views, 
+                                   updated_at, date
+                            FROM visitor_stats 
+                            WHERE date = CURRENT_DATE
+                            ORDER BY updated_at DESC
+                        """)
+                        
+                        if today:
+                            st.write(f"📅 **Today's Data ({len(today)} rows):**")
+                            for row in today:
+                                st.caption(f"• {row['page']}: {row['unique_visitors']}v / {row['page_views']}pv @ {row['updated_at']}")
+                        else:
+                            st.warning("⚠️ No data for TODAY's date!")
+                            
+                            # Check if there's ANY data
+                            all_data = db.fetch_all("""
+                                SELECT date, page, unique_visitors, page_views
+                                FROM visitor_stats
+                                ORDER BY date DESC
+                                LIMIT 5
+                            """)
+                            
+                            if all_data:
+                                st.write("📋 **Most recent data:**")
+                                for row in all_data:
+                                    st.caption(f"• {row['date']} - {row['page']}: {row['unique_visitors']}v / {row['page_views']}pv")
+                            else:
+                                st.error("❌ Table is completely EMPTY!")
+                                
+                    except Exception as e:
+                        st.error(f"❌ Today check failed: {e}")
+                        
+            except Exception as e:
+                st.error(f"❌ Debug error: {e}")
+                import traceback
+                st.code(traceback.format_exc())
+
+
+# =============================================================================
+# PRICE INTELLIGENCE SECTION
 # =============================================================================
 
 def render_price_intelligence_section():
@@ -1129,7 +1247,7 @@ def render_footer():
 
 
 # =============================================================================
-# MAIN PAGE RENDERER
+# MAIN PAGE RENDERER - 🔧 FIX: WITH DEBUG WIDGET
 # =============================================================================
 
 def render_home_page():
@@ -1141,6 +1259,9 @@ def render_home_page():
         track_page("home")
     except:
         pass
+    
+    # 🔧 FIX: ADD DEBUG WIDGET
+    render_debug_widget()
     
     # Inject CSS
     inject_custom_css()
