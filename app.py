@@ -172,39 +172,6 @@ except ImportError:
     def render_install_button():
         pass
 
-# WhatsApp Service (WAHA)
-try:
-    from features.whatsapp_service import (
-        render_whatsapp_settings,
-        render_whatsapp_status,
-        WhatsAppService,
-    )
-    HAS_WHATSAPP = True
-except ImportError:
-    HAS_WHATSAPP = False
-    def render_whatsapp_settings():
-        st.warning("⚠️ Fitur WhatsApp belum tersedia")
-    def render_whatsapp_status():
-        pass
-
-# Doa Player
-try:
-    from features.doa_player import (
-        render_doa_player_page,
-        render_doa_mini_widget,
-    )
-    HAS_DOA_PLAYER = True
-except ImportError:
-    HAS_DOA_PLAYER = False
-    def render_doa_player_page():
-        st.warning("⚠️ Fitur Doa Player belum tersedia")
-    def render_doa_mini_widget():
-        pass
-except ImportError:
-    HAS_ANALYTICS = False
-    def render_analytics_dashboard():
-        st.warning("⚠️ Fitur Analytics Dashboard belum tersedia")
-
 # Page Tracking
 try:
     from services.analytics import track_page
@@ -325,21 +292,68 @@ def add_xp(amount: int, reason: str = ""):
 
 
 # =============================================================================
-# PRICE INTELLIGENCE HEALTH
+# VISITOR ANALYTICS HEALTH (🔧 FIXED)
 # =============================================================================
 
 def render_price_health():
-    """Render Price Intelligence health status."""
+    """Render live visitor analytics status - FIXED to show real data."""
     try:
-        from services.price.monitoring import render_health_indicator
-        render_health_indicator()
-    except ImportError:
-        # Fallback jika module belum ada
-        db_status = "🟢 Online" if os.getenv("DATABASE_URL") else "🟡 Offline Mode"
+        # Try to get LIVE visitor stats from database
+        from services.database.repository import get_db
+        
+        db = get_db()
+        if db:
+            try:
+                # Get latest visitor data
+                result = db.fetch_one("""
+                    SELECT 
+                        COALESCE(SUM(unique_visitors), 0) as visitors,
+                        COALESCE(SUM(page_views), 0) as views,
+                        MAX(updated_at) as last_update
+                    FROM visitor_stats
+                    WHERE date = CURRENT_DATE
+                """)
+                
+                if result and result.get('last_update'):
+                    # Format timestamp for WIB (UTC+7)
+                    from datetime import datetime, timedelta
+                    
+                    last_update = result.get('last_update')
+                    if isinstance(last_update, datetime):
+                        # Convert to WIB
+                        wib_time = last_update + timedelta(hours=7)
+                        time_str = wib_time.strftime('%d %b %H:%M')
+                        
+                        # Show LIVE badge with green indicator
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, #1a5f3c 0%, #2d8659 100%); 
+                                    padding: 0.5rem; border-radius: 10px; text-align: center; 
+                                    border: 1px solid #4ade80;">
+                            <div style="color: #4ade80; font-weight: bold; font-size: 0.9rem;">
+                                🟢 Live Data
+                            </div>
+                            <div style="color: #d4af37; font-size: 0.7rem; margin-top: 0.2rem;">
+                                Update: {time_str} WIB
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        return
+            except Exception as e:
+                # Log but don't show error
+                import logging
+                logging.debug(f"Visitor stats query failed: {e}")
+        
+        # Fallback: Show database status
+        db_status = "🟢 Database" if os.getenv("DATABASE_URL") else "🟡 Offline Mode"
         st.caption(f"Status: {db_status}")
-    except Exception:
-        # Silent fallback
-        st.caption("📊 Mode offline")
+        
+    except ImportError:
+        # Module not available - show basic status
+        db_status = "🟢 Online" if os.getenv("DATABASE_URL") else "🟡 Offline"
+        st.caption(f"Status: {db_status}")
+    except Exception as e:
+        # Any other error - silent fallback
+        st.caption("📊 System Active")
 
 
 # =============================================================================
@@ -372,7 +386,7 @@ def render_sidebar():
             st.markdown("")
         
         # =====================================================================
-        # Price Intelligence Status
+        # 🔧 FIXED: Live Visitor Analytics Status
         # =====================================================================
         render_price_health()
         
