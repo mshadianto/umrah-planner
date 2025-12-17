@@ -6,24 +6,11 @@ package comparison, budget planner, and savings tips.
 """
 
 import streamlit as st
-import pandas as pd # Optional, but good for charts if available
 from datetime import date, datetime, timedelta
 from typing import Dict, List, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
 import json
-
-# =============================================================================
-# DEPENDENCY HANDLING (SAFE IMPORTS)
-# =============================================================================
-# Kita bungkus import eksternal agar simulator tidak crash jika file belum ada
-try:
-    from features.pilgrim_rights.insurance_explainer import render_insurance_explainer
-    HAS_INSURANCE_EXPLAINER = True
-except ImportError:
-    HAS_INSURANCE_EXPLAINER = False
-    def render_insurance_explainer(compact=False):
-        st.info("ℹ️ Modul penjelasan detail asuransi belum terinstall.")
 
 # =============================================================================
 # DATA CLASSES & CONSTANTS
@@ -54,16 +41,16 @@ class CostBreakdown:
 
 # Pricing data
 FLIGHT_PRICES = {
-    "Jakarta": {"economy": 11_000_000, "business": 25_000_000}, # Updated market price
-    "Surabaya": {"economy": 12_500_000, "business": 26_000_000},
-    "Bandung": {"economy": 12_200_000, "business": 25_500_000},
-    "Medan": {"economy": 12_000_000, "business": 27_000_000},
-    "Makassar": {"economy": 13_500_000, "business": 28_000_000},
-    "Semarang": {"economy": 12_300_000, "business": 25_800_000},
-    "Yogyakarta": {"economy": 12_400_000, "business": 26_000_000},
-    "Palembang": {"economy": 11_800_000, "business": 27_000_000},
-    "Balikpapan": {"economy": 13_200_000, "business": 28_500_000},
-    "Pekanbaru": {"economy": 11_600_000, "business": 26_500_000},
+    "Jakarta": {"economy": 8_000_000, "business": 25_000_000},
+    "Surabaya": {"economy": 8_500_000, "business": 26_000_000},
+    "Bandung": {"economy": 8_200_000, "business": 25_500_000},
+    "Medan": {"economy": 9_000_000, "business": 27_000_000},
+    "Makassar": {"economy": 9_500_000, "business": 28_000_000},
+    "Semarang": {"economy": 8_300_000, "business": 25_800_000},
+    "Yogyakarta": {"economy": 8_400_000, "business": 26_000_000},
+    "Palembang": {"economy": 8_800_000, "business": 27_000_000},
+    "Balikpapan": {"economy": 9_200_000, "business": 28_500_000},
+    "Pekanbaru": {"economy": 8_600_000, "business": 26_500_000},
 }
 
 HOTEL_PRICES_PER_NIGHT = {
@@ -88,7 +75,7 @@ SEASONAL_MULTIPLIERS = {
     Season.SUPER_PEAK: 1.50,
 }
 
-VISA_COST = 2_500_000 # Updated Visa Cost
+VISA_COST = 1_500_000
 INSURANCE_BASE = 500_000
 MUTAWIF_COST = 2_000_000
 TRANSPORT_COST = 1_500_000
@@ -98,6 +85,7 @@ MEALS_PER_DAY = {
     "standard": 250_000,
     "premium": 400_000,
 }
+
 
 # =============================================================================
 # CALCULATION FUNCTIONS
@@ -301,7 +289,7 @@ def render_input_section() -> Dict:
             
             # Show hotel info
             price = HOTEL_PRICES_PER_NIGHT["makkah"][params["hotel_star_makkah"]]
-            st.caption(f"Est: {format_currency(price)}/malam")
+            st.caption(f"{format_currency(price)}/malam")
         
         with col2:
             params["hotel_star_madinah"] = st.select_slider(
@@ -312,10 +300,10 @@ def render_input_section() -> Dict:
             )
             
             price = HOTEL_PRICES_PER_NIGHT["madinah"][params["hotel_star_madinah"]]
-            st.caption(f"Est: {format_currency(price)}/malam")
+            st.caption(f"{format_currency(price)}/malam")
     
     # Section 4: Services
-    with st.expander("🍽️ Layanan & Asuransi", expanded=True):
+    with st.expander("🍽️ Layanan", expanded=True):
         col1, col2 = st.columns(2)
         
         with col1:
@@ -334,7 +322,7 @@ def render_input_section() -> Dict:
         with col2:
             params["include_mutawif"] = st.checkbox("👨‍🏫 Mutawif (Rp 2 Juta)", value=True)
             params["include_insurance"] = st.checkbox("🛡️ Asuransi (Rp 500k)", value=True)
-            
+    
     return params
 
 
@@ -366,7 +354,7 @@ def render_cost_breakdown(cost: CostBreakdown, num_travelers: int):
                 with col1:
                     st.markdown(item)
                 with col2:
-                    st.markdown(f"**{format_currency(amount)}**")
+                    st.markdown(format_currency(amount))
         
         # Seasonal adjustment
         if cost.seasonal_adj > 0:
@@ -384,15 +372,8 @@ def render_cost_breakdown(cost: CostBreakdown, num_travelers: int):
         with col2:
             st.markdown(f"### {format_currency(cost.total)}")
     
-    # Detail Asuransi Expander (Requested Feature)
-    if cost.insurance > 0:
-        with st.expander("🏥 Detail Manfaat Asuransi", expanded=False):
-            st.success(f"✅ Asuransi 90 Hari: INCLUDED (senilai ~Rp 3.000.000)")
-            render_insurance_explainer(compact=False)
-
     # Group total if multiple travelers
     if num_travelers > 1:
-        st.markdown("---")
         with st.container(border=True):
             st.markdown("### 👥 Total Grup")
             
@@ -420,17 +401,15 @@ def render_cost_chart(cost: CostBreakdown):
     
     # Filter out zero values
     filtered_data = [(k, v) for k, v in zip(data["Komponen"], data["Biaya"]) if v > 0]
+    
+    # Simple bar representation
     total = sum([v for _, v in filtered_data])
     
-    # Render Bars
     for item, amount in filtered_data:
         pct = amount / total * 100
-        col_label, col_bar = st.columns([1, 2])
-        with col_label:
-            st.caption(f"{item} ({pct:.1f}%)")
-        with col_bar:
-            st.progress(pct / 100)
-            st.caption(format_currency(amount))
+        st.markdown(f"**{item}** ({pct:.1f}%)")
+        st.progress(pct / 100)
+        st.caption(format_currency(amount))
 
 
 def render_comparison():
@@ -484,7 +463,7 @@ def render_savings_tips(cost: CostBreakdown):
     tips = []
     
     # Flight tips
-    if cost.flight > 12_000_000:
+    if cost.flight > 8_500_000:
         tips.append({
             "icon": "✈️",
             "title": "Pilih Penerbangan Ekonomi",
@@ -539,7 +518,7 @@ def render_savings_tips(cost: CostBreakdown):
                 with col2:
                     st.success(f"💰 {tip['savings']}")
     else:
-        st.success("✅ Konfigurasi Anda sudah sangat efisien!")
+        st.success("✅ Konfigurasi Anda sudah cukup hemat!")
 
 
 def render_budget_planner(cost: CostBreakdown, num_travelers: int):
@@ -571,19 +550,15 @@ def render_budget_planner(cost: CostBreakdown, num_travelers: int):
     # Calculate
     remaining = max(total_needed - current_savings, 0)
     days_left = (target_date - date.today()).days
+    months_left = days_left / 30
     
-    # Safety division check
-    if days_left <= 0: days_left = 1
-    months_left = max(days_left / 30, 0.1)
-    
-    if remaining > 0:
+    if remaining > 0 and months_left > 0:
         monthly_saving = int(remaining / months_left)
         weekly_saving = int(remaining / (days_left / 7))
         daily_saving = int(remaining / days_left)
         
         with st.container(border=True):
             st.markdown("### 🎯 Target Tabungan")
-            st.info(f"Anda perlu mengumpulkan **{format_currency(remaining)}** lagi dalam {days_left} hari.")
             
             col1, col2, col3 = st.columns(3)
             
@@ -597,14 +572,12 @@ def render_budget_planner(cost: CostBreakdown, num_travelers: int):
                 st.metric("Per Hari", format_currency(daily_saving))
             
             # Progress bar
-            if total_needed > 0:
-                progress = min(current_savings / total_needed, 1.0)
-                st.progress(progress)
-                st.caption(f"Terkumpul: {progress * 100:.1f}% ({format_currency(current_savings)} dari {format_currency(total_needed)})")
+            progress = current_savings / total_needed
+            st.progress(progress)
+            st.caption(f"Terkumpul: {progress * 100:.1f}% ({format_currency(current_savings)} dari {format_currency(total_needed)})")
     
-    elif remaining == 0 and total_needed > 0:
+    elif remaining == 0:
         st.success("🎉 Tabungan Anda sudah cukup! Siap berangkat umrah!")
-        st.balloons()
     else:
         st.info("Masukkan tabungan saat ini untuk melihat rencana")
 
@@ -624,11 +597,11 @@ def render_save_simulation(params: Dict, cost: CostBreakdown):
                 "total": cost.total,
             }
             st.session_state.sim_saved.append(simulation)
-            st.toast("✅ Simulasi berhasil disimpan!", icon="💾")
+            st.success("✅ Simulasi disimpan!")
     
     with col2:
         if st.button("📤 Export PDF", use_container_width=True):
-            st.toast("Fitur export PDF sedang dipersiapkan", icon="🚧")
+            st.info("Fitur export PDF akan segera hadir")
     
     with col3:
         if st.button("📱 Share WhatsApp", use_container_width=True):
@@ -655,9 +628,7 @@ def render_saved_simulations():
                 
                 with col2:
                     params = sim["params"]
-                    city = params.get('departure_city', 'N/A')
-                    dur = params.get('duration', 0)
-                    st.caption(f"{city} | {dur} hari")
+                    st.caption(f"{params.get('departure_city', 'N/A')} | {params.get('duration', 0)} hari")
                 
                 with col3:
                     st.markdown(f"**{format_currency(sim['total'])}**")
@@ -670,7 +641,7 @@ def render_saved_simulations():
 def render_simulator_page():
     """Main cost simulator page renderer."""
 
-    # Track page view (Graceful fallback)
+    # Track page view
     try:
         from services.analytics import track_page
         track_page("simulator")
@@ -682,16 +653,16 @@ def render_simulator_page():
     
     # Header
     st.markdown("# 💰 Simulasi Biaya Umrah")
-    st.caption("Hitung estimasi biaya umrah dengan akurasi tinggi")
+    st.caption("Hitung estimasi biaya umrah sesuai preferensi Anda")
     
-    # Quick info metrics
+    # Quick info
     with st.container(border=True):
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("💚 Mulai Dari", "Rp 19 Juta")
+            st.metric("💚 Mulai Dari", "Rp 15 Juta")
         with col2:
-            st.metric("⭐ Paket Populer", "Rp 27 Juta")
+            st.metric("⭐ Paket Populer", "Rp 25 Juta")
         with col3:
             st.metric("👑 VIP", "Rp 55 Juta")
         with col4:
@@ -699,13 +670,13 @@ def render_simulator_page():
     
     st.divider()
     
-    # Two column layout for Main Calculator
+    # Two column layout
     col_input, col_result = st.columns([1, 1])
     
     with col_input:
         params = render_input_section()
     
-    # Calculate Logic
+    # Calculate
     cost = calculate_cost(
         departure_city=params["departure_city"],
         departure_date=params["departure_date"],
@@ -732,12 +703,12 @@ def render_simulator_page():
                 group_total = cost.total * params["num_travelers"]
                 st.info(f"👥 Total {params['num_travelers']} orang: **{format_currency(group_total)}**")
         
-        # Breakdown details
+        # Quick breakdown
         render_cost_breakdown(cost, params["num_travelers"])
     
     st.divider()
     
-    # Additional feature tabs
+    # Additional sections
     tabs = st.tabs(["📊 Grafik", "🔄 Perbandingan", "💡 Tips Hemat", "📈 Rencana Tabungan"])
     
     with tabs[0]:
@@ -752,13 +723,13 @@ def render_simulator_page():
     with tabs[3]:
         render_budget_planner(cost, params["num_travelers"])
     
-    # Save/export functionality
+    # Save/export
     render_save_simulation(params, cost)
     
-    # History
+    # Saved simulations
     render_saved_simulations()
     
-    # Footer disclaimer
+    # Footer
     st.divider()
     st.caption("💡 Harga bersifat estimasi dan dapat berubah. Hubungi tim kami untuk penawaran terbaik.")
 
