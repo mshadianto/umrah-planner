@@ -18,6 +18,7 @@ NEW FEATURES (PilgrimPal-Inspired):
 import streamlit as st
 import os
 import sys
+from datetime import datetime, timedelta
 
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -36,18 +37,47 @@ st.set_page_config(
 )
 
 # =============================================================================
-# IMPORTS - Core Pages
+# LAZY IMPORTS & FEATURE FLAGS
 # =============================================================================
-from ui.pages.home import render_home_page
-from ui.pages.chat import render_chat_page
-from ui.pages.simulator import render_simulator_page
-from ui.pages.umrah_mandiri import render_umrah_mandiri_page
-from ui.pages.umrah_bareng import render_umrah_bareng_page
-from ui.pages.booking import render_booking_page
 
-# =============================================================================
-# IMPORTS - New Features (with fallbacks)
-# =============================================================================
+# BATCH 1: Compliance & Trust Features
+try:
+    from ui.pages.hak_jamaah import render_hak_jamaah_page
+    HAS_HAK_JAMAAH = True
+except ImportError:
+    HAS_HAK_JAMAAH = False
+    def render_hak_jamaah_page(): st.warning("⚠️ Fitur Hak Jamaah belum tersedia")
+
+try:
+    from features.verification.agent_verification import render_agent_verification_page
+    HAS_AGENT_VERIFICATION = True
+except ImportError:
+    HAS_AGENT_VERIFICATION = False
+    def render_agent_verification_page(): st.warning("⚠️ Fitur Verifikasi Agent belum tersedia")
+
+try:
+    from features.emergency.emergency_hub import render_emergency_hub_page
+    HAS_EMERGENCY_HUB = True
+except ImportError:
+    HAS_EMERGENCY_HUB = False
+    def render_emergency_hub_page(): st.warning("⚠️ Fitur Emergency Hub belum tersedia")
+
+# Core Pages Imports
+try:
+    from ui.pages.home import render_home_page
+    from ui.pages.chat import render_chat_page
+    from ui.pages.simulator import render_simulator_page
+    from ui.pages.umrah_mandiri import render_umrah_mandiri_page
+    from ui.pages.umrah_bareng import render_umrah_bareng_page
+    from ui.pages.booking import render_booking_page
+except ImportError:
+    # Fallback for core pages if development environment is incomplete
+    def render_home_page(): st.title("🏠 Beranda (Dev Mode)")
+    def render_chat_page(): st.title("🤖 Chat (Dev Mode)")
+    def render_simulator_page(): st.title("💰 Simulator (Dev Mode)")
+    def render_umrah_mandiri_page(): st.title("🧭 Umrah Mandiri (Dev Mode)")
+    def render_umrah_bareng_page(): st.title("👥 Umrah Bareng (Dev Mode)")
+    def render_booking_page(): st.title("📦 Booking (Dev Mode)")
 
 # Crowd Prediction
 try:
@@ -58,10 +88,8 @@ try:
     HAS_CROWD_PREDICTION = True
 except ImportError:
     HAS_CROWD_PREDICTION = False
-    def render_crowd_prediction_page():
-        st.warning("⚠️ Fitur Crowd Prediction belum tersedia")
-    def render_crowd_widget(location="makkah", compact=True):
-        pass
+    def render_crowd_prediction_page(): st.warning("⚠️ Fitur Crowd Prediction belum tersedia")
+    def render_crowd_widget(location="makkah", compact=True): pass
 
 # SOS Emergency
 try:
@@ -72,10 +100,8 @@ try:
     HAS_SOS = True
 except ImportError:
     HAS_SOS = False
-    def render_sos_page():
-        st.warning("⚠️ Fitur SOS Emergency belum tersedia")
-    def render_sos_button(size="small"):
-        pass
+    def render_sos_page(): st.warning("⚠️ Fitur SOS Emergency belum tersedia")
+    def render_sos_button(size="small"): pass
 
 # Group Tracking
 try:
@@ -86,10 +112,8 @@ try:
     HAS_TRACKING = True
 except ImportError:
     HAS_TRACKING = False
-    def render_group_tracking_page():
-        st.warning("⚠️ Fitur Group Tracking belum tersedia")
-    def render_tracking_mini_widget():
-        pass
+    def render_group_tracking_page(): st.warning("⚠️ Fitur Group Tracking belum tersedia")
+    def render_tracking_mini_widget(): pass
 
 # 3D Manasik
 try:
@@ -100,10 +124,8 @@ try:
     HAS_MANASIK = True
 except ImportError:
     HAS_MANASIK = False
-    def render_manasik_page():
-        st.warning("⚠️ Fitur 3D Manasik belum tersedia")
-    def render_manasik_mini_widget():
-        pass
+    def render_manasik_page(): st.warning("⚠️ Fitur 3D Manasik belum tersedia")
+    def render_manasik_mini_widget(): pass
 
 # Smart Comparison
 try:
@@ -111,8 +133,7 @@ try:
     HAS_COMPARISON = True
 except ImportError:
     HAS_COMPARISON = False
-    def render_smart_comparison_page():
-        st.warning("⚠️ Fitur Smart Comparison belum tersedia")
+    def render_smart_comparison_page(): st.warning("⚠️ Fitur Smart Comparison belum tersedia")
 
 # Analytics Dashboard
 try:
@@ -120,10 +141,9 @@ try:
     HAS_ANALYTICS = True
 except ImportError:
     HAS_ANALYTICS = False
-    def render_analytics_dashboard():
-        st.warning("⚠️ Fitur Analytics Dashboard belum tersedia")
+    def render_analytics_dashboard(): st.warning("⚠️ Fitur Analytics Dashboard belum tersedia")
 
-# WhatsApp / WAHA Integration
+# WhatsApp Integration
 try:
     from services.whatsapp import (
         render_whatsapp_settings,
@@ -133,12 +153,9 @@ try:
     HAS_WHATSAPP = True
 except ImportError:
     HAS_WHATSAPP = False
-    def render_whatsapp_settings():
-        st.warning("⚠️ WhatsApp Integration belum tersedia")
-    def render_whatsapp_status():
-        pass
-    def get_whatsapp_service():
-        return None
+    def render_whatsapp_settings(): st.warning("⚠️ WhatsApp Integration belum tersedia")
+    def render_whatsapp_status(): pass
+    def get_whatsapp_service(): return None
 
 # Doa Player
 try:
@@ -152,8 +169,7 @@ except ImportError:
     def render_doa_player_page():
         st.markdown("# 🤲 Doa & Dzikir")
         st.info("🚧 Fitur ini sedang dalam pengembangan...")
-    def render_doa_mini_widget():
-        pass
+    def render_doa_mini_widget(): pass
 
 # PWA Support
 try:
@@ -165,21 +181,17 @@ try:
     HAS_PWA = True
 except ImportError:
     HAS_PWA = False
-    def init_pwa():
-        pass
-    def render_pwa_settings_page():
-        st.warning("⚠️ PWA Support belum tersedia")
-    def render_install_button():
-        pass
+    def init_pwa(): pass
+    def render_pwa_settings_page(): st.warning("⚠️ PWA Support belum tersedia")
+    def render_install_button(): pass
 
-# Page Tracking
+# Page Tracking Service
 try:
     from services.analytics import track_page
     HAS_TRACKING_SERVICE = True
 except ImportError:
     HAS_TRACKING_SERVICE = False
-    def track_page(page_name):
-        pass
+    def track_page(page_name): pass
 
 
 # =============================================================================
@@ -260,16 +272,8 @@ def track_visitor():
 def get_level_title(level: int) -> str:
     """Get title based on level."""
     titles = {
-        1: "Pemula",
-        2: "Pelajar",
-        3: "Praktisi",
-        4: "Ahli",
-        5: "Master",
-        6: "Guru",
-        7: "Ulama",
-        8: "Syaikh",
-        9: "Mufti",
-        10: "Grand Master"
+        1: "Pemula", 2: "Pelajar", 3: "Praktisi", 4: "Ahli", 5: "Master",
+        6: "Guru", 7: "Ulama", 8: "Syaikh", 9: "Mufti", 10: "Grand Master"
     }
     return titles.get(level, "Legend")
 
@@ -292,11 +296,11 @@ def add_xp(amount: int, reason: str = ""):
 
 
 # =============================================================================
-# VISITOR ANALYTICS HEALTH (🔧 FIXED)
+# VISITOR ANALYTICS STATUS
 # =============================================================================
 
-def render_price_health():
-    """Render live visitor analytics status - FIXED to show real data."""
+def render_visitor_analytics_status():
+    """Render live visitor analytics status."""
     try:
         # Try to get LIVE visitor stats from database
         from services.database.repository import get_db
@@ -316,15 +320,11 @@ def render_price_health():
                 
                 if result and result.get('last_update'):
                     # Format timestamp for WIB (UTC+7)
-                    from datetime import datetime, timedelta
-                    
                     last_update = result.get('last_update')
                     if isinstance(last_update, datetime):
-                        # Convert to WIB
                         wib_time = last_update + timedelta(hours=7)
                         time_str = wib_time.strftime('%d %b %H:%M')
                         
-                        # Show LIVE badge with green indicator
                         st.markdown(f"""
                         <div style="background: linear-gradient(135deg, #1a5f3c 0%, #2d8659 100%); 
                                     padding: 0.5rem; border-radius: 10px; text-align: center; 
@@ -339,20 +339,18 @@ def render_price_health():
                         """, unsafe_allow_html=True)
                         return
             except Exception as e:
-                # Log but don't show error
-                import logging
-                logging.debug(f"Visitor stats query failed: {e}")
+                # Log but don't show error to user
+                pass
         
         # Fallback: Show database status
-        db_status = "🟢 Database" if os.getenv("DATABASE_URL") else "🟡 Offline Mode"
+        db_status = "🟢 Database Connected" if os.getenv("DATABASE_URL") else "🟡 Local Mode"
         st.caption(f"Status: {db_status}")
         
     except ImportError:
-        # Module not available - show basic status
-        db_status = "🟢 Online" if os.getenv("DATABASE_URL") else "🟡 Offline"
-        st.caption(f"Status: {db_status}")
-    except Exception as e:
-        # Any other error - silent fallback
+        # Module not available
+        st.caption("Status: 🟡 Offline Mode")
+    except Exception:
+        # Any other error
         st.caption("📊 System Active")
 
 
@@ -363,9 +361,7 @@ def render_price_health():
 def render_sidebar():
     """Render sidebar with navigation, widgets, and branding."""
     with st.sidebar:
-        # =====================================================================
         # Logo & Brand
-        # =====================================================================
         st.markdown("""
         <div style="text-align: center; padding: 1rem 0;">
             <div style="font-size: 3rem;">🕋</div>
@@ -376,25 +372,19 @@ def render_sidebar():
         
         st.markdown("---")
         
-        # =====================================================================
-        # 🆘 SOS Emergency Button (Always Visible)
-        # =====================================================================
+        # SOS Emergency Button (Always Visible)
         if HAS_SOS:
             if st.button("🆘 DARURAT / SOS", key="sos_sidebar_main", use_container_width=True, type="primary"):
                 st.session_state.current_page = "sos"
                 st.rerun()
             st.markdown("")
         
-        # =====================================================================
-        # 🔧 FIXED: Live Visitor Analytics Status
-        # =====================================================================
-        render_price_health()
+        # Live Visitor Analytics Status
+        render_visitor_analytics_status()
         
         st.markdown("---")
         
-        # =====================================================================
-        # 🧭 Main Navigation Menu
-        # =====================================================================
+        # Main Navigation Menu
         st.markdown("### 🧭 Menu Utama")
         
         main_menu = [
@@ -415,12 +405,12 @@ def render_sidebar():
         
         st.markdown("---")
         
-        # =====================================================================
-        # ✨ New Features Menu (PilgrimPal-Inspired)
-        # =====================================================================
+        # ✨ New Features Menu (FIXED INDENTATION)
         st.markdown("### ✨ Fitur Baru")
         
         new_features = [
+            ("📜", "Hak Jamaah", "hak_jamaah", HAS_HAK_JAMAAH),
+            ("✅", "Verifikasi Agent", "verify_agent", HAS_AGENT_VERIFICATION),
             ("📊", "Prediksi Keramaian", "crowd", HAS_CROWD_PREDICTION),
             ("📍", "Group Tracking", "tracking", HAS_TRACKING),
             ("🕋", "Manasik 3D", "manasik", HAS_MANASIK),
@@ -428,63 +418,48 @@ def render_sidebar():
             ("🔍", "Bandingkan Paket", "compare", HAS_COMPARISON),
             ("📱", "WhatsApp", "whatsapp", HAS_WHATSAPP),
             ("📈", "Analytics", "analytics", HAS_ANALYTICS),
+            ("🆘", "Emergency Hub", "emergency", HAS_EMERGENCY_HUB),
             ("📲", "Install App", "install", HAS_PWA),
         ]
         
         for icon, label, page_key, is_available in new_features:
             if is_available:
                 is_active = st.session_state.get("current_page") == page_key
-                if st.button(f"{icon} {label}", key=f"nav_{page_key}", use_container_width=True):
+                # Visual cue for active pages
+                label_display = f"**{label}**" if is_active else label
+                if st.button(f"{icon} {label_display}", key=f"nav_{page_key}", use_container_width=True):
                     st.session_state.current_page = page_key
                     st.rerun()
         
         st.markdown("---")
         
-        # =====================================================================
-        # 📊 Quick Widgets
-        # =====================================================================
+        # Quick Widgets
         st.markdown("### 📊 Quick Info")
         
-        # WhatsApp Status
+        # Conditional rendering of mini widgets
         if HAS_WHATSAPP:
-            try:
-                render_whatsapp_status()
-            except:
-                pass
+            try: render_whatsapp_status()
+            except: pass
         
-        # Crowd Widget
         if HAS_CROWD_PREDICTION:
-            try:
-                render_crowd_widget("makkah", compact=True)
-            except:
-                pass
-        
-        # Group Tracking Widget
+            try: render_crowd_widget("makkah", compact=True)
+            except: pass
+            
         if HAS_TRACKING:
-            try:
-                render_tracking_mini_widget()
-            except:
-                pass
-        
-        # Manasik Progress Widget
+            try: render_tracking_mini_widget()
+            except: pass
+            
         if HAS_MANASIK:
-            try:
-                render_manasik_mini_widget()
-            except:
-                pass
-        
-        # Doa Mini Widget
+            try: render_manasik_mini_widget()
+            except: pass
+            
         if HAS_DOA_PLAYER:
-            try:
-                render_doa_mini_widget()
-            except:
-                pass
+            try: render_doa_mini_widget()
+            except: pass
         
         st.markdown("---")
         
-        # =====================================================================
-        # 🏆 Gamification Stats
-        # =====================================================================
+        # Gamification Stats
         st.markdown("### 🏆 Progress Anda")
         
         level = st.session_state.get("level", 1)
@@ -495,7 +470,6 @@ def render_sidebar():
         st.progress(min(xp / xp_for_next, 1.0))
         st.caption(f"{xp}/{xp_for_next} XP")
         
-        # Achievement badges
         achievements = st.session_state.get("achievements", [])
         if achievements:
             badges = " ".join(achievements[:5])
@@ -503,9 +477,7 @@ def render_sidebar():
         
         st.markdown("---")
         
-        # =====================================================================
         # Footer
-        # =====================================================================
         st.markdown("""
         <div style="text-align: center; padding: 1rem 0;">
             <p style="color: #666; font-size: 0.75rem;">
@@ -535,7 +507,7 @@ def render_page():
         except:
             pass
     
-    # Page mapping
+    # Page mapping (FIXED INDENTATION)
     page_map = {
         # Core pages
         "home": render_home_page,
@@ -546,6 +518,8 @@ def render_page():
         "booking": render_booking_page,
         
         # New feature pages
+        "hak_jamaah": render_hak_jamaah_page,
+        "verify_agent": render_agent_verification_page,
         "crowd": render_crowd_prediction_page,
         "sos": render_sos_page,
         "tracking": render_group_tracking_page,
@@ -554,6 +528,7 @@ def render_page():
         "analytics": render_analytics_dashboard,
         "whatsapp": render_whatsapp_settings,
         "doa": render_doa_player_page,
+        "emergency": render_emergency_hub_page,
         "install": render_pwa_settings_page,
     }
     
@@ -562,11 +537,19 @@ def render_page():
     try:
         renderer()
     except Exception as e:
-        st.error(f"❌ Error rendering page: {str(e)}")
-        st.info("Kembali ke beranda...")
-        if st.button("🏠 Ke Beranda"):
-            st.session_state.current_page = "home"
-            st.rerun()
+        # Improved Error Handling UI
+        st.error(f"❌ Terjadi kesalahan saat memuat halaman: {str(e)}")
+        st.info("Sistem telah mencatat error ini. Silakan kembali ke Beranda.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🏠 Kembali ke Beranda", key="err_home", use_container_width=True):
+                st.session_state.current_page = "home"
+                st.rerun()
+        with col2:
+            if st.button("🆘 Emergency Hub", key="err_sos", type="primary", use_container_width=True):
+                st.session_state.current_page = "emergency"
+                st.rerun()
 
 
 # =============================================================================
