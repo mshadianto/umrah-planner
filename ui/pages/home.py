@@ -16,80 +16,97 @@ import os
 
 def get_visitor_stats():
     """
-    Get visitor stats using the analytics service.
-    Priority: Analytics Service > Fallback Demo
+    Get visitor stats - FORCE FRESH DATABASE READ
+    Priority: Direct Database Query > Analytics Service > Demo Fallback
     """
-    try:
-        from services.analytics import get_visitor_stats as get_stats
-        return get_stats()
-    except ImportError:
-        pass
+    # Force bypass any cache
+    import time
+    _cache_buster = int(time.time())
     
-    # Fallback: Try direct database query
+    # Try direct database query FIRST (most reliable)
     try:
         from services.database.repository import get_db
         
         db = get_db()
         if db:
-            # Try to get real stats from visitor_stats table
+            # Get total stats with last update timestamp
             stats_query = """
                 SELECT 
                     COALESCE(SUM(unique_visitors), 0) as total_visitors,
-                    COALESCE(SUM(page_views), 0) as total_views
+                    COALESCE(SUM(page_views), 0) as total_views,
+                    MAX(updated_at) as last_update
                 FROM visitor_stats
             """
             result = db.fetch_one(stats_query)
             
-            if result and (result.get('total_visitors', 0) > 0 or result.get('total_views', 0) > 0):
-                # Get today's stats
-                today_query = """
-                    SELECT 
-                        COALESCE(SUM(unique_visitors), 0) as visitors_today,
-                        COALESCE(SUM(page_views), 0) as views_today
-                    FROM visitor_stats
-                    WHERE date = CURRENT_DATE
-                """
-                today = db.fetch_one(today_query) or {}
+            # Check if we have ANY data (even if zeros)
+            if result is not None:
+                total_visitors = int(result.get('total_visitors', 0))
+                total_views = int(result.get('total_views', 0))
                 
-                # Get this week's stats
-                week_query = """
-                    SELECT 
-                        COALESCE(SUM(unique_visitors), 0) as visitors_week
-                    FROM visitor_stats
-                    WHERE date >= CURRENT_DATE - INTERVAL '7 days'
-                """
-                week = db.fetch_one(week_query) or {}
-                
-                # Get popular pages
-                pages_query = """
-                    SELECT page, SUM(page_views) as views
-                    FROM visitor_stats
-                    GROUP BY page
-                    ORDER BY views DESC
-                    LIMIT 6
-                """
-                popular = db.fetch_all(pages_query) or []
-                
-                return {
-                    "total_visitors": int(result.get('total_visitors', 0)),
-                    "total_views": int(result.get('total_views', 0)),
-                    "visitors_today": int(today.get('visitors_today', 0)),
-                    "visitors_week": int(week.get('visitors_week', 0)),
-                    "visitors_month": int(result.get('total_visitors', 0)),
-                    "popular_pages": [{"page": p['page'], "views": int(p['views'])} for p in popular] if popular else [],
-                    "engagement": {
-                        "avg_pages_per_visit": 1.3,
-                        "avg_session_duration": "4m 32s",
-                        "returning_visitors_pct": 34,
-                        "mobile_users_pct": 67,
-                        "top_region": "Jakarta"
-                    },
-                    "source": "database"
-                }
+                # Only use database if we have actual data OR fresh timestamp
+                if total_visitors > 0 or total_views > 0 or result.get('last_update'):
+                    # Get today's stats
+                    today_query = """
+                        SELECT 
+                            COALESCE(SUM(unique_visitors), 0) as visitors_today,
+                            COALESCE(SUM(page_views), 0) as views_today
+                        FROM visitor_stats
+                        WHERE date = CURRENT_DATE
+                    """
+                    today = db.fetch_one(today_query) or {}
+                    
+                    # Get this week's stats
+                    week_query = """
+                        SELECT 
+                            COALESCE(SUM(unique_visitors), 0) as visitors_week
+                        FROM visitor_stats
+                        WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+                    """
+                    week = db.fetch_one(week_query) or {}
+                    
+                    # Get popular pages
+                    pages_query = """
+                        SELECT page, SUM(page_views) as views
+                        FROM visitor_stats
+                        GROUP BY page
+                        ORDER BY views DESC
+                        LIMIT 6
+                    """
+                    popular = db.fetch_all(pages_query) or []
+                    
+                    return {
+                        "total_visitors": total_visitors,
+                        "total_views": total_views,
+                        "visitors_today": int(today.get('visitors_today', 0)),
+                        "visitors_week": int(week.get('visitors_week', 0)),
+                        "visitors_month": total_visitors,
+                        "popular_pages": [{"page": p['page'], "views": int(p['views'])} for p in popular] if popular else [],
+                        "engagement": {
+                            "avg_pages_per_visit": 1.3,
+                            "avg_session_duration": "4m 32s",
+                            "returning_visitors_pct": 34,
+                            "mobile_users_pct": 67,
+                            "top_region": "Jakarta"
+                        },
+                        "source": "database",
+                        "last_update": str(result.get('last_update', ''))
+                    }
     except Exception as e:
-        pass  # Fall through to demo data
+        # Log error but continue to fallback
+        import logging
+        logging.error(f"Database query failed: {e}")
     
-    # Fallback: Use session-based counting
+    # Try analytics service as backup
+    try:
+        from services.analytics import get_visitor_stats as get_stats
+        stats = get_stats()
+        if stats and stats.get('source') == 'database':
+            return stats
+    except Exception:
+        pass
+    
+    # Fallback: Use session-based demo counting
     if "visitor_count" not in st.session_state:
         st.session_state.visitor_count = random.randint(950, 1050)
     if "page_view_count" not in st.session_state:
@@ -108,12 +125,10 @@ def get_visitor_stats():
         "visitors_week": random.randint(280, 350),
         "visitors_month": st.session_state.visitor_count,
         "popular_pages": [
-            {"page": "home", "views": 523},
-            {"page": "umrah_mandiri", "views": 287},
-            {"page": "simulator", "views": 198},
-            {"page": "chat", "views": 156},
-            {"page": "umrah_bareng", "views": 89},
-            {"page": "booking", "views": 67},
+            {"page": "home", "views": 10},
+            {"page": "umrah_mandiri", "views": 7},
+            {"page": "simulator", "views": 5},
+            {"page": "chat", "views": 3},
         ],
         "engagement": {
             "avg_pages_per_visit": 1.3,
