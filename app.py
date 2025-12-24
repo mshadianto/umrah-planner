@@ -1,10 +1,14 @@
 """
-LABBAIK AI v6.0 - Super Boom Edition
+LABBAIK AI v6.1 - Super Boom Edition
 =====================================
 Platform Perencanaan Umrah AI #1 Indonesia
 By MS Hadianto
 
 Main entry point - compatible with Streamlit Cloud deployment
+
+UPDATE v6.1:
+- Added AI Itinerary Builder
+- Added Official Resources (Umrah Mandiri v7.1)
 """
 
 import streamlit as st
@@ -24,7 +28,7 @@ st.set_page_config(
     menu_items={
         'Get Help': 'https://labbaik.cloud/help',
         'Report a bug': 'https://labbaik.cloud/feedback',
-        'About': 'LABBAIK AI v6.0 - Platform Perencanaan Umrah AI #1 Indonesia'
+        'About': 'LABBAIK AI v6.1 - Platform Perencanaan Umrah AI #1 Indonesia'
     }
 )
 
@@ -48,6 +52,19 @@ except ImportError:
     def render_umrah_mandiri_page(): st.title("🧭 Umrah Mandiri (Dev Mode)")
     def render_umrah_bareng_page(): st.title("👥 Umrah Bareng (Dev Mode)")
     def render_booking_page(): st.title("📦 Booking (Dev Mode)")
+
+# =============================================================================
+# 🆕 AI Itinerary Builder (NEW!)
+# =============================================================================
+try:
+    from ui.pages.itinerary_builder import render_itinerary_builder_page
+    HAS_ITINERARY = True
+except ImportError:
+    HAS_ITINERARY = False
+    def render_itinerary_builder_page():
+        st.markdown("# 🗓️ AI Itinerary Builder")
+        st.warning("⚠️ Fitur AI Itinerary Builder belum tersedia")
+        st.info("Segera hadir: Generate jadwal Umrah harian otomatis!")
 
 # Crowd Prediction
 try:
@@ -211,6 +228,10 @@ def init_session_state():
         
         # Crowd Prediction
         "crowd_location": "makkah",
+        
+        # 🆕 Itinerary Builder
+        "itinerary_generated": False,
+        "current_itinerary": None,
     }
     
     for key, value in defaults.items():
@@ -378,9 +399,11 @@ def render_sidebar():
         # ✨ New Features Menu
         st.markdown("### ✨ Fitur Baru")
         
+        # 🆕 UPDATED: Added AI Itinerary Builder
         new_features = [
             ("📊", "Prediksi Keramaian", "crowd", HAS_CROWD_PREDICTION),
             ("📍", "Group Tracking", "tracking", HAS_TRACKING),
+            ("🗓️", "AI Itinerary", "itinerary", HAS_ITINERARY),  # 🆕 NEW!
             ("🕋", "Manasik 3D", "manasik", HAS_MANASIK),
             ("🤲", "Doa & Dzikir", "doa", HAS_DOA_PLAYER),
             ("🔍", "Bandingkan Paket", "compare", HAS_COMPARISON),
@@ -447,7 +470,7 @@ def render_sidebar():
         st.markdown("""
         <div style="text-align: center; padding: 1rem 0;">
             <p style="color: #666; font-size: 0.75rem;">
-                v6.0.0 - Super Boom Edition<br>
+                v6.1.0 - Super Boom Edition<br>
                 © 2025 MS Hadianto
             </p>
             <p style="color: #444; font-size: 0.65rem;">
@@ -473,7 +496,7 @@ def render_page():
         except:
             pass
     
-    # Page mapping
+    # 🆕 UPDATED: Added itinerary page
     page_map = {
         # Core pages
         "home": render_home_page,
@@ -484,6 +507,7 @@ def render_page():
         "booking": render_booking_page,
         
         # New feature pages
+        "itinerary": render_itinerary_builder_page,  # 🆕 NEW!
         "crowd": render_crowd_prediction_page,
         "sos": render_sos_page,
         "tracking": render_group_tracking_page,
