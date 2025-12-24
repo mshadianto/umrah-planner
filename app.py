@@ -1,12 +1,13 @@
 """
-LABBAIK AI v6.1 - Super Boom Edition
+LABBAIK AI v6.2 - Super Boom Edition
 =====================================
 Platform Perencanaan Umrah AI #1 Indonesia
 By MS Hadianto
 
 Main entry point - compatible with Streamlit Cloud deployment
 
-UPDATE v6.1:
+UPDATE v6.2:
+- Added Smart Checklist
 - Added AI Itinerary Builder
 - Added Official Resources (Umrah Mandiri v7.1)
 """
@@ -28,7 +29,7 @@ st.set_page_config(
     menu_items={
         'Get Help': 'https://labbaik.cloud/help',
         'Report a bug': 'https://labbaik.cloud/feedback',
-        'About': 'LABBAIK AI v6.1 - Platform Perencanaan Umrah AI #1 Indonesia'
+        'About': 'LABBAIK AI v6.2 - Platform Perencanaan Umrah AI #1 Indonesia'
     }
 )
 
@@ -54,7 +55,7 @@ except ImportError:
     def render_booking_page(): st.title("📦 Booking (Dev Mode)")
 
 # =============================================================================
-# 🆕 AI Itinerary Builder (NEW!)
+# 🆕 AI Itinerary Builder
 # =============================================================================
 try:
     from ui.pages.itinerary_builder import render_itinerary_builder_page
@@ -65,6 +66,19 @@ except ImportError:
         st.markdown("# 🗓️ AI Itinerary Builder")
         st.warning("⚠️ Fitur AI Itinerary Builder belum tersedia")
         st.info("Segera hadir: Generate jadwal Umrah harian otomatis!")
+
+# =============================================================================
+# 🆕 Smart Checklist (NEW in v6.2!)
+# =============================================================================
+try:
+    from ui.pages.smart_checklist import render_smart_checklist_page
+    HAS_CHECKLIST = True
+except ImportError:
+    HAS_CHECKLIST = False
+    def render_smart_checklist_page():
+        st.markdown("# 📋 Smart Checklist")
+        st.warning("⚠️ Fitur Smart Checklist belum tersedia")
+        st.info("Segera hadir: Checklist packing Umrah yang dipersonalisasi!")
 
 # Crowd Prediction
 try:
@@ -229,9 +243,18 @@ def init_session_state():
         # Crowd Prediction
         "crowd_location": "makkah",
         
-        # 🆕 Itinerary Builder
+        # Itinerary Builder
         "itinerary_generated": False,
         "current_itinerary": None,
+        
+        # 🆕 Smart Checklist
+        "checklist_items": {},
+        "checklist_profile": {
+            "gender": "male",
+            "duration": 9,
+            "season": "normal",
+            "health_conditions": []
+        },
     }
     
     for key, value in defaults.items():
@@ -399,11 +422,12 @@ def render_sidebar():
         # ✨ New Features Menu
         st.markdown("### ✨ Fitur Baru")
         
-        # 🆕 UPDATED: Added AI Itinerary Builder
+        # 🆕 UPDATED: Added Smart Checklist
         new_features = [
             ("📊", "Prediksi Keramaian", "crowd", HAS_CROWD_PREDICTION),
             ("📍", "Group Tracking", "tracking", HAS_TRACKING),
-            ("🗓️", "AI Itinerary", "itinerary", HAS_ITINERARY),  # 🆕 NEW!
+            ("🗓️", "AI Itinerary", "itinerary", HAS_ITINERARY),
+            ("📋", "Smart Checklist", "checklist", HAS_CHECKLIST),  # 🆕 NEW!
             ("🕋", "Manasik 3D", "manasik", HAS_MANASIK),
             ("🤲", "Doa & Dzikir", "doa", HAS_DOA_PLAYER),
             ("🔍", "Bandingkan Paket", "compare", HAS_COMPARISON),
@@ -470,7 +494,7 @@ def render_sidebar():
         st.markdown("""
         <div style="text-align: center; padding: 1rem 0;">
             <p style="color: #666; font-size: 0.75rem;">
-                v6.1.0 - Super Boom Edition<br>
+                v6.2.0 - Super Boom Edition<br>
                 © 2025 MS Hadianto
             </p>
             <p style="color: #444; font-size: 0.65rem;">
@@ -496,7 +520,7 @@ def render_page():
         except:
             pass
     
-    # 🆕 UPDATED: Added itinerary page
+    # 🆕 UPDATED: Added checklist page
     page_map = {
         # Core pages
         "home": render_home_page,
@@ -507,7 +531,8 @@ def render_page():
         "booking": render_booking_page,
         
         # New feature pages
-        "itinerary": render_itinerary_builder_page,  # 🆕 NEW!
+        "itinerary": render_itinerary_builder_page,
+        "checklist": render_smart_checklist_page,  # 🆕 NEW!
         "crowd": render_crowd_prediction_page,
         "sos": render_sos_page,
         "tracking": render_group_tracking_page,
