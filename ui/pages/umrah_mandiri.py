@@ -1,46 +1,42 @@
 """
 ================================================================================
-🕋 LABBAIK AI v7.0 - UMRAH MANDIRI SUPER COMPLETE EDITION
+🕋 LABBAIK AI - UMRAH MANDIRI v7.1 COMPLETE
 ================================================================================
-MERGED: Gamification + Virtual Manasik + Budget AI + Weather + Daily Challenges
-      + Visa Checker + Document Checker + PPIU Verification + Miqat Locator
+Lokasi: ui/pages/umrah_mandiri.py
+Fitur: Official Resources, Live Crowd Map, HHR Train, Raudhah, Visa, Miqat, dll
 ================================================================================
 """
 
 import streamlit as st
 from datetime import datetime, date, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
-from enum import Enum
+from typing import Dict, List, Any, Optional
 
 # =============================================================================
-# 🎨 SUPER STYLING - BLACK GOLD THEME
+# 🎨 STYLING
 # =============================================================================
 
-SUPER_CSS = """
+UMRAH_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
 
-.hero-gradient {
+.hero-mandiri {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 20px;
     color: white;
     text-align: center;
-    margin-bottom: 2rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    margin-bottom: 1.5rem;
     border: 1px solid #d4af37;
 }
 
-.hero-gradient h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: #d4af37; }
-.hero-gradient .arabic { font-size: 3rem; font-family: 'Amiri', serif; color: #d4af37; text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+.hero-mandiri h1 { color: #d4af37; margin-bottom: 0.25rem; }
+.hero-mandiri .arabic { font-size: 2rem; font-family: 'Amiri', serif; color: #d4af37; }
 
 .xp-bar-container {
     background: #2d2d2d;
     border-radius: 20px;
-    height: 30px;
+    height: 25px;
     overflow: hidden;
-    margin: 1rem 0;
     position: relative;
     border: 1px solid #d4af37;
 }
@@ -56,63 +52,26 @@ SUPER_CSS = """
     position: absolute;
     width: 100%;
     text-align: center;
-    line-height: 30px;
+    line-height: 25px;
     color: white;
     font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    font-size: 0.8rem;
 }
 
-.achievement-card {
-    background: linear-gradient(145deg, #2d2d2d 0%, #1a1a1a 100%);
+.stat-card {
+    background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
     border-radius: 15px;
     padding: 1rem;
     text-align: center;
-    margin: 0.5rem 0;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    border: 1px solid #d4af37;
+    border: 1px solid #444;
     color: white;
 }
 
-.achievement-card.locked {
-    background: linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%);
-    opacity: 0.6;
-    border-color: #444;
-}
-
-.weather-card {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    border-radius: 20px;
-    padding: 1.5rem;
-    color: white;
-    text-align: center;
-    border: 1px solid #d4af37;
-}
-
-.weather-temp { font-size: 4rem; font-weight: bold; color: #d4af37; }
-
-.countdown-digit {
-    background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
-    color: #d4af37;
-    font-size: 2.5rem;
-    font-weight: bold;
-    padding: 0.75rem 1.25rem;
-    border-radius: 10px;
-    margin: 0.25rem;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    display: inline-block;
-    border: 1px solid #d4af37;
-}
-
-.countdown-label {
-    font-size: 0.75rem;
-    color: #888;
-    text-transform: uppercase;
-    display: block;
-    margin-top: 0.25rem;
-}
+.stat-card.active { border-color: #d4af37; }
+.stat-card h3 { color: #d4af37; margin: 0; font-size: 1.1rem; }
 
 .doa-arabic {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     text-align: right;
     font-family: 'Amiri', serif;
     background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
@@ -121,49 +80,132 @@ SUPER_CSS = """
     margin: 1rem 0;
     border-right: 4px solid #d4af37;
     color: #d4af37;
+    direction: rtl;
 }
 
-.visa-result-card {
-    background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
-    border-radius: 15px;
-    padding: 1.5rem;
-    border: 2px solid #28a745;
-    color: white;
-    margin: 1rem 0;
-}
-
-.doc-status-ok { color: #28a745; }
-.doc-status-warning { color: #ffc107; }
-.doc-status-error { color: #dc3545; }
-
-.miqat-card {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    border-radius: 15px;
-    padding: 1.5rem;
+.countdown-box {
+    background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+    color: #d4af37;
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    display: inline-block;
     border: 1px solid #d4af37;
-    margin: 1rem 0;
+    min-width: 60px;
+    text-align: center;
 }
 
-.ppiu-verified {
-    background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
-    border: 2px solid #28a745;
-    border-radius: 10px;
-    padding: 1rem;
-    margin: 0.5rem 0;
+.achievement-badge {
+    background: linear-gradient(145deg, #2d2d2d 0%, #1a1a1a 100%);
+    border-radius: 12px;
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid #d4af37;
+    color: white;
 }
 
-.ppiu-unverified {
-    background: linear-gradient(135deg, #4a1a1a 0%, #2d0d0d 100%);
-    border: 2px solid #dc3545;
-    border-radius: 10px;
-    padding: 1rem;
-    margin: 0.5rem 0;
-}
-
-.gold-text { color: #d4af37; }
-.gold-border { border: 1px solid #d4af37; }
+.achievement-badge.locked { opacity: 0.5; border-color: #444; }
 </style>
 """
+
+# =============================================================================
+# 📱 OFFICIAL RESOURCES DATA
+# =============================================================================
+
+OFFICIAL_RESOURCES = {
+    "nusuk": {
+        "name": "NUSUK - Platform Resmi",
+        "url": "https://www.nusuk.sa",
+        "icon": "🏛️",
+        "desc": "Platform resmi Kementerian Haji & Umrah Saudi Arabia",
+        "features": ["E-Visa Umrah", "Paket Umrah", "Permit Raudhah", "Info & Panduan"],
+        "required": True,
+        "android": "https://play.google.com/store/apps/details?id=sa.gov.moh.nusuk",
+        "ios": "https://apps.apple.com/app/nusuk/id1521968498"
+    },
+    "prayers_map": {
+        "name": "Peta Keramaian Masjid Nabawi",
+        "url": "https://eserv.wmn.gov.sa/e-services/prayers_map/?lang=en",
+        "icon": "🗺️",
+        "desc": "Real-time crowd density dari General Presidency of Harameen",
+        "features": ["Live crowd level", "Jadwal sholat Madinah", "Area mapping"],
+        "required": False,
+    },
+    "hhr": {
+        "name": "Haramain High-Speed Railway",
+        "url": "https://sar.hhr.sa/",
+        "icon": "🚄",
+        "desc": "Kereta cepat 300km/jam Makkah-Jeddah-Madinah",
+        "features": ["Booking tiket online", "Jadwal keberangkatan", "2.5 jam Makkah-Madinah"],
+        "required": True,
+    },
+    "careem": {
+        "name": "Careem - Taxi App",
+        "url": "https://www.careem.com/",
+        "icon": "🚗",
+        "desc": "Aplikasi taxi terpopuler di Saudi Arabia",
+        "features": ["Ride hailing dalam kota", "Harga transparan", "Cash/Card"],
+        "required": True,
+        "android": "https://play.google.com/store/apps/details?id=com.careem.acma",
+        "ios": "https://apps.apple.com/app/careem/id592978487"
+    },
+    "simpu": {
+        "name": "SISKOPATUH KEMENAG",
+        "url": "https://simpu.kemenag.go.id/",
+        "icon": "🇮🇩",
+        "desc": "Verifikasi travel agent resmi terdaftar Kemenag RI",
+        "features": ["Cek legalitas PPIU", "Database resmi", "Hotline 1500-363"],
+        "required": True,
+    }
+}
+
+HHR_ROUTES = [
+    {"from": "Makkah", "to": "Madinah", "duration": "2j 30m", "economy": 250, "business": 375},
+    {"from": "Makkah", "to": "Jeddah", "duration": "45m", "economy": 75, "business": 115},
+    {"from": "Jeddah Airport", "to": "Makkah", "duration": "35m", "economy": 75, "business": 115},
+    {"from": "Jeddah", "to": "Madinah", "duration": "1j 50m", "economy": 200, "business": 300},
+]
+
+ESSENTIAL_APPS = [
+    {"name": "NUSUK", "icon": "🕋", "purpose": "Visa, permits, booking", "required": True},
+    {"name": "Google Maps", "icon": "🗺️", "purpose": "Navigasi (download offline!)", "required": True},
+    {"name": "Careem", "icon": "🚗", "purpose": "Taxi dalam kota", "required": True},
+    {"name": "Uber", "icon": "🚙", "purpose": "Alternatif taxi", "required": False},
+    {"name": "WhatsApp", "icon": "💬", "purpose": "Komunikasi", "required": True},
+    {"name": "Tawakkalna", "icon": "📲", "purpose": "Digital ID Saudi (optional)", "required": False},
+]
+
+RAUDHAH_INFO = {
+    "hadith": "Apa yang ada di antara rumahku dan mimbarku adalah taman dari taman-taman surga.",
+    "source": "HR. Bukhari & Muslim",
+    "location": "Area berkarpet hijau di Masjid Nabawi, Madinah",
+    "size": "22m x 15m (~330 m²)",
+    "booking": "Via aplikasi NUSUK",
+    "tips": [
+        "📱 Download dan daftar di aplikasi NUSUK",
+        "📍 Aktifkan GPS saat di dekat Masjid Nabawi",
+        "⏰ Slot baru muncul setiap Jumat untuk 1 minggu ke depan",
+        "🕐 Cek app setiap jam atau setengah jam",
+        "⚡ Slot sangat cepat habis!",
+        "1️⃣ Hanya 1 permit per orang per bulan",
+        "🚪 Masuk via Gate 37 (wanita)",
+        "⏱️ Datang 30-45 menit sebelum slot"
+    ]
+}
+
+EMERGENCY_CONTACTS = {
+    "saudi": [
+        {"name": "Police", "phone": "999", "icon": "👮"},
+        {"name": "Ambulance", "phone": "997", "icon": "🚑"},
+        {"name": "Fire", "phone": "998", "icon": "🚒"},
+    ],
+    "indonesia": [
+        {"name": "KBRI Riyadh", "phone": "+966-11-488-2800", "icon": "🇮🇩"},
+        {"name": "KJRI Jeddah", "phone": "+966-12-667-0826", "icon": "🇮🇩"},
+        {"name": "Hotline KEMENAG", "phone": "1500-363", "icon": "📞"},
+    ]
+}
 
 # =============================================================================
 # 🎮 GAMIFICATION DATA
@@ -183,1305 +225,1023 @@ LEVELS = [
 ]
 
 ACHIEVEMENTS = [
-    {"id": "first_step", "name": "Langkah Pertama", "icon": "👣", "desc": "Mulai journey", "xp": 50, "cat": "journey"},
-    {"id": "planner", "name": "Master Planner", "icon": "📋", "desc": "10 checklist selesai", "xp": 100, "cat": "journey"},
-    {"id": "all_pillar", "name": "3 Pilar Complete", "icon": "🏛️", "desc": "Semua pilar selesai", "xp": 300, "cat": "journey"},
-    {"id": "scholar", "name": "Pencari Ilmu", "icon": "📚", "desc": "Baca semua manasik", "xp": 150, "cat": "knowledge"},
-    {"id": "budget_set", "name": "Budget Planner", "icon": "💰", "desc": "Hitung estimasi", "xp": 50, "cat": "financial"},
-    {"id": "saver", "name": "Penabung Setia", "icon": "🐷", "desc": "Target tabungan", "xp": 75, "cat": "financial"},
-    {"id": "passport", "name": "Paspor Ready", "icon": "🛂", "desc": "Checklist paspor", "xp": 100, "cat": "preparation"},
-    {"id": "manasik_pro", "name": "Manasik Pro", "icon": "🕌", "desc": "Virtual manasik done", "xp": 150, "cat": "ibadah"},
-    {"id": "streak_7", "name": "Istiqomah", "icon": "🔥", "desc": "7 hari streak", "xp": 250, "cat": "special"},
-    {"id": "perfectionist", "name": "Perfectionist", "icon": "💎", "desc": "100% complete", "xp": 500, "cat": "special"},
-    # NEW ACHIEVEMENTS
-    {"id": "visa_checked", "name": "Visa Expert", "icon": "🛂", "desc": "Cek kelayakan visa", "xp": 75, "cat": "preparation"},
-    {"id": "docs_ready", "name": "Dokumen Lengkap", "icon": "📄", "desc": "Semua dokumen OK", "xp": 100, "cat": "preparation"},
-    {"id": "miqat_master", "name": "Miqat Master", "icon": "📍", "desc": "Pahami miqat", "xp": 50, "cat": "knowledge"},
-    {"id": "safe_travel", "name": "Safe Traveler", "icon": "🛡️", "desc": "Verifikasi PPIU", "xp": 75, "cat": "preparation"},
-]
-
-DAILY_CHALLENGES = [
-    {"id": "read_dua", "name": "Baca 1 Doa Umrah", "xp": 10, "icon": "📖"},
-    {"id": "arabic", "name": "Pelajari 3 Frasa Arab", "xp": 15, "icon": "🗣️"},
-    {"id": "checklist", "name": "Centang 3 Checklist", "xp": 20, "icon": "✅"},
-    {"id": "save", "name": "Tabung Hari Ini", "xp": 25, "icon": "💰"},
-    {"id": "talbiyah", "name": "Latihan Talbiyah", "xp": 20, "icon": "🎵"},
+    {"id": "first_step", "name": "Langkah Pertama", "icon": "👣", "desc": "Mulai journey Umrah Mandiri", "xp": 50},
+    {"id": "resources_explorer", "name": "Resources Explorer", "icon": "🔗", "desc": "Jelajahi Official Resources", "xp": 50},
+    {"id": "visa_checked", "name": "Visa Expert", "icon": "🛂", "desc": "Cek kelayakan visa", "xp": 75},
+    {"id": "docs_ready", "name": "Dokumen Lengkap", "icon": "📄", "desc": "100% dokumen siap", "xp": 100},
+    {"id": "miqat_master", "name": "Miqat Master", "icon": "📍", "desc": "Pahami miqat & ihram", "xp": 50},
+    {"id": "safe_travel", "name": "Safe Traveler", "icon": "🛡️", "desc": "Verifikasi PPIU", "xp": 75},
+    {"id": "budget_set", "name": "Budget Planner", "icon": "💰", "desc": "Hitung estimasi biaya", "xp": 50},
+    {"id": "manasik_complete", "name": "Manasik Pro", "icon": "🕌", "desc": "Selesaikan 8 langkah manasik", "xp": 150},
+    {"id": "pillar_admin", "name": "Admin Master", "icon": "📋", "desc": "Selesaikan pilar Administrasi", "xp": 100},
+    {"id": "pillar_logistik", "name": "Logistik Pro", "icon": "🏨", "desc": "Selesaikan pilar Logistik", "xp": 100},
+    {"id": "pillar_eksekusi", "name": "Eksekusi Ready", "icon": "🚀", "desc": "Selesaikan pilar Eksekusi", "xp": 100},
 ]
 
 # =============================================================================
-# 🛂 VISA ELIGIBILITY DATA (NEW!)
-# =============================================================================
-
-class VisaType(Enum):
-    E_TOURIST = "E-Tourist Visa"
-    VISA_ON_ARRIVAL = "Visa on Arrival"
-    UMRAH_VISA = "Umrah Visa (via PPIU)"
-    FAMILY_VISIT = "Family Visit Visa"
-    PERSONAL_VISIT = "Personal Visit Visa"
-
-E_TOURIST_ELIGIBLE_DIRECT = [
-    "United States", "United Kingdom", "Canada", "Australia", "New Zealand",
-    "Germany", "France", "Italy", "Spain", "Netherlands", "Belgium", 
-    "Switzerland", "Austria", "Sweden", "Norway", "Denmark", "Finland",
-    "Japan", "South Korea", "Singapore", "Malaysia", "Brunei", 
-    "China", "Hong Kong", "Macau", "Kazakhstan"
-]
-
-@dataclass
-class VisaResult:
-    eligible_types: List[VisaType]
-    recommended: VisaType
-    process_time: str
-    estimated_cost_idr: int
-    apply_url: str
-    steps: List[str]
-    notes: List[str]
-
-def check_visa_eligibility(
-    nationality: str,
-    has_us_visa: bool = False,
-    has_uk_visa: bool = False,
-    has_schengen_visa: bool = False,
-    has_saudi_relative: bool = False
-) -> VisaResult:
-    """Check visa eligibility based on nationality and existing visas."""
-    
-    eligible = []
-    notes = []
-    
-    if nationality in E_TOURIST_ELIGIBLE_DIRECT:
-        eligible.extend([VisaType.E_TOURIST, VisaType.VISA_ON_ARRIVAL])
-    elif has_us_visa or has_uk_visa or has_schengen_visa:
-        eligible.extend([VisaType.E_TOURIST, VisaType.VISA_ON_ARRIVAL])
-        qualifying = []
-        if has_us_visa: qualifying.append("US")
-        if has_uk_visa: qualifying.append("UK")
-        if has_schengen_visa: qualifying.append("Schengen")
-        notes.append(f"✅ Eligible karena punya visa {', '.join(qualifying)} valid")
-    
-    if has_saudi_relative:
-        eligible.append(VisaType.FAMILY_VISIT)
-        notes.append("👨‍👩‍👧 Family Visit bisa diajukan oleh kerabat di Saudi")
-    
-    eligible.append(VisaType.UMRAH_VISA)
-    
-    if VisaType.E_TOURIST in eligible:
-        return VisaResult(
-            eligible_types=eligible,
-            recommended=VisaType.E_TOURIST,
-            process_time="Instant (online)",
-            estimated_cost_idr=3_200_000,
-            apply_url="https://www.nusuk.sa",
-            steps=[
-                "1️⃣ Kunjungi nusuk.sa atau download app NUSUK",
-                "2️⃣ Pilih 'Get Visa' atau 'Apply for E-Visa'",
-                "3️⃣ Isi data paspor dan informasi pribadi",
-                "4️⃣ Upload foto dan scan paspor",
-                "5️⃣ Bayar dengan kartu kredit/debit (SAR 480)",
-                "6️⃣ Visa terbit dalam beberapa menit!",
-                "7️⃣ Download dan simpan di HP"
-            ],
-            notes=notes
-        )
-    else:
-        notes.append("⚠️ Pastikan PPIU terdaftar di KEMENAG!")
-        notes.append("🔗 Verifikasi di: simpu.kemenag.go.id")
-        return VisaResult(
-            eligible_types=eligible,
-            recommended=VisaType.UMRAH_VISA,
-            process_time="1-3 hari kerja",
-            estimated_cost_idr=2_500_000,
-            apply_url="https://simpu.kemenag.go.id",
-            steps=[
-                "1️⃣ Pilih PPIU (Travel Agent) terdaftar KEMENAG",
-                "2️⃣ Verifikasi di simpu.kemenag.go.id",
-                "3️⃣ Serahkan paspor & dokumen ke travel agent",
-                "4️⃣ Travel agent mengajukan via platform Maqam",
-                "5️⃣ Visa terbit dalam 1-3 hari kerja",
-                "6️⃣ Ambil paspor dengan visa di travel agent"
-            ],
-            notes=notes
-        )
-
-# =============================================================================
-# 📋 DOCUMENT CHECKER DATA (NEW!)
-# =============================================================================
-
-@dataclass
-class DocCheck:
-    name: str
-    status: str  # "ok", "warning", "error"
-    message: str
-    action: Optional[str] = None
-
-@dataclass
-class ReadinessReport:
-    overall_status: str
-    score: int
-    checks: List[DocCheck]
-    days_until_departure: int
-    critical_actions: List[str]
-
-def check_documents(
-    departure_date: date,
-    passport_expiry: date,
-    passport_blank_pages: int,
-    has_meningitis: bool,
-    meningitis_date: Optional[date],
-    has_insurance: bool,
-    insurance_coverage: int,
-    has_ticket: bool,
-    has_hotel: bool
-) -> ReadinessReport:
-    """Check document readiness for Umrah."""
-    
-    checks = []
-    critical = []
-    today = date.today()
-    days_until = (departure_date - today).days
-    
-    # Passport validity
-    min_valid = departure_date + timedelta(days=180)
-    if passport_expiry >= min_valid:
-        checks.append(DocCheck("Paspor", "ok", f"Valid hingga {passport_expiry.strftime('%d/%m/%Y')} ✅"))
-    elif passport_expiry >= departure_date:
-        checks.append(DocCheck("Paspor", "warning", "Kurang dari 6 bulan validity!", "Perpanjang paspor segera"))
-        critical.append("⚠️ Perpanjang paspor (butuh 6 bulan validity)")
-    else:
-        checks.append(DocCheck("Paspor", "error", "PASPOR EXPIRED!", "Harus perpanjang sebelum apply visa"))
-        critical.append("🚨 URGENT: Paspor expired!")
-    
-    # Blank pages
-    if passport_blank_pages >= 2:
-        checks.append(DocCheck("Halaman Kosong", "ok", f"{passport_blank_pages} halaman ✅"))
-    else:
-        checks.append(DocCheck("Halaman Kosong", "error", f"Hanya {passport_blank_pages} (butuh min. 2)", "Tambah halaman paspor"))
-        critical.append("Tambah halaman paspor")
-    
-    # Meningitis vaccine
-    if has_meningitis and meningitis_date:
-        valid_until = meningitis_date + timedelta(days=3*365)
-        if valid_until >= departure_date:
-            checks.append(DocCheck("Vaksin Meningitis", "ok", f"Valid hingga {valid_until.strftime('%d/%m/%Y')} ✅"))
-        else:
-            checks.append(DocCheck("Vaksin Meningitis", "warning", "Mungkin perlu booster", "Konsultasi dokter"))
-    else:
-        checks.append(DocCheck("Vaksin Meningitis", "error", "WAJIB - Belum vaksin!", "Vaksin di KKP Bandara"))
-        critical.append("🚨 WAJIB: Vaksin Meningitis ACWY")
-    
-    # Insurance
-    if has_insurance:
-        if insurance_coverage >= 50000:
-            checks.append(DocCheck("Asuransi", "ok", f"Coverage USD {insurance_coverage:,} ✅"))
-        else:
-            checks.append(DocCheck("Asuransi", "warning", f"Coverage kurang (USD {insurance_coverage:,})", "Upgrade ke min USD 50,000"))
-    else:
-        checks.append(DocCheck("Asuransi", "error", "Belum punya asuransi!", "Beli asuransi perjalanan"))
-        critical.append("Beli asuransi perjalanan")
-    
-    # Ticket & Hotel
-    if has_ticket:
-        checks.append(DocCheck("Tiket PP", "ok", "Sudah ada ✅"))
-    else:
-        checks.append(DocCheck("Tiket PP", "warning", "Belum booking", "Booking tiket PP"))
-    
-    if has_hotel:
-        checks.append(DocCheck("Hotel", "ok", "Sudah booking ✅"))
-    else:
-        checks.append(DocCheck("Hotel", "warning", "Belum booking", "Booking hotel"))
-    
-    # Calculate score
-    scores = {"ok": 100, "warning": 50, "error": 0}
-    avg = sum(scores[c.status] for c in checks) // len(checks)
-    
-    if avg >= 80:
-        overall = "ready"
-    elif avg >= 50:
-        overall = "warning"
-    else:
-        overall = "not_ready"
-    
-    return ReadinessReport(
-        overall_status=overall,
-        score=avg,
-        checks=checks,
-        days_until_departure=days_until,
-        critical_actions=critical
-    )
-
-# =============================================================================
-# 📍 MIQAT DATA (NEW!)
-# =============================================================================
-
-MIQAT_DATA = {
-    "jeddah_direct": {
-        "name": "Yalamlam",
-        "name_ar": "يلملم",
-        "location": "Selatan Makkah",
-        "timing": "Di pesawat, ~1 jam sebelum landing Jeddah",
-        "tips": [
-            "✅ Pakai ihram sebelum boarding lebih aman",
-            "✅ Pilot biasanya mengumumkan saat mendekati miqat",
-            "✅ Siapkan pakaian ihram di tas kabin"
-        ]
-    },
-    "madinah_first": {
-        "name": "Dzulhulaifah (Bir Ali)",
-        "name_ar": "ذو الحليفة",
-        "location": "10 km dari Masjid Nabawi",
-        "timing": "Di Madinah, sebelum berangkat ke Makkah",
-        "tips": [
-            "✅ Miqat terjauh, paling mudah untuk pemula",
-            "✅ Bisa mandi & ihram santai di hotel",
-            "✅ Ada masjid di Bir Ali untuk sholat"
-        ]
-    },
-    "transit_gulf": {
-        "name": "Qarn al-Manazil",
-        "name_ar": "قرن المنازل",
-        "location": "Timur Makkah (arah Riyadh/Taif)",
-        "timing": "Sebelum memasuki wilayah miqat di pesawat",
-        "tips": [
-            "✅ Perhatikan pengumuman pilot",
-            "✅ Jika transit lama, bisa ihram di airport",
-            "✅ Konsultasi travel agent untuk kepastian"
-        ]
-    }
-}
-
-TALBIYAH = {
-    "arabic": "لَبَّيْكَ اللّٰهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيْكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيْكَ لَكَ",
-    "latin": "Labbaik Allahumma labbaik, labbaik laa syariika laka labbaik, innal hamda wan ni'mata laka wal mulk, laa syariika lak",
-    "arti": "Aku penuhi panggilan-Mu ya Allah, tiada sekutu bagi-Mu. Segala puji, nikmat dan kerajaan milik-Mu."
-}
-
-# =============================================================================
-# 🔍 PPIU DATA (NEW!)
-# =============================================================================
-
-# Sample verified PPIU (in production: from KEMENAG API)
-SAMPLE_PPIU = [
-    {"name": "PT. Arminareka Perdana", "id": "D/123/2020", "verified": True, "rating": 4.5, "city": "Jakarta"},
-    {"name": "PT. Azra Tours", "id": "D/456/2021", "verified": True, "rating": 4.2, "city": "Surabaya"},
-    {"name": "PT. Patuna Mekar Jaya", "id": "D/789/2019", "verified": True, "rating": 4.7, "city": "Jakarta"},
-    {"name": "PT. Cheria Holiday", "id": "D/321/2022", "verified": True, "rating": 4.3, "city": "Bandung"},
-    {"name": "PT. Al Hijaz Indowisata", "id": "D/654/2020", "verified": True, "rating": 4.6, "city": "Jakarta"},
-    {"name": "PT. Ebad Wisata", "id": "D/987/2021", "verified": True, "rating": 4.4, "city": "Semarang"},
-]
-
-# =============================================================================
-# 📿 VIRTUAL MANASIK DATA (EXISTING)
+# 📿 MANASIK & PILLAR DATA
 # =============================================================================
 
 MANASIK_STEPS = [
-    {
-        "step": 1, "title": "Niat & Persiapan", "icon": "🎯",
-        "location": "Rumah / Hotel",
-        "desc": "Niatkan umrah karena Allah. Persiapkan fisik, mental, dan spiritual.",
-        "tips": ["Perbanyak istighfar", "Lunasi hutang", "Minta maaf keluarga"],
-        "dua": "اَللّٰهُمَّ إِنِّيْ أُرِيْدُ الْعُمْرَةَ",
-        "dua_latin": "Allahumma innii uridul 'umrah",
-        "dua_arti": "Ya Allah, aku ingin melaksanakan umrah",
-    },
-    {
-        "step": 2, "title": "Miqat & Ihram", "icon": "🧕",
-        "location": "Bir Ali / Pesawat",
-        "desc": "Mandi, wudhu, pakai pakaian ihram, niat umrah.",
-        "tips": ["Pria: 2 kain putih tanpa jahitan", "Wanita: pakaian menutup aurat", "Pakai wangi sebelum ihram"],
-        "dua": "لَبَّيْكَ اللّٰهُمَّ عُمْرَةً",
-        "dua_latin": "Labbaik Allahumma 'umratan",
-        "dua_arti": "Aku penuhi panggilan-Mu untuk umrah",
-    },
-    {
-        "step": 3, "title": "Talbiyah", "icon": "🎵",
-        "location": "Sejak Miqat",
-        "desc": "Ucapkan talbiyah dengan suara keras (pria) hingga sampai Ka'bah.",
-        "tips": ["Perbanyak sepanjang perjalanan", "Wanita dengan suara pelan", "Berhenti saat mulai thawaf"],
-        "dua": "لَبَّيْكَ اللّٰهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيْكَ لَكَ لَبَّيْكَ",
-        "dua_latin": "Labbaik Allahumma labbaik, labbaik laa syariika laka labbaik",
-        "dua_arti": "Aku penuhi panggilan-Mu ya Allah",
-    },
-    {
-        "step": 4, "title": "Thawaf", "icon": "🕋",
-        "location": "Masjidil Haram",
-        "desc": "Kelilingi Ka'bah 7 putaran berlawanan jarum jam.",
-        "tips": ["Idhtiba (buka bahu kanan) untuk pria", "Raml 3 putaran pertama", "Mulai dari Hajar Aswad"],
-        "dua": "بِسْمِ اللهِ وَاللهُ أَكْبَرُ",
-        "dua_latin": "Bismillahi wallahu akbar",
-        "dua_arti": "Dengan nama Allah, Allah Maha Besar",
-    },
-    {
-        "step": 5, "title": "Sholat Maqam Ibrahim", "icon": "🙏",
-        "location": "Belakang Maqam Ibrahim",
-        "desc": "Sholat 2 rakaat sunnah thawaf.",
-        "tips": ["Jika ramai, boleh di mana saja", "Baca Al-Kafirun & Al-Ikhlas"],
-        "dua": "وَاتَّخِذُوا مِنْ مَقَامِ إِبْرَاهِيمَ مُصَلًّى",
-        "dua_latin": "Wattakhidzu min maqami ibrahim mushalla",
-        "dua_arti": "Jadikanlah Maqam Ibrahim tempat sholat",
-    },
-    {
-        "step": 6, "title": "Minum Zamzam", "icon": "💧",
-        "location": "Area Zamzam",
-        "desc": "Minum air zamzam sambil berdoa.",
-        "tips": ["Minum berdiri menghadap kiblat", "Berdoa sesuai hajat", "Minum sampai puas"],
-        "dua": "اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ عِلْمًا نَافِعًا",
-        "dua_latin": "Allahumma inni as'aluka 'ilman nafi'an",
-        "dua_arti": "Ya Allah, aku memohon ilmu yang bermanfaat",
-    },
-    {
-        "step": 7, "title": "Sa'i", "icon": "🏃",
-        "location": "Shafa - Marwah",
-        "desc": "Berjalan 7 kali antara Bukit Shafa dan Marwah.",
-        "tips": ["Mulai dari Shafa", "Pria lari kecil di lampu hijau", "Selesai di Marwah"],
-        "dua": "إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللهِ",
-        "dua_latin": "Innash shafa wal marwata min sya'airillah",
-        "dua_arti": "Shafa dan Marwah adalah syiar Allah",
-    },
-    {
-        "step": 8, "title": "Tahallul", "icon": "✂️",
-        "location": "Sekitar Masjidil Haram",
-        "desc": "Potong/cukur rambut untuk mengakhiri ihram.",
-        "tips": ["Pria: cukur habis (afdhal)", "Wanita: potong ~3cm", "Larangan ihram selesai"],
-        "dua": "اَلْحَمْدُ لِلّٰهِ الَّذِيْ قَضٰى عَنَّا نُسُكَنَا",
-        "dua_latin": "Alhamdulillahilladzi qadha 'anna nusukana",
-        "dua_arti": "Puji bagi Allah yang menyempurnakan ibadah kami",
-    },
+    {"step": 1, "title": "Niat & Persiapan", "icon": "🎯", 
+     "dua": "اَللّٰهُمَّ إِنِّيْ أُرِيْدُ الْعُمْرَةَ فَيَسِّرْهَا لِيْ",
+     "latin": "Allahumma innii uridul 'umrata fayassirhaa lii",
+     "arti": "Ya Allah, aku ingin umrah, maka mudahkanlah bagiku"},
+    {"step": 2, "title": "Miqat & Ihram", "icon": "🧕", 
+     "dua": "لَبَّيْكَ اللّٰهُمَّ عُمْرَةً",
+     "latin": "Labbaik Allahumma 'umratan",
+     "arti": "Aku memenuhi panggilan-Mu ya Allah untuk umrah"},
+    {"step": 3, "title": "Talbiyah", "icon": "🎵", 
+     "dua": "لَبَّيْكَ اللّٰهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيْكَ لَكَ لَبَّيْكَ",
+     "latin": "Labbaik Allahumma labbaik, labbaik laa syariika laka labbaik",
+     "arti": "Aku memenuhi panggilan-Mu ya Allah, tiada sekutu bagi-Mu"},
+    {"step": 4, "title": "Thawaf (7 Putaran)", "icon": "🕋", 
+     "dua": "بِسْمِ اللهِ وَاللهُ أَكْبَرُ",
+     "latin": "Bismillahi wallahu akbar",
+     "arti": "Dengan nama Allah, Allah Maha Besar"},
+    {"step": 5, "title": "Sholat di Maqam Ibrahim", "icon": "🙏", 
+     "dua": "وَاتَّخِذُوا مِنْ مَقَامِ إِبْرَاهِيمَ مُصَلًّى",
+     "latin": "Wattakhidzu min maqami ibrahim mushalla",
+     "arti": "Dan jadikanlah maqam Ibrahim sebagai tempat sholat"},
+    {"step": 6, "title": "Minum Air Zamzam", "icon": "💧", 
+     "dua": "اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ عِلْمًا نَافِعًا وَرِزْقًا وَاسِعًا وَشِفَاءً مِنْ كُلِّ دَاءٍ",
+     "latin": "Allahumma inni as'aluka 'ilman naafi'an wa rizqan waasi'an wa syifaa'an min kulli daa'",
+     "arti": "Ya Allah, aku memohon ilmu yang bermanfaat, rezeki yang luas, dan kesembuhan dari segala penyakit"},
+    {"step": 7, "title": "Sa'i (Safa-Marwa)", "icon": "🏃", 
+     "dua": "إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللهِ",
+     "latin": "Innash shafa wal marwata min sya'a'irillah",
+     "arti": "Sesungguhnya Safa dan Marwa adalah syiar Allah"},
+    {"step": 8, "title": "Tahallul (Cukur/Potong)", "icon": "✂️", 
+     "dua": "اَلْحَمْدُ لِلّٰهِ الَّذِيْ قَضٰى عَنَّا نُسُكَنَا",
+     "latin": "Alhamdulillahilladzi qadha 'anna nusukana",
+     "arti": "Segala puji bagi Allah yang telah menyempurnakan ibadah kami"},
 ]
-
-# =============================================================================
-# 🏛️ 3 PILAR DATA (EXISTING)
-# =============================================================================
 
 PILLAR_DATA = {
     "administrasi": {
-        "title": "Pilar 1: Administrasi", "subtitle": "Pre-Departure", "icon": "📋", "color": "#1a5f3c",
+        "title": "Administrasi", "icon": "📋", "color": "#3498db",
         "tasks": [
-            {"id": "passport", "name": "Paspor aktif >6 bulan", "xp": 50, "priority": "wajib", "icon": "🛂"},
-            {"id": "photo", "name": "Foto 4x6 background putih", "xp": 10, "priority": "wajib", "icon": "📷"},
-            {"id": "ticket", "name": "Tiket pesawat PP", "xp": 50, "priority": "wajib", "icon": "✈️"},
-            {"id": "vaccine", "name": "Vaksin meningitis", "xp": 30, "priority": "wajib", "icon": "💉"},
-            {"id": "insurance", "name": "Asuransi perjalanan", "xp": 20, "priority": "recommended", "icon": "🛡️"},
+            {"id": "passport", "name": "Paspor aktif >6 bulan", "xp": 50},
+            {"id": "foto", "name": "Pas foto 4x6 (latar putih)", "xp": 20},
+            {"id": "kk", "name": "Kartu Keluarga", "xp": 20},
+            {"id": "ktp", "name": "KTP", "xp": 20},
+            {"id": "vaccine", "name": "Vaksin Meningitis", "xp": 40},
+            {"id": "ticket", "name": "Tiket Pesawat PP", "xp": 50},
         ]
     },
     "logistik": {
-        "title": "Pilar 2: Logistik", "subtitle": "Booking & Visa", "icon": "🏨", "color": "#2d8659",
+        "title": "Logistik", "icon": "🏨", "color": "#2ecc71",
         "tasks": [
-            {"id": "visa", "name": "Visa umrah via Nusuk", "xp": 60, "priority": "wajib", "icon": "📄"},
-            {"id": "hotel_makkah", "name": "Hotel Makkah booked", "xp": 50, "priority": "wajib", "icon": "🕋"},
-            {"id": "hotel_madinah", "name": "Hotel Madinah booked", "xp": 50, "priority": "wajib", "icon": "🕌"},
-            {"id": "raudhah", "name": "Slot Raudhah (wanita)", "xp": 40, "priority": "wajib", "icon": "💚"},
-            {"id": "nusuk", "name": "Download & daftar Nusuk", "xp": 30, "priority": "wajib", "icon": "📱"},
+            {"id": "visa", "name": "Visa Umrah/Tourist", "xp": 60},
+            {"id": "hotel_makkah", "name": "Hotel Makkah", "xp": 50},
+            {"id": "hotel_madinah", "name": "Hotel Madinah", "xp": 50},
+            {"id": "nusuk", "name": "Daftar akun NUSUK", "xp": 30},
+            {"id": "simcard", "name": "SIM Card Saudi", "xp": 20},
         ]
     },
     "eksekusi": {
-        "title": "Pilar 3: Eksekusi", "subtitle": "On-Site Survival", "icon": "🚀", "color": "#3ba876",
+        "title": "Eksekusi", "icon": "🚀", "color": "#e74c3c",
         "tasks": [
-            {"id": "careem", "name": "Download Careem", "xp": 30, "priority": "wajib", "icon": "🚗"},
-            {"id": "maps", "name": "Google Maps offline", "xp": 30, "priority": "wajib", "icon": "🗺️"},
-            {"id": "riyal", "name": "Tukar Riyal tunai", "xp": 30, "priority": "wajib", "icon": "💵"},
-            {"id": "powerbank", "name": "Powerbank charged", "xp": 10, "priority": "recommended", "icon": "🔋"},
-            {"id": "medicine", "name": "Obat-obatan pribadi", "xp": 20, "priority": "wajib", "icon": "💊"},
+            {"id": "apps", "name": "Download apps (Careem, Maps)", "xp": 30},
+            {"id": "offline_maps", "name": "Google Maps offline Makkah/Madinah", "xp": 30},
+            {"id": "riyal", "name": "Tukar uang ke SAR", "xp": 30},
+            {"id": "packing", "name": "Packing list lengkap", "xp": 30},
+            {"id": "emergency", "name": "Simpan nomor darurat", "xp": 20},
         ]
     }
 }
 
-# =============================================================================
-# 💰 BUDGET DATA (EXISTING)
-# =============================================================================
-
-COST_COMPONENTS = {
-    "flight": {
-        "label": "✈️ Tiket Pesawat",
-        "options": [
-            {"name": "LCC Promo", "price": 5500000, "tips": "Book 2-3 bulan sebelumnya"},
-            {"name": "LCC Regular", "price": 7000000, "tips": "Bagasi 20kg, no meal"},
-            {"name": "Full Service", "price": 10000000, "tips": "Bagasi 30kg, meal included"},
-            {"name": "Premium", "price": 15000000, "tips": "Turkish, Emirates, Saudi"},
+MIQAT_DATA = {
+    "jeddah_direct": {
+        "name": "Yalamlam (As-Sa'diyyah)", 
+        "timing": "Di pesawat, ~1 jam sebelum landing Jeddah", 
+        "tips": [
+            "✈️ Pakai ihram sebelum boarding LEBIH AMAN",
+            "📢 Pilot biasanya announce saat melewati miqat",
+            "🧕 Wanita: pakaian biasa, niat saja"
         ]
     },
-    "hotel_makkah": {
-        "label": "🕋 Hotel Makkah",
-        "per_night": True,
-        "options": [
-            {"name": "Budget (1km)", "price": 400000, "tips": "Jalan 15+ menit"},
-            {"name": "Standard (500m)", "price": 700000, "tips": "Jalan 7-10 menit"},
-            {"name": "Premium (200m)", "price": 1500000, "tips": "Dekat pintu"},
-            {"name": "Luxury (50m)", "price": 3500000, "tips": "Clock Tower area"},
-        ]
-    },
-    "hotel_madinah": {
-        "label": "🕌 Hotel Madinah",
-        "per_night": True,
-        "options": [
-            {"name": "Budget", "price": 350000, "tips": "Per malam"},
-            {"name": "Standard", "price": 550000, "tips": "Per malam"},
-            {"name": "Premium", "price": 1200000, "tips": "Dekat pintu"},
-        ]
-    },
-    "transport": {
-        "label": "🚗 Transport",
-        "options": [
-            {"name": "Budget (Bus+Train)", "price": 400000, "tips": "Total trip"},
-            {"name": "Standard (Careem)", "price": 800000, "tips": "Total trip"},
-            {"name": "Premium (Private)", "price": 2000000, "tips": "AC, guide"},
-        ]
-    },
-    "meals": {
-        "label": "🍽️ Makan",
-        "per_day": True,
-        "options": [
-            {"name": "Hemat", "price": 100000, "tips": "Street food"},
-            {"name": "Standard", "price": 200000, "tips": "Restaurant"},
-            {"name": "Nyaman", "price": 350000, "tips": "Variety"},
+    "madinah_first": {
+        "name": "Dzulhulaifah (Bir Ali)", 
+        "timing": "Di Madinah, sebelum berangkat ke Makkah", 
+        "tips": [
+            "🕌 Ada masjid miqat dengan fasilitas lengkap",
+            "🚿 Kamar mandi & tempat ganti tersedia",
+            "⏰ Miqat terjauh dari Makkah, paling mudah untuk pemula"
         ]
     },
 }
 
-# =============================================================================
-# 🌡️ WEATHER & OTHER DATA (EXISTING)
-# =============================================================================
-
-WEATHER_DATA = {
-    "makkah": {"temp": 38, "condition": "Cerah", "icon": "☀️", "humidity": 25},
-    "madinah": {"temp": 35, "condition": "Cerah", "icon": "☀️", "humidity": 30},
-}
-
-CROWD_PREDICTION = [
-    {"time": "00:00-03:00", "level": 2, "label": "Sepi", "color": "#28a745"},
-    {"time": "03:00-06:00", "level": 3, "label": "Sedang", "color": "#ffc107"},
-    {"time": "06:00-09:00", "level": 4, "label": "Ramai", "color": "#fd7e14"},
-    {"time": "12:00-15:00", "level": 5, "label": "Sangat Ramai", "color": "#dc3545"},
-    {"time": "18:00-21:00", "level": 5, "label": "Sangat Ramai", "color": "#dc3545"},
-    {"time": "21:00-00:00", "level": 3, "label": "Sedang", "color": "#ffc107"},
-]
-
-EMERGENCY_CONTACTS = {
-    "saudi": [
-        {"name": "Police", "phone": "999", "icon": "👮"},
-        {"name": "Ambulance", "phone": "997", "icon": "🚑"},
-        {"name": "Fire", "phone": "998", "icon": "🚒"},
-    ],
-    "indonesia": [
-        {"name": "KBRI Riyadh", "phone": "+966-11-488-2800", "icon": "🇮🇩"},
-        {"name": "KJRI Jeddah", "phone": "+966-12-667-0826", "icon": "🇮🇩"},
-    ],
-}
-
-# DOA COLLECTION (20+ doa - keeping existing)
-DOA_COLLECTION = [
-    {"name": "Talbiyah", "arabic": "لَبَّيْكَ اللّٰهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيْكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيْكَ لَكَ", "latin": "Labbaik Allahumma labbaik...", "meaning": "Aku penuhi panggilan-Mu ya Allah...", "when": "Sejak miqat hingga thawaf", "category": "wajib"},
-    {"name": "Niat Umrah", "arabic": "اَللّٰهُمَّ إِنِّيْ أُرِيْدُ الْعُمْرَةَ فَيَسِّرْهَا لِيْ وَتَقَبَّلْهَا مِنِّيْ", "latin": "Allahumma innii uridul 'umrah...", "meaning": "Ya Allah, aku ingin umrah...", "when": "Saat niat ihram di miqat", "category": "wajib"},
-    {"name": "Doa Mulai Thawaf", "arabic": "بِسْمِ اللهِ وَاللهُ أَكْبَرُ", "latin": "Bismillahi wallahu akbar", "meaning": "Dengan nama Allah, Allah Maha Besar", "when": "Saat melewati Hajar Aswad", "category": "thawaf"},
-    {"name": "Doa Rukun Yamani", "arabic": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ", "latin": "Rabbana aatina fid dunya hasanah...", "meaning": "Ya Tuhan, berilah kami kebaikan...", "when": "Antara Rukun Yamani dan Hajar Aswad", "category": "thawaf"},
-    {"name": "Doa Naik Shafa", "arabic": "إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللهِ", "latin": "Innash shafa wal marwata...", "meaning": "Shafa dan Marwah adalah syiar Allah", "when": "Saat naik ke Bukit Shafa", "category": "sai"},
-    {"name": "Doa Minum Zamzam", "arabic": "اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ عِلْمًا نَافِعًا", "latin": "Allahumma inni as'aluka 'ilman nafi'an...", "meaning": "Ya Allah, aku mohon ilmu bermanfaat...", "when": "Saat minum air zamzam", "category": "zamzam"},
-    {"name": "Salam Rasulullah", "arabic": "اَلسَّلَامُ عَلَيْكَ يَا رَسُوْلَ اللهِ", "latin": "Assalamu 'alaika ya Rasulallah", "meaning": "Salam sejahtera atasmu wahai Rasulullah", "when": "Di depan makam Rasulullah", "category": "madinah"},
-    {"name": "Doa Raudhah", "arabic": "اَللّٰهُمَّ اجْعَلْ فِيْ قَلْبِيْ نُوْرًا", "latin": "Allahummaj'al fii qalbii nuran...", "meaning": "Ya Allah, jadikanlah cahaya di hatiku...", "when": "Saat sholat di Raudhah", "category": "madinah"},
-    {"name": "Doa Perjalanan", "arabic": "سُبْحَانَ الَّذِيْ سَخَّرَ لَنَا هٰذَا", "latin": "Subhanalladzi sakhkhara lana hadza...", "meaning": "Maha Suci yang menundukkan ini untuk kami...", "when": "Saat naik kendaraan", "category": "umum"},
-    {"name": "Istighfar", "arabic": "أَسْتَغْفِرُ اللهَ الْعَظِيْمَ", "latin": "Astaghfirullahal 'azhim...", "meaning": "Aku mohon ampun kepada Allah...", "when": "Setiap saat", "category": "umum"},
+E_TOURIST_ELIGIBLE = [
+    "United States", "United Kingdom", "Canada", "Australia", 
+    "Germany", "France", "Japan", "South Korea", "Singapore", 
+    "Malaysia", "Brunei", "New Zealand", "Switzerland", "Netherlands"
 ]
 
 # =============================================================================
-# 🔧 SESSION STATE
+# 🔧 SESSION STATE FUNCTIONS
 # =============================================================================
 
-def init_super_state():
-    """Initialize all session state."""
+def init_umrah_mandiri_state():
+    """Initialize session state for Umrah Mandiri."""
     defaults = {
         "um_xp": 0,
         "um_level": 1,
         "um_achievements": ["first_step"],
-        "um_daily_completed": [],
-        "um_streak": 0,
         "um_tasks": {"administrasi": [], "logistik": [], "eksekusi": []},
         "um_departure_date": None,
         "um_duration": 9,
         "um_manasik_step": 0,
         "um_manasik_completed": [],
         "um_savings": {"target": 25000000, "current": 0},
-        # NEW states
-        "um_visa_checked": False,
-        "um_docs_checked": False,
-        "um_miqat_checked": False,
-        "um_ppiu_checked": False,
     }
-    for key, val in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = val
-
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
 
 def add_xp(amount: int, reason: str = ""):
-    """Add XP and check level up."""
-    st.session_state.um_xp += amount
-    for level_data in reversed(LEVELS):
-        if st.session_state.um_xp >= level_data["min_xp"]:
-            if st.session_state.um_level < level_data["level"]:
-                st.session_state.um_level = level_data["level"]
+    """Add XP and check for level up."""
+    st.session_state.um_xp = st.session_state.get("um_xp", 0) + amount
+    
+    # Check level up
+    for lv in reversed(LEVELS):
+        if st.session_state.um_xp >= lv["min_xp"]:
+            if st.session_state.um_level < lv["level"]:
+                st.session_state.um_level = lv["level"]
                 st.balloons()
-                st.toast(f"🎉 Level Up! {level_data['name']}")
+                st.toast(f"🎉 Level Up! {lv['icon']} {lv['name']}")
             break
+    
     if reason:
         st.toast(f"+{amount} XP: {reason}")
 
-
 def unlock_achievement(aid: str):
-    """Unlock achievement."""
+    """Unlock an achievement."""
     if aid not in st.session_state.um_achievements:
         ach = next((a for a in ACHIEVEMENTS if a["id"] == aid), None)
         if ach:
             st.session_state.um_achievements.append(aid)
             add_xp(ach["xp"], f"🏆 {ach['name']}")
 
-
-def get_current_level():
+def get_current_level() -> dict:
+    """Get current level info."""
     for lv in reversed(LEVELS):
         if st.session_state.um_xp >= lv["min_xp"]:
             return lv
     return LEVELS[0]
 
-
-def get_next_level():
-    curr = get_current_level()
-    for lv in LEVELS:
-        if lv["level"] > curr["level"]:
-            return lv
-    return None
-
-
 # =============================================================================
-# 🎨 RENDER FUNCTIONS - HEADER & GAMIFICATION
+# 🎨 RENDER COMPONENTS
 # =============================================================================
 
 def render_hero():
-    """Render hero header."""
-    st.markdown(SUPER_CSS, unsafe_allow_html=True)
-    st.markdown("""
-    <div class="hero-gradient">
-        <div class="arabic">🕋 لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
-        <h1>UMRAH MANDIRI v7.0</h1>
-        <p style="font-size: 1.2rem; opacity: 0.9; color: #ccc;">Panduan Terlengkap + Visa Checker + Document Validator</p>
+    """Render hero section."""
+    st.markdown(UMRAH_CSS, unsafe_allow_html=True)
+    
+    level = get_current_level()
+    st.markdown(f"""
+    <div class="hero-mandiri">
+        <div class="arabic">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</div>
+        <h1>🧭 Umrah Mandiri</h1>
+        <p style="color:#888;">Panduan Lengkap DIY Umrah + Official Resources</p>
+        <p style="color:#d4af37;margin-top:0.5rem;">{level['icon']} Level {level['level']}: {level['name']}</p>
     </div>
     """, unsafe_allow_html=True)
 
-
-def render_gamification_bar():
-    """Render XP bar."""
-    curr = get_current_level()
-    nxt = get_next_level()
-    
-    col1, col2, col3, col4 = st.columns([1, 2, 1, 1])
-    
-    with col1:
-        st.markdown(f"<div style='text-align:center;'><span style='font-size:2.5rem;'>{curr['icon']}</span><br><b style='color:#d4af37;'>Lv {curr['level']}</b><br><small style='color:#888;'>{curr['name']}</small></div>", unsafe_allow_html=True)
-    
-    with col2:
-        if nxt:
-            prog = (st.session_state.um_xp - curr["min_xp"]) / (nxt["min_xp"] - curr["min_xp"])
-            st.markdown(f"""
-            <div class="xp-bar-container">
-                <div class="xp-bar-fill" style="width: {min(prog, 1) * 100}%;"></div>
-                <div class="xp-bar-text">{st.session_state.um_xp} / {nxt['min_xp']} XP</div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="xp-bar-container">
-                <div class="xp-bar-fill" style="width:100%;"></div>
-                <div class="xp-bar-text">🏆 MAX - {st.session_state.um_xp} XP</div>
-            </div>
-            """, unsafe_allow_html=True)
-    
-    with col3:
-        st.metric("🏆 Badges", f"{len(st.session_state.um_achievements)}/{len(ACHIEVEMENTS)}")
-    
-    with col4:
-        st.metric("🔥 Streak", f"{st.session_state.um_streak}d")
-
-
-def render_quick_stats():
-    """Render quick stats."""
-    total_tasks = sum(len(p["tasks"]) for p in PILLAR_DATA.values())
-    done_tasks = sum(len(st.session_state.um_tasks[p]) for p in PILLAR_DATA)
-    task_pct = done_tasks / total_tasks * 100 if total_tasks > 0 else 0
-    manasik_pct = len(st.session_state.um_manasik_completed) / len(MANASIK_STEPS) * 100
-    savings_pct = st.session_state.um_savings["current"] / st.session_state.um_savings["target"] * 100
-    
+def render_stats_cards():
+    """Render quick stats cards."""
     cols = st.columns(4)
     
+    # Persiapan progress
+    total_tasks = sum(len(p["tasks"]) for p in PILLAR_DATA.values())
+    done_tasks = sum(len(st.session_state.um_tasks.get(k, [])) for k in PILLAR_DATA.keys())
+    
     with cols[0]:
-        with st.container(border=True):
-            st.markdown("### 📋 Persiapan")
-            st.progress(task_pct / 100)
-            st.caption(f"{done_tasks}/{total_tasks} ({task_pct:.0f}%)")
+        pct = int(done_tasks / total_tasks * 100) if total_tasks > 0 else 0
+        st.markdown(f"""
+        <div class="stat-card {'active' if pct > 0 else ''}">
+            <div style="font-size:1.5rem;">📋</div>
+            <h3>Persiapan</h3>
+            <div style="background:#333;border-radius:10px;height:8px;margin:0.5rem 0;">
+                <div style="background:#d4af37;width:{pct}%;height:100%;border-radius:10px;"></div>
+            </div>
+            <small>{done_tasks}/{total_tasks} ({pct}%)</small>
+        </div>
+        """, unsafe_allow_html=True)
     
     with cols[1]:
-        with st.container(border=True):
-            st.markdown("### 📿 Manasik")
-            st.progress(manasik_pct / 100)
-            st.caption(f"{len(st.session_state.um_manasik_completed)}/8 langkah")
+        manasik_done = len(st.session_state.um_manasik_completed)
+        st.markdown(f"""
+        <div class="stat-card {'active' if manasik_done > 0 else ''}">
+            <div style="font-size:1.5rem;">🕌</div>
+            <h3>Manasik</h3>
+            <div style="background:#333;border-radius:10px;height:8px;margin:0.5rem 0;">
+                <div style="background:#d4af37;width:{manasik_done/8*100}%;height:100%;border-radius:10px;"></div>
+            </div>
+            <small>{manasik_done}/8 langkah</small>
+        </div>
+        """, unsafe_allow_html=True)
     
     with cols[2]:
-        with st.container(border=True):
-            st.markdown("### 💰 Tabungan")
-            st.progress(min(savings_pct / 100, 1.0))
-            st.caption(f"Rp {st.session_state.um_savings['current']:,.0f}".replace(",", "."))
+        savings = st.session_state.um_savings
+        pct_save = int(savings["current"] / savings["target"] * 100) if savings["target"] > 0 else 0
+        st.markdown(f"""
+        <div class="stat-card {'active' if savings['current'] > 0 else ''}">
+            <div style="font-size:1.5rem;">💰</div>
+            <h3>Tabungan</h3>
+            <div style="background:#333;border-radius:10px;height:8px;margin:0.5rem 0;">
+                <div style="background:#d4af37;width:{min(pct_save,100)}%;height:100%;border-radius:10px;"></div>
+            </div>
+            <small>Rp {savings['current']:,}</small>
+        </div>
+        """, unsafe_allow_html=True)
     
     with cols[3]:
-        with st.container(border=True):
-            st.markdown("### ⏰ Countdown")
-            if st.session_state.um_departure_date:
-                days = (st.session_state.um_departure_date - date.today()).days
-                st.markdown(f"<h2 style='color:#d4af37;text-align:center;'>{max(days, 0)}</h2>", unsafe_allow_html=True)
-                st.caption("hari lagi")
-            else:
-                st.caption("Set tanggal →")
-
-
-# =============================================================================
-# 🛂 NEW: VISA ELIGIBILITY CHECKER
-# =============================================================================
-
-def render_visa_checker():
-    """Render Visa Eligibility Checker."""
-    st.markdown("## 🛂 Cek Kelayakan Visa Umrah")
-    st.info("💡 Ketahui jenis visa yang cocok untuk Anda dalam 1 menit!")
-    
-    with st.form("visa_form"):
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            nationality = st.selectbox(
-                "🌍 Kewarganegaraan",
-                ["Indonesia", "Malaysia", "Singapore"] + E_TOURIST_ELIGIBLE_DIRECT[:10],
-                index=0
-            )
-        
-        with col2:
-            st.write("**Visa yang dimiliki (masih valid):**")
-        
-        col3, col4, col5 = st.columns(3)
-        with col3:
-            has_us = st.checkbox("🇺🇸 Visa USA")
-        with col4:
-            has_uk = st.checkbox("🇬🇧 Visa UK")
-        with col5:
-            has_schengen = st.checkbox("🇪🇺 Visa Schengen")
-        
-        has_relative = st.checkbox("👨‍👩‍👧 Punya kerabat (ortu/pasangan/anak) di Saudi Arabia?")
-        
-        submitted = st.form_submit_button("🔍 Cek Kelayakan Visa", use_container_width=True, type="primary")
-    
-    if submitted:
-        result = check_visa_eligibility(
-            nationality=nationality,
-            has_us_visa=has_us,
-            has_uk_visa=has_uk,
-            has_schengen_visa=has_schengen,
-            has_saudi_relative=has_relative
-        )
-        
-        # Award XP
-        if not st.session_state.um_visa_checked:
-            st.session_state.um_visa_checked = True
-            add_xp(50, "Cek visa eligibility")
-            unlock_achievement("visa_checked")
-        
-        st.markdown(f"""
-        <div class="visa-result-card">
-            <h2>✅ Rekomendasi: {result.recommended.value}</h2>
-            <p>⏱️ Waktu Proses: <b>{result.process_time}</b></p>
-            <p>💰 Estimasi Biaya: <b>Rp {result.estimated_cost_idr:,}</b></p>
-        </div>
-        """.replace(",", "."), unsafe_allow_html=True)
-        
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            st.markdown("### 📋 Langkah-langkah:")
-            for step in result.steps:
-                st.write(step)
-        
-        with col2:
-            st.link_button("🔗 Apply Sekarang", result.apply_url, use_container_width=True)
-        
-        if result.notes:
-            st.warning("### ⚠️ Catatan Penting:")
-            for note in result.notes:
-                st.write(f"• {note}")
-
-
-# =============================================================================
-# 📋 NEW: DOCUMENT READINESS CHECKER
-# =============================================================================
-
-def render_document_checker():
-    """Render Document Readiness Checker."""
-    st.markdown("## 📋 Cek Kesiapan Dokumen")
-    st.info("💡 Pastikan semua dokumen lengkap sebelum berangkat!")
-    
-    with st.form("doc_form"):
-        st.subheader("📅 Tanggal Keberangkatan")
-        departure = st.date_input(
-            "Rencana berangkat",
-            value=st.session_state.um_departure_date or date.today() + timedelta(days=60),
-            min_value=date.today()
-        )
-        
-        st.subheader("🛂 Paspor")
-        col1, col2 = st.columns(2)
-        with col1:
-            passport_exp = st.date_input("Tanggal expired paspor", value=date.today() + timedelta(days=365*3))
-        with col2:
-            blank_pages = st.number_input("Halaman kosong", min_value=0, max_value=20, value=4)
-        
-        st.subheader("💉 Vaksinasi")
-        col3, col4 = st.columns(2)
-        with col3:
-            has_vaccine = st.checkbox("Sudah vaksin Meningitis ACWY?")
-        with col4:
-            vaccine_date = st.date_input("Tanggal vaksinasi", value=date.today() - timedelta(days=365)) if has_vaccine else None
-        
-        st.subheader("🛡️ Asuransi & Booking")
-        col5, col6, col7 = st.columns(3)
-        with col5:
-            has_insurance = st.checkbox("Punya asuransi?")
-            coverage = st.number_input("Coverage (USD)", value=50000) if has_insurance else 0
-        with col6:
-            has_ticket = st.checkbox("Sudah ada tiket PP?")
-        with col7:
-            has_hotel = st.checkbox("Sudah booking hotel?")
-        
-        submitted = st.form_submit_button("🔍 Cek Kesiapan", use_container_width=True, type="primary")
-    
-    if submitted:
-        st.session_state.um_departure_date = departure
-        
-        result = check_documents(
-            departure_date=departure,
-            passport_expiry=passport_exp,
-            passport_blank_pages=blank_pages,
-            has_meningitis=has_vaccine,
-            meningitis_date=vaccine_date,
-            has_insurance=has_insurance,
-            insurance_coverage=coverage,
-            has_ticket=has_ticket,
-            has_hotel=has_hotel
-        )
-        
-        # Award XP
-        if not st.session_state.um_docs_checked:
-            st.session_state.um_docs_checked = True
-            add_xp(50, "Cek kesiapan dokumen")
-        
-        if result.score >= 80:
-            unlock_achievement("docs_ready")
-        
-        # Status display
-        status_config = {
-            "ready": ("✅ SIAP BERANGKAT!", "success"),
-            "warning": ("⚠️ HAMPIR SIAP", "warning"),
-            "not_ready": ("❌ BELUM SIAP", "error")
-        }
-        text, type_ = status_config[result.overall_status]
-        getattr(st, type_)(f"## {text}")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("📊 Skor Kesiapan", f"{result.score}%")
-        with col2:
-            st.metric("📅 Hari hingga Berangkat", f"{result.days_until_departure} hari")
-        
-        if result.critical_actions:
-            st.error("### 🚨 ACTION DIPERLUKAN:")
-            for action in result.critical_actions:
-                st.write(f"• {action}")
-        
-        st.markdown("### 📝 Detail Checklist:")
-        for check in result.checks:
-            icon = {"ok": "✅", "warning": "⚠️", "error": "❌"}[check.status]
-            with st.expander(f"{icon} {check.name}"):
-                st.write(check.message)
-                if check.action:
-                    st.info(f"**Action:** {check.action}")
-
-
-# =============================================================================
-# 📍 NEW: MIQAT LOCATOR
-# =============================================================================
-
-def render_miqat_locator():
-    """Render Miqat & Ihram Locator."""
-    st.markdown("## 📍 Panduan Miqat & Ihram")
-    
-    st.error("⚠️ **PENTING:** Melewati miqat tanpa ihram = umrah tidak sah!")
-    
-    route = st.selectbox(
-        "🛫 Pilih rute perjalanan Anda:",
-        [
-            "Jakarta → Jeddah (Direct)",
-            "Jakarta → Madinah (Direct)",
-            "Jakarta → Madinah → Makkah",
-            "Via Dubai/Doha/Riyadh (Transit)"
-        ]
-    )
-    
-    if st.button("🔍 Lihat Panduan Miqat", use_container_width=True, type="primary"):
-        # Award XP
-        if not st.session_state.um_miqat_checked:
-            st.session_state.um_miqat_checked = True
-            add_xp(30, "Pelajari miqat")
-            unlock_achievement("miqat_master")
-        
-        # Determine miqat
-        if "Madinah" in route and "Makkah" in route:
-            miqat = MIQAT_DATA["madinah_first"]
-        elif "Jeddah" in route:
-            miqat = MIQAT_DATA["jeddah_direct"]
-        else:
-            miqat = MIQAT_DATA["transit_gulf"]
-        
-        st.markdown(f"""
-        <div class="miqat-card">
-            <h2 style="color:#d4af37;">📍 Miqat Anda: {miqat['name']} ({miqat['name_ar']})</h2>
-            <p><b>📌 Lokasi:</b> {miqat['location']}</p>
-            <p><b>⏰ Waktu Ihram:</b> {miqat['timing']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("### 💡 Tips:")
-        for tip in miqat['tips']:
-            st.write(tip)
-        
-        st.divider()
-        
-        st.markdown("### 🤲 Niat Umrah:")
-        st.markdown(f"""
-        <div class="doa-arabic">لَبَّيْكَ اللّٰهُمَّ عُمْرَةً</div>
-        """, unsafe_allow_html=True)
-        st.caption("**Labbaik Allahumma 'umratan** - Aku penuhi panggilan-Mu untuk umrah")
-        
-        st.markdown("### 🎵 Talbiyah:")
-        st.markdown(f"""
-        <div class="doa-arabic">{TALBIYAH['arabic']}</div>
-        """, unsafe_allow_html=True)
-        st.caption(f"**{TALBIYAH['latin']}**")
-        st.caption(f"*{TALBIYAH['arti']}*")
-        
-        # Ihram checklist
-        st.markdown("### ✅ Checklist Persiapan Ihram:")
-        checklist = [
-            "Mandi sunnah ihram",
-            "Potong kuku & bulu",
-            "Pakai pakaian ihram (pria: 2 kain putih)",
-            "Wanita: pakaian menutup aurat",
-            "Pakai wangi sebelum ihram",
-            "Niat umrah",
-            "Baca talbiyah"
-        ]
-        for item in checklist:
-            st.checkbox(item, key=f"ihram_{item[:10]}")
-
-
-# =============================================================================
-# 🔍 NEW: PPIU VERIFICATION
-# =============================================================================
-
-def render_ppiu_checker():
-    """Render PPIU Verification Tool."""
-    st.markdown("## 🔍 Verifikasi Travel Agent (PPIU)")
-    
-    st.error("""
-    ⚠️ **WASPADA PENIPUAN!**
-    
-    Banyak travel agent ILEGAL yang menipu jamaah!
-    Selalu verifikasi di **simpu.kemenag.go.id** sebelum bayar!
-    """)
-    
-    search = st.text_input("🔎 Cari nama travel agent:", placeholder="Contoh: Patuna, Arminareka...")
-    
-    if search:
-        # Award XP once
-        if not st.session_state.um_ppiu_checked:
-            st.session_state.um_ppiu_checked = True
-            add_xp(40, "Verifikasi PPIU")
-            unlock_achievement("safe_travel")
-        
-        results = [p for p in SAMPLE_PPIU if search.lower() in p["name"].lower()]
-        
-        if results:
-            for ppiu in results:
-                if ppiu["verified"]:
-                    st.markdown(f"""
-                    <div class="ppiu-verified">
-                        <h3>✅ {ppiu['name']}</h3>
-                        <p><b>Status:</b> TERDAFTAR RESMI KEMENAG</p>
-                        <p><b>No. Izin:</b> {ppiu['id']}</p>
-                        <p><b>Kota:</b> {ppiu['city']}</p>
-                        <p><b>Rating:</b> {'⭐' * int(ppiu['rating'])} ({ppiu['rating']}/5)</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div class="ppiu-unverified">
-                        <h3>❌ {ppiu['name']}</h3>
-                        <p><b>Status:</b> TIDAK TERDAFTAR - HATI-HATI!</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-        else:
-            st.error(f"❌ Tidak ditemukan: '{search}'")
-            st.warning("""
-            **Kemungkinan:**
-            1. Travel agent tidak terdaftar (ILEGAL!)
-            2. Nama berbeda dengan yang terdaftar
-            
-            **Langkah selanjutnya:**
-            - Minta nomor izin KEMENAG dari travel agent
-            - Verifikasi manual di simpu.kemenag.go.id
-            - **Jika tidak bisa diverifikasi, JANGAN BAYAR!**
-            """)
-    
-    st.divider()
-    st.info("""
-    **🔗 Link Verifikasi Resmi:**
-    - SISKOPATUH KEMENAG: [simpu.kemenag.go.id](https://simpu.kemenag.go.id/)
-    - Hotline KEMENAG: **1500-363**
-    """)
-
-
-# =============================================================================
-# 🎨 EXISTING RENDER FUNCTIONS (Shortened for space)
-# =============================================================================
-
-def render_countdown():
-    """Render countdown widget."""
-    st.markdown("## ⏰ Countdown to Baitullah")
-    
-    col1, col2 = st.columns([2, 3])
-    with col1:
-        dep = st.date_input("Tanggal Keberangkatan", value=st.session_state.um_departure_date or date.today() + timedelta(days=90))
-        st.session_state.um_departure_date = dep
-        dur = st.slider("Durasi (hari)", 7, 21, st.session_state.um_duration)
-        st.session_state.um_duration = dur
-    
-    with col2:
         if st.session_state.um_departure_date:
             days = (st.session_state.um_departure_date - date.today()).days
-            if days > 0:
-                months, rem = divmod(days, 30)
-                weeks, d = divmod(rem, 7)
-                st.markdown(f"""
-                <div style="text-align:center;">
-                    <span class="countdown-digit">{months}</span>
-                    <span class="countdown-digit">{weeks}</span>
-                    <span class="countdown-digit">{d}</span>
+            days_text = f"{days} hari" if days > 0 else "Sudah lewat!"
+        else:
+            days_text = "Set tanggal"
+        st.markdown(f"""
+        <div class="stat-card">
+            <div style="font-size:1.5rem;">⏰</div>
+            <h3>Countdown</h3>
+            <small style="color:#d4af37;font-size:1rem;">{days_text}</small>
+        </div>
+        """, unsafe_allow_html=True)
+
+def render_xp_bar():
+    """Render XP progress bar."""
+    curr = get_current_level()
+    nxt = next((lv for lv in LEVELS if lv["level"] > curr["level"]), None)
+    
+    if nxt:
+        prog = (st.session_state.um_xp - curr["min_xp"]) / (nxt["min_xp"] - curr["min_xp"])
+        xp_text = f"{st.session_state.um_xp} / {nxt['min_xp']} XP"
+    else:
+        prog = 1.0
+        xp_text = f"{st.session_state.um_xp} XP (MAX)"
+    
+    st.markdown(f"""
+    <div class="xp-bar-container">
+        <div class="xp-bar-fill" style="width:{min(prog,1)*100}%;"></div>
+        <div class="xp-bar-text">{curr['icon']} {curr['name']} — {xp_text}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# =============================================================================
+# 📱 TAB: OFFICIAL RESOURCES (NEW!)
+# =============================================================================
+
+def render_tab_resources():
+    """Render Official Resources tab - NEW FEATURE!"""
+    st.markdown("## 📱 Official Resources & Live Services")
+    st.info("🔗 Kumpulan link resmi Saudi & Indonesia untuk Umrah Mandiri")
+    
+    subtabs = st.tabs(["🏛️ Platform", "📱 Apps", "🚄 Kereta", "💚 Raudhah", "🗺️ Live Map", "🆘 Darurat"])
+    
+    # --- Platform Resmi ---
+    with subtabs[0]:
+        st.markdown("### 🏛️ Platform Resmi")
+        for key, res in OFFICIAL_RESOURCES.items():
+            with st.container(border=True):
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    badge = "🔴 **WAJIB**" if res.get("required") else ""
+                    st.markdown(f"### {res['icon']} {res['name']} {badge}")
+                    st.caption(res["desc"])
+                    for f in res.get("features", []):
+                        st.write(f"• {f}")
+                with col2:
+                    st.link_button("🔗 Buka", res["url"], use_container_width=True)
+                    if res.get("android"):
+                        st.link_button("Android", res["android"], use_container_width=True)
+        
+        # Unlock achievement
+        if "resources_explorer" not in st.session_state.um_achievements:
+            unlock_achievement("resources_explorer")
+    
+    # --- Essential Apps ---
+    with subtabs[1]:
+        st.markdown("### 📱 Aplikasi Wajib Download")
+        st.warning("⚠️ **Download SEMUA sebelum berangkat!** WiFi di Saudi tidak selalu stabil.")
+        
+        cols = st.columns(3)
+        for i, app in enumerate(ESSENTIAL_APPS):
+            with cols[i % 3]:
+                with st.container(border=True):
+                    badge = "🔴" if app["required"] else "🟡"
+                    st.markdown(f"<div style='text-align:center;font-size:2rem;'>{app['icon']}</div>", unsafe_allow_html=True)
+                    st.markdown(f"**{app['name']}** {badge}")
+                    st.caption(app["purpose"])
+        
+        st.divider()
+        st.markdown("### ✅ Checklist Download")
+        for app in ESSENTIAL_APPS:
+            st.checkbox(f"{app['icon']} {app['name']} - {app['purpose']}", key=f"app_check_{app['name']}")
+    
+    # --- Haramain Train ---
+    with subtabs[2]:
+        st.markdown("### 🚄 Haramain High-Speed Railway")
+        st.success("**Kereta tercepat Timur Tengah!** 300 km/jam, Makkah-Madinah hanya 2.5 jam")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.link_button("🎫 Booking Tiket Resmi", "https://sar.hhr.sa/", use_container_width=True, type="primary")
+        with col2:
+            st.link_button("📅 Lihat Jadwal", "https://sar.hhr.sa/timetable", use_container_width=True)
+        
+        st.divider()
+        st.markdown("#### 🛤️ Rute & Harga")
+        
+        for route in HHR_ROUTES:
+            col1, col2, col3, col4 = st.columns([2.5, 1, 1, 1])
+            with col1:
+                st.markdown(f"**{route['from']} → {route['to']}**")
+            with col2:
+                st.caption(f"⏱️ {route['duration']}")
+            with col3:
+                st.write(f"💺 SAR {route['economy']}")
+            with col4:
+                st.write(f"🎩 SAR {route['business']}")
+        
+        st.divider()
+        st.markdown("#### 💡 Tips Naik HHR")
+        tips = [
+            "📅 Book 1-2 minggu sebelumnya, terutama saat Ramadan",
+            "🧳 Bagasi max 25kg + 1 hand carry",
+            "⏰ Datang 30 menit sebelum keberangkatan",
+            "🕌 Ada musholla & kafetaria di kereta",
+            "📱 WiFi tersedia di kereta & stasiun",
+            "🎫 E-ticket valid, tidak perlu print"
+        ]
+        for tip in tips:
+            st.write(tip)
+    
+    # --- Raudhah Booking ---
+    with subtabs[3]:
+        st.markdown("### 💚 Panduan Booking Raudhah")
+        
+        st.success(f"""
+        **Hadits:**  
+        *"{RAUDHAH_INFO['hadith']}"*  
+        — {RAUDHAH_INFO['source']}
+        """)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write(f"📍 **Lokasi:** {RAUDHAH_INFO['location']}")
+            st.write(f"📐 **Ukuran:** {RAUDHAH_INFO['size']}")
+        with col2:
+            st.write(f"📱 **Booking:** {RAUDHAH_INFO['booking']}")
+        
+        st.divider()
+        st.markdown("#### 📱 Langkah Booking:")
+        for i, tip in enumerate(RAUDHAH_INFO["tips"], 1):
+            st.write(f"{i}. {tip}")
+        
+        st.divider()
+        col1, col2 = st.columns(2)
+        with col1:
+            st.link_button("📱 NUSUK (Android)", "https://play.google.com/store/apps/details?id=sa.gov.moh.nusuk", use_container_width=True, type="primary")
+        with col2:
+            st.link_button("📱 NUSUK (iOS)", "https://apps.apple.com/app/nusuk/id1521968498", use_container_width=True, type="primary")
+    
+    # --- Live Crowd Map ---
+    with subtabs[4]:
+        st.markdown("### 🗺️ Peta Keramaian Real-time Masjid Nabawi")
+        
+        st.info("""
+        **General Presidency of Harameen** menyediakan peta keramaian real-time 
+        untuk membantu jamaah merencanakan waktu kunjungan!
+        """)
+        
+        st.link_button(
+            "🗺️ BUKA PETA JAMAAH MASJID NABAWI (LIVE)", 
+            "https://eserv.wmn.gov.sa/e-services/prayers_map/?lang=en",
+            use_container_width=True,
+            type="primary"
+        )
+        
+        st.divider()
+        st.markdown("#### 🚦 Arti Warna:")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.success("🟢 **Available**\nArea kosong, waktu terbaik!")
+        with col2:
+            st.warning("🟡 **Almost Busy**\nMulai ramai")
+        with col3:
+            st.error("🔴 **Busy**\nSangat padat, hindari")
+        
+        st.divider()
+        st.markdown("#### ⏰ Prediksi Waktu Terbaik:")
+        predictions = [
+            ("00:00 - 03:00", "🟢 Sepi", True),
+            ("03:00 - 06:00", "🟡 Sedang", False),
+            ("06:00 - 09:00", "🟠 Ramai", False),
+            ("12:00 - 15:00", "🔴 Sangat Ramai", False),
+            ("18:00 - 21:00", "🔴 Sangat Ramai", False),
+            ("21:00 - 00:00", "🟡 Sedang", False),
+        ]
+        cols = st.columns(3)
+        for i, (time, level, best) in enumerate(predictions):
+            with cols[i % 3]:
+                if best:
+                    st.success(f"**{time}**\n{level} ✅")
+                else:
+                    st.info(f"**{time}**\n{level}")
+    
+    # --- Emergency Contacts ---
+    with subtabs[5]:
+        st.markdown("### 🆘 Kontak Darurat")
+        st.error("⚠️ **Simpan nomor-nomor ini di HP Anda SEBELUM berangkat!**")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("#### 🇸🇦 Saudi Arabia")
+            for c in EMERGENCY_CONTACTS["saudi"]:
+                st.markdown(f"{c['icon']} **{c['name']}:** `{c['phone']}`")
+        
+        with col2:
+            st.markdown("#### 🇮🇩 Indonesia")
+            for c in EMERGENCY_CONTACTS["indonesia"]:
+                st.markdown(f"{c['icon']} **{c['name']}:** `{c['phone']}`")
+        
+        st.divider()
+        st.markdown("#### 💾 Quick Copy")
+        st.code("""
+EMERGENCY SAUDI:
+- Police: 999
+- Ambulance: 997
+- Fire: 998
+
+INDONESIA:
+- KBRI Riyadh: +966-11-488-2800
+- KJRI Jeddah: +966-12-667-0826
+- KEMENAG: 1500-363
+        """, language="text")
+
+# =============================================================================
+# 📅 TAB: COUNTDOWN
+# =============================================================================
+
+def render_tab_countdown():
+    """Render Countdown tab."""
+    st.markdown("## ⏰ Countdown to Baitullah")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        dep_date = st.date_input(
+            "Tanggal Keberangkatan",
+            value=st.session_state.um_departure_date or (date.today() + timedelta(days=90)),
+            min_value=date.today()
+        )
+        st.session_state.um_departure_date = dep_date
+        
+        duration = st.slider("Durasi (hari)", 7, 21, st.session_state.um_duration)
+        st.session_state.um_duration = duration
+        
+        return_date = dep_date + timedelta(days=duration)
+        st.info(f"📅 Pulang: **{return_date.strftime('%d %B %Y')}**")
+    
+    with col2:
+        days_left = (dep_date - date.today()).days
+        
+        if days_left > 0:
+            months = days_left // 30
+            weeks = (days_left % 30) // 7
+            days = days_left % 7
+            
+            st.markdown(f"""
+            <div style="text-align:center;">
+                <div class="countdown-box">{months}</div>
+                <div class="countdown-box">{weeks}</div>
+                <div class="countdown-box">{days}</div>
+                <div style="display:flex;justify-content:center;gap:2rem;margin-top:0.5rem;color:#888;">
+                    <span>BULAN</span>
+                    <span>MINGGU</span>
+                    <span>HARI</span>
                 </div>
-                """, unsafe_allow_html=True)
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.success("🕋 Selamat menunaikan ibadah Umrah!")
 
+# =============================================================================
+# 🏛️ TAB: 3 PILAR
+# =============================================================================
 
-def render_pillars():
-    """Render 3 pillar dashboard."""
-    st.markdown("## 🏛️ 3 Pilar Persiapan")
+def render_tab_pillars():
+    """Render 3 Pillars tab."""
+    st.markdown("## 🏛️ 3 Pilar Persiapan Umrah")
     
-    tabs = st.tabs([f"{PILLAR_DATA[p]['icon']} {PILLAR_DATA[p]['title'].split(':')[1]}" for p in PILLAR_DATA])
-    
-    for tab, (pid, pillar) in zip(tabs, PILLAR_DATA.items()):
-        with tab:
-            done = len(st.session_state.um_tasks[pid])
+    for pillar_id, pillar in PILLAR_DATA.items():
+        with st.expander(f"{pillar['icon']} {pillar['title']}", expanded=True):
+            done_count = len(st.session_state.um_tasks.get(pillar_id, []))
             total = len(pillar["tasks"])
-            st.progress(done / total if total > 0 else 0)
-            st.caption(f"{done}/{total} selesai")
+            pct = int(done_count / total * 100) if total > 0 else 0
+            
+            st.progress(pct / 100, text=f"{done_count}/{total} selesai ({pct}%)")
             
             for task in pillar["tasks"]:
-                is_done = task["id"] in st.session_state.um_tasks[pid]
-                col1, col2 = st.columns([0.1, 0.9])
-                with col1:
-                    if st.checkbox("", value=is_done, key=f"{pid}_{task['id']}", label_visibility="collapsed"):
-                        if task["id"] not in st.session_state.um_tasks[pid]:
-                            st.session_state.um_tasks[pid].append(task["id"])
-                            add_xp(task["xp"], task["name"])
-                    elif task["id"] in st.session_state.um_tasks[pid]:
-                        st.session_state.um_tasks[pid].remove(task["id"])
-                with col2:
-                    badge = {"wajib": "🔴", "recommended": "🟡"}.get(task["priority"], "")
-                    st.write(f"{task['icon']} {task['name']} {badge} (+{task['xp']} XP)")
+                done = task["id"] in st.session_state.um_tasks.get(pillar_id, [])
+                if st.checkbox(f"{task['name']} (+{task['xp']} XP)", value=done, key=f"task_{pillar_id}_{task['id']}"):
+                    if task["id"] not in st.session_state.um_tasks[pillar_id]:
+                        st.session_state.um_tasks[pillar_id].append(task["id"])
+                        add_xp(task["xp"], task["name"])
+                        
+                        # Check pillar completion
+                        if len(st.session_state.um_tasks[pillar_id]) == len(pillar["tasks"]):
+                            unlock_achievement(f"pillar_{pillar_id}")
+                else:
+                    if task["id"] in st.session_state.um_tasks.get(pillar_id, []):
+                        st.session_state.um_tasks[pillar_id].remove(task["id"])
 
+# =============================================================================
+# 📿 TAB: MANASIK
+# =============================================================================
 
-def render_manasik():
-    """Render virtual manasik."""
-    st.markdown("## 📿 Virtual Manasik Simulator")
+def render_tab_manasik():
+    """Render Virtual Manasik tab."""
+    st.markdown("## 📿 Virtual Manasik Umrah")
     
-    # Step indicator
-    cols = st.columns(len(MANASIK_STEPS))
-    for i, col in enumerate(cols):
-        with col:
+    # Progress indicator
+    completed = len(st.session_state.um_manasik_completed)
+    st.progress(completed / 8, text=f"Progress: {completed}/8 langkah")
+    
+    # Step selector
+    cols = st.columns(8)
+    for i, step in enumerate(MANASIK_STEPS):
+        with cols[i]:
             is_done = i in st.session_state.um_manasik_completed
-            is_curr = i == st.session_state.um_manasik_step
-            color = "#d4af37" if is_done else ("#f4d03f" if is_curr else "#333")
-            st.markdown(f"<div style='text-align:center;'><div style='width:30px;height:30px;border-radius:50%;background:{color};margin:auto;line-height:30px;color:{'#1a1a1a' if is_done or is_curr else '#888'};font-size:0.8rem;border:1px solid #d4af37;'>{i+1}</div></div>", unsafe_allow_html=True)
+            is_current = i == st.session_state.um_manasik_step
+            
+            btn_type = "primary" if is_current else "secondary"
+            icon = "✅" if is_done else step["icon"]
+            
+            if st.button(icon, key=f"step_btn_{i}", type=btn_type, use_container_width=True):
+                st.session_state.um_manasik_step = i
+                st.rerun()
     
     st.divider()
     
-    curr = MANASIK_STEPS[st.session_state.um_manasik_step]
+    # Current step content
+    step = MANASIK_STEPS[st.session_state.um_manasik_step]
     
-    with st.container(border=True):
-        st.markdown(f"### {curr['icon']} Langkah {curr['step']}: {curr['title']}")
-        st.markdown(f"📍 **Lokasi:** {curr['location']}")
-        st.write(curr['desc'])
-        
-        for tip in curr['tips']:
-            st.write(f"• {tip}")
-        
-        st.markdown(f"<div class='doa-arabic'>{curr['dua']}</div>", unsafe_allow_html=True)
-        st.caption(f"{curr['dua_latin']} - *{curr['dua_arti']}*")
+    st.markdown(f"### {step['icon']} Langkah {step['step']}: {step['title']}")
     
+    # Arabic dua
+    st.markdown(f"<div class='doa-arabic'>{step['dua']}</div>", unsafe_allow_html=True)
+    
+    # Latin & meaning
+    st.markdown(f"**Latin:** *{step['latin']}*")
+    st.markdown(f"**Arti:** {step['arti']}")
+    
+    st.divider()
+    
+    # Navigation
     col1, col2, col3 = st.columns(3)
+    
     with col1:
         if st.session_state.um_manasik_step > 0:
             if st.button("⬅️ Sebelumnya", use_container_width=True):
                 st.session_state.um_manasik_step -= 1
                 st.rerun()
+    
     with col2:
-        is_curr_done = st.session_state.um_manasik_step in st.session_state.um_manasik_completed
-        if not is_curr_done:
-            if st.button("✅ Selesai", use_container_width=True, type="primary"):
+        is_completed = st.session_state.um_manasik_step in st.session_state.um_manasik_completed
+        if not is_completed:
+            if st.button("✅ Tandai Selesai", use_container_width=True, type="primary"):
                 st.session_state.um_manasik_completed.append(st.session_state.um_manasik_step)
-                add_xp(25, f"Manasik: {curr['title']}")
-                if len(st.session_state.um_manasik_completed) == len(MANASIK_STEPS):
-                    unlock_achievement("manasik_pro")
+                add_xp(25, f"Manasik: {step['title']}")
+                
+                # Check completion
+                if len(st.session_state.um_manasik_completed) == 8:
+                    unlock_achievement("manasik_complete")
                 st.rerun()
         else:
-            st.success("✅ Dipelajari!")
+            st.success("✅ Sudah selesai!")
+    
     with col3:
-        if st.session_state.um_manasik_step < len(MANASIK_STEPS) - 1:
+        if st.session_state.um_manasik_step < 7:
             if st.button("Selanjutnya ➡️", use_container_width=True):
                 st.session_state.um_manasik_step += 1
                 st.rerun()
 
+# =============================================================================
+# 💰 TAB: BUDGET
+# =============================================================================
 
-def render_budget():
-    """Render budget optimizer."""
-    st.markdown("## 💰 AI Budget Optimizer")
+def render_tab_budget():
+    """Render Budget Optimizer tab."""
+    st.markdown("## 💰 Budget Optimizer")
     
     col1, col2 = st.columns(2)
+    
     with col1:
-        budget = st.number_input("Total Budget (Rp)", 10_000_000, 100_000_000, 25_000_000, 1_000_000)
-    with col2:
-        is_ramadan = st.checkbox("🌙 Musim Ramadan (+30%)")
-    
-    duration = st.slider("Durasi (hari)", 7, 21, 9)
-    
-    selections = {}
-    for cid, comp in COST_COMPONENTS.items():
-        idx = st.selectbox(
-            comp['label'],
-            range(len(comp["options"])),
-            format_func=lambda i, c=comp: f"{c['options'][i]['name']} - Rp {c['options'][i]['price']:,}".replace(",", "."),
-            key=f"budget_{cid}"
+        budget = st.number_input("Total Budget (Rp)", 
+            min_value=10_000_000, 
+            max_value=100_000_000, 
+            value=25_000_000, 
+            step=1_000_000,
+            format="%d"
         )
-        opt = comp["options"][idx]
-        if comp.get("per_night"):
-            selections[cid] = opt["price"] * (duration - 1)
-        elif comp.get("per_day"):
-            selections[cid] = opt["price"] * duration
-        else:
-            selections[cid] = opt["price"]
+        
+        duration = st.slider("Durasi Perjalanan (hari)", 7, 21, 9)
+        
+        travel_class = st.selectbox("Kelas Perjalanan", ["Budget", "Standard", "Premium"])
     
-    subtotal = sum(selections.values()) + 1_500_000  # Extras
-    total = int(subtotal * 1.3) if is_ramadan else subtotal
+    with col2:
+        # Calculate estimates
+        multiplier = {"Budget": 0.8, "Standard": 1.0, "Premium": 1.5}[travel_class]
+        
+        estimates = {
+            "✈️ Tiket Pesawat": int(8_000_000 * multiplier),
+            "🏨 Hotel Makkah": int(400_000 * duration * multiplier),
+            "🏨 Hotel Madinah": int(350_000 * (duration // 3) * multiplier),
+            "🚄 Transport": int(500_000 * multiplier),
+            "🍽️ Makan": int(150_000 * duration),
+            "📱 SIM & Data": 100_000,
+            "🎁 Oleh-oleh": 1_500_000,
+            "🔄 Lain-lain": 1_000_000,
+        }
+        
+        total = sum(estimates.values())
+        
+        st.markdown("#### 📊 Estimasi Biaya:")
+        for item, cost in estimates.items():
+            st.write(f"{item}: **Rp {cost:,}**".replace(",", "."))
+        
+        st.divider()
+        
+        if total <= budget:
+            st.success(f"### ✅ Total: Rp {total:,}".replace(",", "."))
+            st.write(f"💰 Sisa: Rp {budget - total:,}".replace(",", "."))
+        else:
+            st.error(f"### ⚠️ Total: Rp {total:,}".replace(",", "."))
+            st.write(f"❌ Kurang: Rp {total - budget:,}".replace(",", "."))
+    
+    if st.button("💾 Simpan Perhitungan", use_container_width=True):
+        if "budget_set" not in st.session_state.um_achievements:
+            unlock_achievement("budget_set")
+        st.success("✅ Budget tersimpan!")
+
+# =============================================================================
+# 🛂 TAB: VISA CHECKER
+# =============================================================================
+
+def render_tab_visa():
+    """Render Visa Checker tab."""
+    st.markdown("## 🛂 Cek Kelayakan Visa")
+    
+    st.info("""
+    **2 Jenis Visa untuk Umrah:**
+    - **E-Tourist Visa**: Instant, apply sendiri online (~Rp 3.2jt)
+    - **Umrah Visa**: Via PPIU/Travel Agent (~Rp 2.5jt)
+    """)
+    
+    with st.form("visa_check_form"):
+        nationality = st.selectbox("Kewarganegaraan", 
+            ["Indonesia", "Malaysia", "Brunei"] + E_TOURIST_ELIGIBLE[:5] + ["Lainnya"])
+        
+        st.markdown("**Apakah Anda punya visa aktif:**")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            has_us = st.checkbox("🇺🇸 Visa USA")
+        with col2:
+            has_uk = st.checkbox("🇬🇧 Visa UK")
+        with col3:
+            has_schengen = st.checkbox("🇪🇺 Schengen")
+        
+        submitted = st.form_submit_button("🔍 Cek Kelayakan", use_container_width=True, type="primary")
+        
+        if submitted:
+            eligible_etourist = nationality in E_TOURIST_ELIGIBLE or has_us or has_uk or has_schengen
+            
+            st.divider()
+            
+            if eligible_etourist:
+                st.success("### ✅ Eligible: E-Tourist Visa!")
+                st.markdown("""
+                **Keuntungan E-Tourist:**
+                - ⏱️ Proses instant (menit)
+                - 💰 Biaya ~Rp 3.2jt
+                - 📅 Valid 1 tahun, multiple entry
+                - ✈️ Tidak perlu travel agent
+                """)
+                st.link_button("🔗 Apply di NUSUK", "https://umrah.nusuk.sa", use_container_width=True, type="primary")
+            else:
+                st.info("### ℹ️ Gunakan: Umrah Visa via PPIU")
+                st.markdown("""
+                **Proses Umrah Visa:**
+                - ⏱️ Proses 1-3 hari kerja
+                - 💰 Biaya ~Rp 2.5jt
+                - 📅 Single entry
+                - 🏢 Harus via travel agent resmi
+                """)
+                st.link_button("🔗 Cek PPIU Resmi", "https://simpu.kemenag.go.id/", use_container_width=True)
+            
+            unlock_achievement("visa_checked")
+
+# =============================================================================
+# 📍 TAB: MIQAT
+# =============================================================================
+
+def render_tab_miqat():
+    """Render Miqat Locator tab."""
+    st.markdown("## 📍 Panduan Miqat & Ihram")
+    
+    st.error("⚠️ **PENTING:** Melewati miqat tanpa ihram = umrah tidak sah!")
+    
+    route = st.selectbox("Pilih Rute Perjalanan Anda:", [
+        "Jakarta → Jeddah (Direct Flight)",
+        "Jakarta → Madinah → Makkah"
+    ])
+    
+    if st.button("🔍 Lihat Panduan Miqat", use_container_width=True, type="primary"):
+        st.divider()
+        
+        if "Madinah" in route:
+            miqat = MIQAT_DATA["madinah_first"]
+            st.success(f"### 📍 Miqat Anda: {miqat['name']}")
+            st.write(f"⏰ **Waktu Ihram:** {miqat['timing']}")
+        else:
+            miqat = MIQAT_DATA["jeddah_direct"]
+            st.warning(f"### 📍 Miqat Anda: {miqat['name']}")
+            st.write(f"⏰ **Waktu Ihram:** {miqat['timing']}")
+        
+        st.markdown("#### 💡 Tips:")
+        for tip in miqat["tips"]:
+            st.write(tip)
+        
+        st.divider()
+        st.markdown("### 🤲 Niat Umrah:")
+        st.markdown("<div class='doa-arabic'>لَبَّيْكَ اللّٰهُمَّ عُمْرَةً</div>", unsafe_allow_html=True)
+        st.markdown("**Latin:** *Labbaik Allahumma 'umratan*")
+        st.markdown("**Arti:** Aku memenuhi panggilan-Mu ya Allah untuk umrah")
+        
+        unlock_achievement("miqat_master")
+
+# =============================================================================
+# 🔍 TAB: PPIU VERIFICATION
+# =============================================================================
+
+def render_tab_ppiu():
+    """Render PPIU Verification tab."""
+    st.markdown("## 🔍 Verifikasi Travel Agent (PPIU)")
+    
+    st.error("""
+    ⚠️ **WASPADA PENIPUAN!**  
+    Banyak travel agent ilegal yang menipu jamaah. 
+    SELALU verifikasi sebelum bayar!
+    """)
+    
+    st.link_button(
+        "🔗 Buka SISKOPATUH KEMENAG", 
+        "https://simpu.kemenag.go.id/",
+        use_container_width=True,
+        type="primary"
+    )
+    
+    st.caption("📞 Hotline KEMENAG: **1500-363**")
     
     st.divider()
-    delta = budget - total
-    if delta >= 0:
-        st.success(f"### ✅ Total: Rp {total:,}".replace(",", "."))
-        st.info(f"💰 Sisa: Rp {delta:,}".replace(",", "."))
-    else:
-        st.error(f"### ⚠️ Over budget: Rp {total:,}".replace(",", "."))
     
-    if st.button("💾 Simpan", type="primary"):
-        add_xp(50, "Budget planned!")
-        unlock_achievement("budget_set")
-
-
-def render_weather():
-    """Render weather."""
-    st.markdown("## 🌡️ Cuaca Tanah Suci")
+    st.markdown("### ✅ Checklist Verifikasi:")
+    checks = [
+        "Nama perusahaan terdaftar di SISKOPATUH",
+        "Nomor SK Kemenag valid",
+        "Alamat kantor jelas & bisa dikunjungi",
+        "Ada kontrak tertulis yang jelas",
+        "Pembayaran via rekening perusahaan (bukan pribadi)",
+        "Review positif dari jamaah sebelumnya"
+    ]
     
-    col1, col2 = st.columns(2)
-    for city, data in WEATHER_DATA.items():
-        with col1 if city == "makkah" else col2:
-            st.markdown(f"""
-            <div class="weather-card">
-                <h3>{'🕋 Makkah' if city == 'makkah' else '🕌 Madinah'}</h3>
-                <div style="font-size:3rem;">{data['icon']}</div>
-                <div class="weather-temp">{data['temp']}°C</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-
-def render_doa():
-    """Render doa collection."""
-    st.markdown("## 🤲 Koleksi Doa Umrah")
+    all_checked = True
+    for check in checks:
+        if not st.checkbox(check, key=f"ppiu_{check[:10]}"):
+            all_checked = False
     
-    cats = {"wajib": "🔴 Wajib", "thawaf": "🕋 Thawaf", "sai": "🏃 Sa'i", "zamzam": "💧 Zamzam", "madinah": "🕌 Madinah", "umum": "📿 Umum"}
-    cat = st.radio("Kategori", list(cats.keys()), format_func=lambda x: cats[x], horizontal=True)
+    st.divider()
     
-    for doa in [d for d in DOA_COLLECTION if d["category"] == cat]:
-        with st.container(border=True):
-            st.markdown(f"### {doa['name']}")
-            st.markdown(f"<div class='doa-arabic'>{doa['arabic']}</div>", unsafe_allow_html=True)
-            st.caption(f"**{doa['latin']}** - *{doa['meaning']}*")
+    if st.button("✅ Saya Sudah Verifikasi PPIU", use_container_width=True, type="primary"):
+        if all_checked:
+            unlock_achievement("safe_travel")
+            st.success("🛡️ Excellent! Badge Safe Traveler unlocked!")
+        else:
+            st.warning("⚠️ Pastikan semua checklist tercentang untuk keamanan Anda!")
 
+# =============================================================================
+# 🏆 TAB: BADGES
+# =============================================================================
 
-def render_daily():
-    """Render daily challenges."""
-    st.markdown("## 🎯 Daily Challenges")
+def render_tab_badges():
+    """Render Achievements/Badges tab."""
+    st.markdown("## 🏆 Koleksi Badge")
     
-    cols = st.columns(3)
-    for i, ch in enumerate(DAILY_CHALLENGES):
-        with cols[i % 3]:
-            done = ch["id"] in st.session_state.um_daily_completed
-            with st.container(border=True):
-                if done:
-                    st.success(f"✅ {ch['icon']} ~~{ch['name']}~~")
-                else:
-                    st.write(f"{ch['icon']} {ch['name']} (+{ch['xp']} XP)")
-                    if st.button("Complete", key=f"daily_{ch['id']}", use_container_width=True):
-                        st.session_state.um_daily_completed.append(ch["id"])
-                        add_xp(ch["xp"], ch['name'])
-                        st.rerun()
-
-
-def render_achievements():
-    """Render achievements."""
-    st.markdown("## 🏆 Achievements")
+    unlocked = len(st.session_state.um_achievements)
+    total = len(ACHIEVEMENTS)
+    
+    st.progress(unlocked / total, text=f"{unlocked}/{total} badges unlocked")
     
     cols = st.columns(4)
     for i, ach in enumerate(ACHIEVEMENTS):
         with cols[i % 4]:
-            unlocked = ach["id"] in st.session_state.um_achievements
+            is_unlocked = ach["id"] in st.session_state.um_achievements
+            
+            if is_unlocked:
+                st.markdown(f"""
+                <div class="achievement-badge">
+                    <div style="font-size:2rem;">{ach['icon']}</div>
+                    <div><b>{ach['name']}</b></div>
+                    <small style="color:#888;">{ach['desc']}</small>
+                    <div style="color:#d4af37;">+{ach['xp']} XP</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="achievement-badge locked">
+                    <div style="font-size:2rem;">🔒</div>
+                    <div><b>???</b></div>
+                    <small style="color:#666;">{ach['desc']}</small>
+                </div>
+                """, unsafe_allow_html=True)
+
+# =============================================================================
+# 💰 TAB: TABUNGAN
+# =============================================================================
+
+def render_tab_savings():
+    """Render Savings Tracker tab."""
+    st.markdown("## 💰 Tracker Tabungan Umrah")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        target = st.number_input("Target Tabungan (Rp)", 
+            min_value=5_000_000, 
+            max_value=100_000_000, 
+            value=st.session_state.um_savings["target"],
+            step=1_000_000,
+            format="%d"
+        )
+        st.session_state.um_savings["target"] = target
+        
+        current = st.number_input("Tabungan Saat Ini (Rp)",
+            min_value=0,
+            max_value=target,
+            value=st.session_state.um_savings["current"],
+            step=100_000,
+            format="%d"
+        )
+        st.session_state.um_savings["current"] = current
+    
+    with col2:
+        pct = int(current / target * 100) if target > 0 else 0
+        
+        st.markdown(f"""
+        <div style="text-align:center;padding:1rem;">
+            <div style="font-size:4rem;color:#d4af37;">{pct}%</div>
+            <div style="color:#888;">Tercapai</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.progress(min(pct / 100, 1.0))
+        
+        remaining = target - current
+        st.write(f"💰 Sisa: **Rp {remaining:,}**".replace(",", "."))
+        
+        if st.session_state.um_departure_date:
+            days = (st.session_state.um_departure_date - date.today()).days
+            if days > 0:
+                daily = remaining / days
+                st.info(f"📅 Tabung **Rp {int(daily):,}**/hari".replace(",", "."))
+
+# =============================================================================
+# 🆘 TAB: SOS
+# =============================================================================
+
+def render_tab_sos():
+    """Render SOS Emergency tab."""
+    st.markdown("## 🆘 Emergency SOS")
+    
+    st.error("**Untuk keadaan darurat, hubungi nomor di bawah:**")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### 🇸🇦 Saudi Arabia")
+        for c in EMERGENCY_CONTACTS["saudi"]:
             st.markdown(f"""
-            <div class="achievement-card {'locked' if not unlocked else ''}">
-                <div style="font-size:2rem;">{'🔒' if not unlocked else ach['icon']}</div>
-                <div style="font-weight:bold;">{ach['name']}</div>
-                <div style="font-size:0.8rem;color:#888;">{ach['desc']}</div>
+            <div style="background:#2d0d0d;padding:1rem;border-radius:10px;margin:0.5rem 0;text-align:center;border:1px solid #dc3545;">
+                <div style="font-size:1.5rem;">{c['icon']}</div>
+                <div><b>{c['name']}</b></div>
+                <div style="font-size:1.5rem;color:#dc3545;font-weight:bold;">{c['phone']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("### 🇮🇩 Indonesia")
+        for c in EMERGENCY_CONTACTS["indonesia"]:
+            st.markdown(f"""
+            <div style="background:#1a2d1a;padding:1rem;border-radius:10px;margin:0.5rem 0;text-align:center;border:1px solid #28a745;">
+                <div style="font-size:1.5rem;">{c['icon']}</div>
+                <div><b>{c['name']}</b></div>
+                <div style="font-size:1rem;color:#28a745;font-weight:bold;">{c['phone']}</div>
             </div>
             """, unsafe_allow_html=True)
 
-
-def render_savings():
-    """Render savings tracker."""
-    st.markdown("## 🐷 Tabungan Umrah")
-    
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        target = st.number_input("Target (Rp)", 10_000_000, 100_000_000, st.session_state.um_savings["target"])
-        st.session_state.um_savings["target"] = target
-        
-        with st.form("savings_form"):
-            amount = st.number_input("Tambah (Rp)", 0, step=100000)
-            if st.form_submit_button("💰 Tambah"):
-                st.session_state.um_savings["current"] += amount
-                add_xp(10, "Menabung!")
-                if st.session_state.um_savings["current"] >= target:
-                    unlock_achievement("saver")
-                st.rerun()
-    
-    with col2:
-        curr = st.session_state.um_savings["current"]
-        st.markdown(f"<div style='text-align:center;'><span style='font-size:3rem;'>🐷</span><h3>Rp {curr:,.0f}</h3></div>".replace(",", "."), unsafe_allow_html=True)
-        st.progress(min(curr / target, 1.0))
-
-
-def render_sos():
-    """Render SOS contacts."""
-    st.markdown("## 🆘 Emergency SOS")
-    st.error("⚠️ Dalam keadaan darurat, hubungi nomor di bawah!")
-    
-    for cat, contacts in EMERGENCY_CONTACTS.items():
-        st.subheader("🇸🇦 Saudi Arabia" if cat == "saudi" else "🇮🇩 Indonesia")
-        cols = st.columns(len(contacts))
-        for i, c in enumerate(contacts):
-            with cols[i]:
-                st.markdown(f"**{c['icon']} {c['name']}**")
-                st.markdown(f"📞 {c['phone']}")
-
+# =============================================================================
+# ⚠️ DYOR DISCLAIMER
+# =============================================================================
 
 def render_dyor():
     """Render DYOR disclaimer."""
     st.warning("""
     ⚠️ **DYOR - Do Your Own Research**
     
-    LABBAIK adalah platform edukasi. Selalu verifikasi di:
-    🇸🇦 [nusuk.sa](https://nusuk.sa) | 🇮🇩 [simpu.kemenag.go.id](https://simpu.kemenag.go.id)
-    📞 KBRI Riyadh: +966-11-488-2800
+    LABBAIK.AI adalah platform edukasi. Informasi dapat berubah sewaktu-waktu.
+    Selalu verifikasi di sumber resmi:
+    - 🇸🇦 [nusuk.sa](https://www.nusuk.sa) - Platform Resmi Saudi
+    - 🇮🇩 [simpu.kemenag.go.id](https://simpu.kemenag.go.id) - Verifikasi PPIU
+    - 📞 Hotline KEMENAG: 1500-363
     
-    **Anda bertanggung jawab penuh atas keputusan perjalanan.**
+    **Anda bertanggung jawab penuh atas keputusan perjalanan ibadah Anda.**
     """)
 
-
 # =============================================================================
-# 🚀 MAIN RENDERER
+# 🚀 MAIN RENDER FUNCTION
 # =============================================================================
 
 def render_umrah_mandiri_page():
-    """Main page renderer."""
+    """Main entry point for Umrah Mandiri page."""
     
-    init_super_state()
+    # Initialize state
+    init_umrah_mandiri_state()
     
+    # Render hero & stats
     render_hero()
-    render_gamification_bar()
+    render_stats_cards()
+    st.markdown("")
+    render_xp_bar()
     
     st.divider()
-    render_quick_stats()
-    st.divider()
     
-    # TABS - Now with NEW critical features first!
+    # Main tabs - RESOURCES FIRST (NEW!)
     tabs = st.tabs([
-        "🛂 Cek Visa",          # NEW
-        "📋 Cek Dokumen",       # NEW
-        "📍 Panduan Miqat",     # NEW
-        "🔍 Verifikasi PPIU",   # NEW
+        "📱 Resources",      # NEW - Tab pertama!
         "⏰ Countdown",
         "🏛️ 3 Pilar",
         "📿 Manasik",
         "💰 Budget",
-        "🌡️ Weather",
-        "🤲 Doa",
-        "🎯 Daily",
+        "🛂 Visa",
+        "📍 Miqat",
+        "🔍 PPIU",
         "🏆 Badges",
-        "🐷 Tabungan",
-        "🆘 SOS",
+        "💳 Tabungan",
+        "🆘 SOS"
     ])
     
-    with tabs[0]: render_visa_checker()
-    with tabs[1]: render_document_checker()
-    with tabs[2]: render_miqat_locator()
-    with tabs[3]: render_ppiu_checker()
-    with tabs[4]: render_countdown()
-    with tabs[5]: render_pillars()
-    with tabs[6]: render_manasik()
-    with tabs[7]: render_budget()
-    with tabs[8]: render_weather()
-    with tabs[9]: render_doa()
-    with tabs[10]: render_daily()
-    with tabs[11]: render_achievements()
-    with tabs[12]: render_savings()
-    with tabs[13]: render_sos()
+    with tabs[0]:
+        render_tab_resources()
+    
+    with tabs[1]:
+        render_tab_countdown()
+    
+    with tabs[2]:
+        render_tab_pillars()
+    
+    with tabs[3]:
+        render_tab_manasik()
+    
+    with tabs[4]:
+        render_tab_budget()
+    
+    with tabs[5]:
+        render_tab_visa()
+    
+    with tabs[6]:
+        render_tab_miqat()
+    
+    with tabs[7]:
+        render_tab_ppiu()
+    
+    with tabs[8]:
+        render_tab_badges()
+    
+    with tabs[9]:
+        render_tab_savings()
+    
+    with tabs[10]:
+        render_tab_sos()
     
     st.divider()
     render_dyor()
 
 
 # =============================================================================
-# ENTRY POINT
+# EXPORT
 # =============================================================================
-
-if __name__ == "__main__":
-    st.set_page_config(
-        page_title="LABBAIK.AI - Umrah Mandiri v7.0",
-        page_icon="🕋",
-        layout="wide"
-    )
-    render_umrah_mandiri_page()
-
 
 __all__ = ["render_umrah_mandiri_page"]
